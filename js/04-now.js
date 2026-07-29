@@ -38,6 +38,9 @@ function exitNow(){
    zapisy i cała mapa działają bez migracji.
    ============================================================ */
 function nowAskEnergy(){
+  /* Kalendarz: odśwież okno czasu w tle, póki użytkownik rusza suwakami.
+     Nieblokujące i ciche — do doboru trafi świeże FREE_WINDOW albo nic. */
+  if(typeof refreshCalWindow === 'function') refreshCalWindow();
   const line='Zanim wskażę, co teraz — pokaż mi, jak masz.';
   nowSwap(`
     <div class="kicker">Max sprawdza stan</div>

@@ -105,6 +105,8 @@ function toggleCons(k){
   consSave(c);
   buzz(BUZZ.easier);
   if(k==='gtasks' && c[k]) { openConnect(); connectGoogleTasks(); return; }
+  if(k==='gcal'   && c[k]) { openConnect(); connectCalendar(); return; }
+  if(k==='gcal'   && !c[k]){ FREE_WINDOW = null; }   // wyłączenie zgody = zapominamy okno
   if(k==='body' && c[k])  { openConnect(); connectBody(); return; }
   openConnect();
 }
@@ -181,13 +183,99 @@ async function calWindow(token){
     u.searchParams.set('singleEvents','true');
     u.searchParams.set('orderBy','startTime');
     const r = await fetch(u, {headers:{Authorization:'Bearer '+token}});
+    if(!r.ok){ FREE_WINDOW = null; return null; }
     const j = await r.json();
-    /* Bierzemy WYŁĄCZNIE start. Reszta pola nie jest nawet odczytywana. */
-    const first = (j.items||[]).map(e => e.start && (e.start.dateTime||null)).filter(Boolean)[0];
-    if(!first) return null;
-    FREE_WINDOW = Math.max(5, Math.round((new Date(first) - now)/60000));
+    /* Bierzemy WYŁĄCZNIE start pierwszego PRZYSZŁEGO zdarzenia z godziną.
+       Zdarzenia całodniowe (start.date) i trwające (start < teraz) pomijamy —
+       „okno" to czas do następnej rzeczy, nie do bieżącej. Reszta pól (tytuł,
+       uczestnicy, lokalizacja) nie jest w ogóle odczytywana (P-34/P-38). */
+    const first = (j.items||[])
+      .map(e => e.start && e.start.dateTime)
+      .filter(Boolean)
+      .map(dt => new Date(dt))
+      .filter(d => d > now)[0];
+    if(!first){ FREE_WINDOW = null; return null; }   // czysty horyzont = brak ograniczenia okna
+    FREE_WINDOW = Math.max(5, Math.round((first - now)/60000));
     return FREE_WINDOW;
-  }catch(e){ return null; }
+  }catch(e){ FREE_WINDOW = null; return null; }
+}
+
+/* ============================================================
+   KALENDARZ — OAuth (Google Identity Services, bez backendu)
+   ------------------------------------------------------------
+   Audyt A-6: stary szkielet OAuth nie domykał się bez backendu (wymiana kodu
+   na token potrzebowała sekretu). GIS token client daje token dostępu wprost
+   w przeglądarce dla zakresu READ-ONLY — z samym Client ID typu „Web" i
+   dozwolonym origin. Żaden sekret, żaden backend. Token żyje w pamięci (~1h),
+   nie jest zapisywany. Nadal bierzemy z kalendarza tylko minuty (calWindow).
+   ============================================================ */
+const GCAL_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
+let _gisReady = null;
+let _calTokenClient = null;
+let CAL_TOKEN = null;   // { token, exp } — tylko w pamięci sesji
+
+function loadGIS(){
+  if(_gisReady) return _gisReady;
+  _gisReady = new Promise((resolve, reject)=>{
+    if(window.google && google.accounts && google.accounts.oauth2){ resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.async = true; s.defer = true;
+    s.onload = ()=>resolve();
+    s.onerror = ()=>reject(new Error('gis-load-failed'));
+    document.head.appendChild(s);
+  });
+  return _gisReady;
+}
+
+/* Zwraca token kalendarza (read-only) albo null. silent=true nie pokazuje okna,
+   jeśli zgoda już była (do cichego odświeżania przed doborem). */
+function getCalToken(silent){
+  return new Promise(async (resolve)=>{
+    if(!GOOGLE_CLIENT_ID){ resolve(null); return; }
+    if(CAL_TOKEN && CAL_TOKEN.exp > Date.now() + 60000){ resolve(CAL_TOKEN.token); return; }
+    try{
+      await loadGIS();
+      const cb = (resp)=>{
+        if(resp && resp.access_token){
+          CAL_TOKEN = { token: resp.access_token, exp: Date.now() + (Number(resp.expires_in||3600)*1000) };
+          resolve(CAL_TOKEN.token);
+        } else resolve(null);
+      };
+      if(!_calTokenClient){
+        _calTokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID, scope: GCAL_SCOPE, callback: cb });
+      } else { _calTokenClient.callback = cb; }
+      _calTokenClient.requestAccessToken({ prompt: silent ? '' : 'consent' });
+    }catch(e){ resolve(null); }
+  });
+}
+
+/* Włączenie zgody na kalendarz: raz pytamy o dostęp, od razu liczymy okno. */
+async function connectCalendar(){
+  if(!GOOGLE_CLIENT_ID){
+    nowSwap(`
+      <div class="kicker">Kalendarz</div>
+      <div class="max-line" style="margin-bottom:10px">Brakuje jednej rzeczy</div>
+      <div class="now-why-big">
+        Potrzebny Client ID z Google Cloud Console (typ: aplikacja webowa, zakres
+        <code>calendar.readonly</code>, Twój adres jako dozwolony origin). Wklej go
+        w stałej <code>GOOGLE_CLIENT_ID</code> w kodzie.
+        <br><br>Do tego czasu dobór działa bez okna czasu — to tylko dodatek.
+      </div>
+    `,`<button class="btn btn-primary" onclick="openConnect()">Rozumiem</button>`);
+    return;
+  }
+  const t = await getCalToken(false);
+  if(t) await calWindow(t);
+  openConnect();
+}
+
+/* Ciche odświeżenie okna przed doborem — nie pyta, jeśli zgody już nie ma. */
+async function refreshCalWindow(){
+  if(!consLoad().gcal || !GOOGLE_CLIENT_ID){ FREE_WINDOW = null; return; }
+  const t = await getCalToken(true);
+  if(t) await calWindow(t); else FREE_WINDOW = null;
 }
 
 /* ============================================================

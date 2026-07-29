@@ -43,6 +43,7 @@ do pamięci aplikacji.
 | R-7 | Lustro mówi nieprawdę o stanie (błąd danych) | Doktryna „lustro, nie diagnoza"; naprawiony bug zanieczyszczający statystykę (A-5); brak wniosków diagnostycznych. |
 | R-8 | Nieaktualne numery pomocowe | Data weryfikacji w kodzie + coroczny przegląd (decyzja GENESIS). |
 | R-9 | Profilowanie / rozpoznawanie emocji w pracy/edukacji (AI Act) | Wyłącznie B2C wellness; ścieżka „dla pracodawców/uczelni" świadomie odrzucona. |
+| R-10 | Dostęp do kalendarza ujawnia treść spotkań | **Zakres wyłącznie `calendar.readonly`**; token GIS żyje tylko w pamięci (nie zapisywany); z kalendarza czytamy **wyłącznie minutę startu następnego zdarzenia** (`calWindow`) — tytuły, uczestnicy, lokalizacja nie są w ogóle odczytywane (P-34/P-38). Zgoda `gcal` domyślnie wyłączona. |
 
 ## 4. Prawa podmiotów
 
@@ -60,4 +61,7 @@ oceniamy jako **niskie–średnie**. Warunki dopuszczenia do produkcji:
 3. E2E dla logowania OAuth (osobna fraza szyfrująca) — dziś tylko e-mail+hasło.
 4. Twarde wymuszenie planu paid na proxy przed włączeniem AI dla wielu użytkowników.
 
-Kalendarza **nie wdrażamy** przed zamknięciem powyższych i aktualizacją tej DPIA.
+**Kalendarz** został zaimplementowany w wariancie minimalizującym ryzyko (R-10):
+tylko `calendar.readonly`, token w pamięci, z kalendarza wyłącznie liczba minut do
+następnej rzeczy, zgoda domyślnie wyłączona. Uznajemy to za dopuszczalne w obecnym
+kształcie; warunki 1–4 dotyczą backendu/konta i pozostają w mocy niezależnie.

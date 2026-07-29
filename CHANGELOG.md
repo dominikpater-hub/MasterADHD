@@ -2,6 +2,25 @@
 
 Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 
+## [Nieopublikowane] — kalendarz (A-6, A-7)
+
+Zweryfikowane w headless Chromium: 0 błędów; z kalendarzem OFF **zero żądań do
+Google**; `calWindow` liczy okno poprawnie (pomija zdarzenia całodniowe i trwające);
+okno wpływa na dobór.
+
+### Dodane
+- **Kalendarz — okno czasu w doborze (P-34).** Domknięty OAuth bez backendu przez
+  **Google Identity Services** (token client, zakres `calendar.readonly`, tylko Client ID
+  typu „Web" — żaden sekret; rozwiązuje A-6). `getCalToken()` (token w pamięci, ~1h),
+  `connectCalendar()` przy włączeniu zgody `gcal`, `refreshCalWindow()` cicho odświeża
+  okno na starcie check-inu — więc `FREE_WINDOW` realnie zasila `scoreTask`/`pickReal`
+  i plakietkę „X min do następnej rzeczy" (rozwiązuje A-7, martwy dotąd tor).
+
+### Zmienione
+- `calWindow()` bierze pierwszy **przyszły** start z godziną (pomija całodniowe i
+  trwające); z kalendarza nadal czyta wyłącznie minuty — tytuły/uczestnicy/lokalizacja
+  nie są odczytywane (P-34/P-38). DPIA zaktualizowana (R-10).
+
 ## [v19] — skala
 
 Backend, konto, sync, monetyzacja, DPIA. Dostarczone jako **poprawne źródło +

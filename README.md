@@ -123,8 +123,10 @@ Pełna lista i uzasadnienia: [`docs/AUDYT-v16.1.0.md`](docs/AUDYT-v16.1.0.md), s
   free = pełne offline, paid = AI + sync), DPIA (`docs/DPIA.md`). Wszystko domyślnie wyłączone —
   aplikacja działa lokalnie, dopóki nie wpiszesz configu.
 
-Roadmapa z audytu domknięta. Dalej to już iteracje: audio Maxa (nagrania),
-kalendarz (po zamknięciu warunków z DPIA), testy z użytkownikami.
+Roadmapa z audytu domknięta. **Kalendarz** dołączony: OAuth bez backendu przez
+Google Identity Services (`calendar.readonly`), z kalendarza wyłącznie minuty do
+następnej rzeczy (P-34) — zasila dobór i plakietkę „X min do następnej rzeczy"
+(rozwiązuje A-6/A-7). Dalej to iteracje: nagrania głosu Maxa, testy z użytkownikami.
 
 ---
 
