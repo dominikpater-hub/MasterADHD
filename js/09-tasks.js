@@ -123,9 +123,13 @@ function scoreTask(task, st, windowMin){
   const d = ENE_VAL[task.ene] - uEne;
   s -= d > 0 ? d * 34 : Math.abs(d) * 9;
 
-  /* 2. Napięcie kontra opór przed wejściem. */
-  if(st.t >= 60) s -= task.dread * 16;
-  else if(st.t <= 30) s += (4 - task.dread) * 4;
+  /* 2. Napięcie kontra opór przed wejściem — funkcja CIĄGŁA (A-4).
+        Progi 60/30 działały tylko na skrajnościach, a suwak startuje na 50,
+        więc oś napięcia — wyróżnik produktu — była martwa w stanie domyślnym.
+        Teraz: zero przy 40, symetrycznie w obie strony. Wysokie napięcie tłumi
+        dread (nakręcony nie zadzwoni do urzędu); niskie napięcie sprzyja wejściu
+        w trudne (spokój to dobry moment na tę rozmowę). */
+  s -= task.dread * (st.t - 40) * 0.4;
 
   /* 3. Okno czasowe z kalendarza, jeśli jest. Nie proponujemy
         godzinnej rzeczy przed spotkaniem za 20 minut. */
@@ -173,7 +177,7 @@ function explainPick(task, st, windowMin){
   else if(task.ene === 'mid') parts.push('to średnia rzecz, w sam raz na teraz');
   else parts.push('to pasuje do tego, jak masz');
 
-  if(st.t >= 60 && task.dread <= 2) parts.push('i nie wymaga zbierania się');
+  if(st.t >= 50 && task.dread <= 2) parts.push('i nie wymaga zbierania się');
   if(windowMin && task.min <= windowMin) parts.push(`zmieścisz to w ${windowMin} min do następnej rzeczy`);
   if(task.started > 0) parts.push('a to już się zaczęło, więc wracasz, nie ruszasz od zera');
 

@@ -34,9 +34,59 @@ function openConnect(){
     <div class="cn-note">
       Wszystko trzymam na Twoim urządzeniu. Cofnięcie zgody zatrzymuje wysyłanie na zewnątrz.
     </div>
+
+    <div class="cn-data">
+      <div class="cn-data-h">Twoje dane (RODO art. 15, 17, 20)</div>
+      <button class="btn btn-ghost" onclick="exportData()">📥 Pobierz wszystko (JSON)</button>
+      <button class="btn btn-ghost cn-danger" onclick="wipeConfirm()">🗑️ Usuń wszystkie dane</button>
+    </div>
   `,`
     <button class="btn btn-primary" onclick="renderTasks()">Wróć</button>
   `);
+}
+
+/* ============================================================
+   TWOJE DANE — eksport i usunięcie (RODO art. 15/17/20)
+   ------------------------------------------------------------
+   Wszystko żyje lokalnie, więc przenoszalność i prawo do bycia zapomnianym
+   realizujemy w całości na urządzeniu: eksport = zrzut localStorage do JSON,
+   usunięcie = skasowanie kluczy aplikacji i twardy reset. */
+function appDataKeys(){
+  const out = [];
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(k && /^(masteradhd\.|guardianid\.|gt\.)/.test(k)) out.push(k);
+  }
+  return out;
+}
+function exportData(){
+  try{
+    const dump = { _app:'MasterADHD', _wersja:'v17', _eksport:new Date().toISOString(), dane:{} };
+    appDataKeys().forEach(k=>{ dump.dane[k] = localStorage.getItem(k); });
+    const blob = new Blob([JSON.stringify(dump, null, 2)], {type:'application/json'});
+    const url  = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'masteradhd-dane-' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 120);
+    buzz(BUZZ.done);
+  }catch(e){ alert('Nie udało się przygotować pliku. Spróbuj ponownie.'); }
+}
+function wipeConfirm(){
+  nowSwap(`
+    <div class="kicker">Usunięcie danych</div>
+    <div class="max-line" style="margin-bottom:8px">Na pewno usunąć wszystko?</div>
+    <div class="now-why-big">Skasuję Twój dziennik, mapę, zadania, profil i zgody — nieodwracalnie,
+      z tego urządzenia. Warto wcześniej pobrać kopię.</div>
+  `,`
+    <button class="btn btn-ghost cn-danger" onclick="wipeData()">Tak, usuń wszystko</button>
+    <button class="btn btn-primary" onclick="openConnect()">Anuluj</button>
+  `);
+}
+function wipeData(){
+  appDataKeys().forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} });
+  try{ location.reload(); }catch(e){ location.href = location.pathname; }
 }
 function toggleCons(k){
   const c = consLoad();

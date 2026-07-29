@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#16131f">
 <title>MasterADHD · Max</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MasterADHD">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -43,7 +49,7 @@
 
     <div class="consent" id="aConsentBox">
       <input type="checkbox" id="aConsent">
-      <label for="aConsent">Akceptuję <a onclick="showTrust();return false">zasady prywatności</a>. Moje dane są moje — zostają na moim urządzeniu.</label>
+      <label for="aConsent">Akceptuję <a onclick="showTrust();return false">zasady prywatności</a>. Moje dane są moje — mogę je pobrać lub usunąć w każdej chwili.</label>
     </div>
     <div class="emsg" id="aConsentErr" style="margin:-4px 0 6px">Zaznacz zgodę, żeby założyć konto.</div>
 
@@ -68,9 +74,9 @@
     <h2>🛡️ Twoje dane należą do Ciebie</h2>
     <div class="trust-item"><span class="ic">📱</span><div>Twoje dane <b>nie opuszczają tego urządzenia</b>. Nie wysyłamy ich na żaden serwer.</div></div>
     <div class="trust-item"><span class="ic">🚫</span><div><b>Nie sprzedajemy</b> Twoich danych. Nie ma reklam. Jesteś użytkownikiem, nie towarem.</div></div>
-    <div class="trust-item"><span class="ic">📥</span><div>Twoje wpisy są <b>tylko u Ciebie</b>, w tej przeglądarce. Nic nie trzymamy po swojej stronie.</div></div>
-    <div class="trust-item"><span class="ic">🗑️</span><div>Możesz je <b>skasować w każdej chwili</b> — czyszcząc dane aplikacji w przeglądarce.</div></div>
-    <div class="trust-item"><span class="ic">📴</span><div>Sedno Maxa działa <b>bez sieci</b>. Tylko podpowiedzi AI potrzebują połączenia.</div></div>
+    <div class="trust-item"><span class="ic">📥</span><div>W każdej chwili możesz <b>pobrać wszystko</b>, co o Tobie wiemy (Połączenia → Twoje dane).</div></div>
+    <div class="trust-item"><span class="ic">🗑️</span><div>Możesz <b>usunąć wszystkie dane</b> jednym ruchem. Bez pytań.</div></div>
+    <div class="trust-item"><span class="ic">📴</span><div>Max działa <b>offline</b> i instaluje się na ekranie głównym. Tylko podpowiedzi AI potrzebują sieci.</div></div>
     <button class="trust-close" onclick="hideTrust()">Rozumiem</button>
   </div>
 </div>
@@ -176,5 +182,14 @@
 <script src="js/08-auth.js"></script>
 <script src="js/09-tasks.js"></script>
 <script src="js/10-sensors.js"></script>
+<script>
+/* Rejestracja Service Workera — offline + instalacja (audyt A-8). Ciche,
+   niekrytyczne: brak SW nie psuje aplikacji. */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
 </body>
 </html>

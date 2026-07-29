@@ -2,6 +2,32 @@
 
 Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 
+## [v17] — fundament
+
+Zweryfikowane w headless Chromium (0 błędów; SW aktywny; reload offline serwuje
+całą aplikację z cache; eksport/usunięcie i ciągła oś napięcia PASS).
+
+### Dodane
+- **Proxy do modelu (A-1).** Cloudflare Worker w `worker/` (klucz w sekrecie,
+  rate-limit per IP przez KV, whitelist modeli, zawężony CORS) + instrukcja wdrożenia.
+  Klient (`js/03-ai.js`) ma jedno wejście `callModel()` wołające konfigurowalny
+  `AI_PROXY_URL`; usunięte bezpośrednie wywołania `api.anthropic.com`. Puste `AI_PROXY_URL`
+  = AI wyłączone (bezpieczny domyślny stan).
+- **Manifest + service worker (A-8).** `manifest.webmanifest`, ikony (192/512/maskable/SVG),
+  `sw.js` (cache-first na powłokę, aktualizacja w tle, nawigacja offline). „Max działa offline"
+  przestaje być obietnicą bez pokrycia; aplikacja instaluje się na ekranie głównym.
+- **Eksport i usunięcie danych (RODO art. 15/17/20).** „Połączenia → Twoje dane":
+  `exportData()` (zrzut całego stanu do JSON) i `wipeData()` (trwałe skasowanie + reset).
+  Panel zaufania i zgoda znów obiecują pobranie/usunięcie — bo teraz to prawda.
+- **Polityka prywatności.** `docs/POLITYKA-PRYWATNOSCI.md` — realny dokument (art. 9,
+  podstawy prawne, prawa, retencja), z polami do uzupełnienia przez administratora.
+
+### Zmienione
+- **Ciągła funkcja napięcia (A-4).** `scoreTask` liczy `dread × (napięcie − 40) × 0.4`
+  zamiast dwóch progów 60/30. Oś napięcia — wyróżnik produktu — działa teraz od stanu
+  domyślnego (suwak startuje na 50), nie tylko na skrajnościach. Zweryfikowane: przy
+  energii 15 i napięciu 50 Max nie podsuwa już telefonu do urzędu (dread 4).
+
 ## [v16.1] — naprawy, zero nowych funkcji
 
 Cel: produkt przestaje kłamać. Wszystkie naprawy zweryfikowane w headless Chromium

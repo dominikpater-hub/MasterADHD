@@ -580,3 +580,9 @@
   .now-task-big{font-size:30px;line-height:1.2;font-weight:600;color:var(--pearl);letter-spacing:-.02em;max-width:12em;margin-bottom:12px}
   .now-why-big{font-size:15px;color:var(--mist);line-height:1.5;max-width:20em}
   .now-actions{width:100%;display:flex;flex-direction:column;gap:11px;position:relative;z-index:2}
+
+  /* ================== TWOJE DANE (RODO) w panelu połączeń ================== */
+  .cn-data{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+  .cn-data-h{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mist);font-weight:700;margin-bottom:2px}
+  .cn-danger{color:#ffabab;border-color:rgba(255,120,120,.35)}
+  .cn-danger:active{background:rgba(255,80,80,.1)}

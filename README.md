@@ -30,23 +30,31 @@ utrzymywalną strukturę plików. Zachowanie jest identyczne z prototypem — pa
 
 ```
 MasterADHD/
-├── index.html            # szkielet: <head>, markup ekranów, ładowanie modułów
+├── index.html            # szkielet: <head>, markup ekranów, ładowanie modułów, rejestracja SW
+├── manifest.webmanifest  # PWA: nazwa, ikony, kolory, tryb standalone
+├── sw.js                 # service worker (cache-first na powłokę, offline)
+├── icons/                # ikony aplikacji (192/512/maskable + SVG)
 ├── css/
 │   └── styles.css        # cała warstwa wizualna (motyw, sceny, komponenty)
 ├── js/                   # moduły ładowane po kolei jako klasyczne <script>
 │   ├── 01-core.js        # persona Maxa, pamięć sesji, licznik startów, mapa
 │   ├── 02-safety.js      # warstwa bezpieczeństwa §16, ekran wsparcia, głos (TTS), wibracje
-│   ├── 03-ai.js          # warstwa AI (tailorSteps, analyzeDump) — WYMAGA proxy backendowego
+│   ├── 03-ai.js          # warstwa AI: callModel() → proxy (AI_PROXY_URL); domyślnie wyłączona
 │   ├── 04-now.js         # tryb TERAZ, główny pomiar (3 suwaki), „Zrzuć myśli", czat
 │   ├── 05-profile.js     # formy gramatyczne, powitania, Max jako gospodarz, recenzje
 │   ├── 06-emotions.js    # „Zrzuć emocje" (model Russella), Atlas emocji, ankieta różnicująca
 │   ├── 07-goals.js       # cele/profil, motywacja do regularności, plany jeśli-to
 │   ├── 08-auth.js        # Guardian ID — logowanie (etap 1, bez backendu)
-│   ├── 09-tasks.js       # warstwa zadań, wzbogacanie heurystyczne, DOBÓR, „Twoje rzeczy"
-│   └── 10-sensors.js     # połączenia i zgody, Google Tasks (szkielet), kalendarz, czujniki
+│   ├── 09-tasks.js       # warstwa zadań, wzbogacanie, DOBÓR (ciągła oś napięcia), „Twoje rzeczy"
+│   └── 10-sensors.js     # połączenia i zgody, eksport/usunięcie danych, kalendarz, czujniki
+├── worker/               # proxy AI (Cloudflare Worker) — źródło + instrukcja wdrożenia
+│   ├── src/worker.js
+│   ├── wrangler.toml
+│   └── README.md
 └── docs/
     ├── AUDYT-v16.1.0.md              # pełny audyt (techniczny · treści · potencjału)
-    └── prototype-v16-monolith.html  # zamrożony prototyp jednoplikowy (proweniencja)
+    ├── POLITYKA-PRYWATNOSCI.md       # polityka prywatności (RODO, art. 9)
+    └── prototype-v16-monolith.html   # zamrożony prototyp jednoplikowy (proweniencja)
 ```
 
 ### Dlaczego klasyczne `<script>`, nie moduły ES
@@ -73,13 +81,15 @@ npx serve .
 
 Następnie otwórz `http://localhost:8000`.
 
-### Uwaga o warstwie AI
+### Warstwa AI (opcjonalna, przez proxy)
 
-`js/03-ai.js` woła `https://api.anthropic.com` bezpośrednio z przeglądarki. Działa to **wyłącznie**
-w środowisku artefaktów Claude, gdzie autoryzację wstrzykuje host. W realnym wdrożeniu (PWA)
-wymaga **proxy po stronie serwera** (Cloudflare Worker / Edge Function) z kluczem w zmiennej
-środowiskowej — patrz audyt, punkt A-1. Bez tego moduł AI jest wyłączony, a reszta aplikacji
-(heurystyki lokalne) działa normalnie.
+Klient nigdy nie trzyma klucza API i nie woła Anthropic bezpośrednio. `js/03-ai.js` woła
+konfigurowalny endpoint `AI_PROXY_URL`; obsługuje go Cloudflare Worker ze źródłem w
+[`worker/`](worker/README.md) (klucz w sekrecie, rate-limit, whitelist modeli, zawężony CORS).
+
+Domyślnie `AI_PROXY_URL` jest **puste = warstwa AI wyłączona** — cała aplikacja działa na
+heurystykach lokalnych. Po wdrożeniu proxy wpisz jego URL w `js/03-ai.js`. AI odpala się dodatkowo
+tylko przy włączonej zgodzie `ai` (patrz audyt A-1b).
 
 ---
 
@@ -91,8 +101,10 @@ Pełna lista i uzasadnienia: [`docs/AUDYT-v16.1.0.md`](docs/AUDYT-v16.1.0.md), s
   (A-3), ankieta emocji zanieczyszcza statystykę (A-5), egzekwowanie zgody `ai` (A-1b), skan
   kryzysowy na wszystkich polach (A-9), `esc()` na odpowiedziach modelu (A-11), formy rodzajowe
   (B-1), usunięcie niedotrzymanych obietnic (B-4), martwy kod (A-14). *Cel: produkt przestaje kłamać.*
-- **v17 — fundament.** Proxy do modelu, manifest + service worker („offline" staje się prawdą),
-  eksport + usunięcie danych (RODO art. 17/20), ciągła funkcja napięcia (A-4), polityka prywatności.
+- **v17 — fundament. ✅ zrobione.** Proxy do modelu (`worker/`, klient przez `AI_PROXY_URL`),
+  manifest + service worker („offline" jest prawdą, aplikacja instalowalna), eksport + usunięcie
+  danych (RODO art. 17/20, w „Połączenia → Twoje dane"), ciągła funkcja napięcia (A-4 —
+  oś działa od stanu domyślnego), polityka prywatności (`docs/POLITYKA-PRYWATNOSCI.md`).
 - **v18 — wartość.** Powiadomienia (nośnik dla kotwicy zdarzeniowej), realne wejście zadań
   (share target + „wklej listę"), własne audio Maxa, ankieta emocji na własnym kafelku.
 - **v19 — skala.** Backend, konto, sync, monetyzacja (free = offline, paid = warstwa AI), DPIA.

@@ -240,6 +240,7 @@ async function processDump(){
 }
 
 async function analyzeDump(text){
+  if(!AI_PROXY_URL) return null;    // A-1: brak proxy → offline (bez proxy analiza nie zadziała)
   if(!consLoad().ai) return null;   // A-1b: treść dziennika (art. 9 RODO) nie wychodzi bez zgody
   if(!navigator.onLine) return null;
   const prompt =
@@ -259,16 +260,8 @@ Zwróć WYŁĄCZNIE JSON, bez markdown:
 
 Nie diagnozuj. Nie używaj terminów klinicznych. Nie obiecuj poprawy.`;
   try{
-    const ctl = new AbortController();
-    const to = setTimeout(()=>ctl.abort(), 12000);
-    const r = await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST", headers:{"Content-Type":"application/json"}, signal:ctl.signal,
-      body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:1000,
-        messages:[{role:"user",content:prompt}] })
-    });
-    clearTimeout(to);
-    const data = await r.json();
-    const txt = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const txt = await callModel(prompt, 1000, 12000);
+    if(txt === null) return null;
     return JSON.parse(txt.replace(/```json|```/g,'').trim());
   }catch(e){ return null; }
 }

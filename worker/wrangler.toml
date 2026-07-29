@@ -1,0 +1,19 @@
+name = "masteradhd-ai-proxy"
+main = "src/worker.js"
+compatibility_date = "2024-11-01"
+
+# --- Zmienne jawne (widoczne, nie-sekretne) ---
+[vars]
+# W produkcji ZAWĘŹ do swojej domeny, np. "https://masteradhd.pages.dev".
+# "*" jest wygodne na czas developmentu, ale wpuszcza każdą stronę.
+ALLOWED_ORIGIN = "*"
+
+# --- Sekret (NIE wpisuj tutaj) ---
+# Ustaw poleceniem:  wrangler secret put ANTHROPIC_API_KEY
+
+# --- Opcjonalny rate-limit per IP (KV) ---
+# Utwórz namespace:  wrangler kv namespace create RATE
+# a potem odkomentuj i wklej id:
+# [[kv_namespaces]]
+# binding = "RATE"
+# id = "TWOJE_KV_ID"

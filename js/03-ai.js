@@ -9,8 +9,39 @@
    ============================================================ */
 let aiState = 'idle';   // idle | pending | ok | offline
 
+/* A-1: klient NIE woła Anthropic bezpośrednio (klucz w kliencie = wyciek; brak
+   klucza = 401/CORS). Wołamy własne proxy (Cloudflare Worker — patrz worker/).
+   Puste AI_PROXY_URL = warstwa AI wyłączona, aplikacja działa na heurystykach
+   lokalnych. To bezpieczny domyślny stan. */
+const AI_PROXY_URL = '';   // ← wpisz URL swojego proxy, np. 'https://masteradhd-ai-proxy.xxx.workers.dev'
+const AI_MODEL = 'claude-sonnet-4-6';
+
+/* Jedno wejście do modelu. Zwraca surowy tekst odpowiedzi albo null
+   (AI off / brak zgody / offline / błąd). Bramka zgody A-1b jest tutaj,
+   więc żadna ścieżka nie ominie sprawdzenia. */
+async function callModel(prompt, maxTokens, timeoutMs){
+  if(!AI_PROXY_URL) return null;        // brak proxy → nie udajemy, że AI działa
+  if(!consLoad().ai) return null;       // A-1b: treść nie wychodzi bez zgody
+  if(!navigator.onLine) return null;
+  try{
+    const ctl = new AbortController();
+    const to = setTimeout(()=>ctl.abort(), timeoutMs || 10000);
+    const r = await fetch(AI_PROXY_URL, {
+      method:'POST', headers:{'Content-Type':'application/json'}, signal:ctl.signal,
+      body: JSON.stringify({ model:AI_MODEL, max_tokens:maxTokens || 1000,
+        messages:[{role:'user', content:prompt}] })
+    });
+    clearTimeout(to);
+    if(!r.ok) return null;
+    const data = await r.json();
+    const txt = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    return txt || null;
+  }catch(e){ return null; }
+}
+
 async function tailorSteps(){
   if(!consLoad().ai){ aiState='idle'; return; }   // A-1b: bez zgody treść zadania nie opuszcza urządzenia
+  if(!AI_PROXY_URL){ aiState='idle'; return; }     // brak proxy → nie kłamiemy plakietką „dopasowane"
   if(!navigator.onLine){ aiState='offline'; return; }
   aiState='pending';
   const skeleton = steps.map((s,i)=>`${i+1}. ${s.word} (${s.hint})`).join('\n');
@@ -34,16 +65,8 @@ Zwróć WYŁĄCZNIE JSON, bez markdown:
 {"steps":[{"word":"...","hint":"...","max":"..."}]}`;
 
   try{
-    const ctl = new AbortController();
-    const to = setTimeout(()=>ctl.abort(), 9000);
-    const r = await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST", headers:{"Content-Type":"application/json"}, signal:ctl.signal,
-      body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:1000,
-        messages:[{role:"user",content:prompt}] })
-    });
-    clearTimeout(to);
-    const data = await r.json();
-    const txt = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const txt = await callModel(prompt, 1000, 9000);
+    if(txt === null){ aiState='offline'; return; }
     const parsed = JSON.parse(txt.replace(/```json|```/g,'').trim());
     if(parsed && Array.isArray(parsed.steps) && parsed.steps.length === steps.length){
       /* Nadpisujemy WYŁĄCZNIE treść. somatic i cała reszta szkieletu zostaje. */

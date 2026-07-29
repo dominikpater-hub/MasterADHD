@@ -1,0 +1,20 @@
+{
+  "name": "MasterADHD · Max",
+  "short_name": "MasterADHD",
+  "description": "Max — trener nastroju dla osób z ADHD. Wskazuje realną rzecz z Twojej listy i pomaga ruszyć.",
+  "lang": "pl",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#16131f",
+  "theme_color": "#16131f",
+  "categories": ["health", "lifestyle", "productivity"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
