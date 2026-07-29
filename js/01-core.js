@@ -18,33 +18,6 @@ function memLoad(){
 function memSave(m){
   try{ localStorage.setItem(MEM_KEY, JSON.stringify(m)); }catch(e){}
 }
-/* Buduje kontekstowe powitanie na podstawie ostatniej sesji. */
-function maxGreeting(){
-  const m = memLoad();
-  if(!m || !m.sessions){
-    return { name:'Max · Twój trener',
-      html:`<b>Hej. Jestem Max.</b> Kiedy utkniesz i nie możesz ruszyć — naciśnij duży guzik na dole. Zajmę się resztą.` };
-  }
-  /* WARSTWA 1 — powrót po przerwie. Nagroda idzie za POWRÓT, nie za ciągłość.
-     Zero wyrzutów typu „nie widzieliśmy Cię 3 dni". */
-  const gap = daysSinceLastSeen();
-  if(gap >= 3){
-    const dni = (m.days && m.days.length) ? m.days.length : m.sessions || 1;
-    return { name:'Max',
-      html:`<b>Wracasz.</b> To się liczy bardziej niż ciągłość. Masz za sobą ${dni} ${dni===1?'dzień':'dni'} — nic nie przepadło.` };
-  }
-  // wracający użytkownik — Max pamięta
-  if(m.lastTask && m.lastHelped === 'breakdown'){
-    return { name:`Max · widzimy się ${m.sessions}. raz`,
-      html:`<b>Ostatnim razem pomogło rozbicie zadania.</b> Gdy znów utkniesz — rozbijamy to tak samo.` };
-  }
-  if(m.lastTask){
-    return { name:`Max · pamięta`,
-      html:`<b>Ostatnio utknąłeś przy: „${m.lastTask}”.</b> Dziś też? Naciśnij guzik, ruszymy to razem.` };
-  }
-  return { name:`Max · widzimy się ${m.sessions}. raz`,
-    html:`<b>Dobrze Cię widzieć znowu.</b> Gdy utkniesz — jeden guzik i lecimy krok po kroku.` };
-}
 /* Zapisuje ślad po sesji. */
 function memRecord(patch){
   const m = memLoad() || { sessions:0, created:Date.now() };

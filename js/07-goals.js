@@ -310,7 +310,13 @@ function sceneWhatTask(){
 
 function submitTask(skip){
   const el = document.getElementById('taskInput');
-  sessionTask = (!skip && el) ? el.value.trim() : '';
+  if(!skip){
+    const t = readUserText(el);   // A-9: skan kryzysowy przed zapisem i przed LLM
+    if(t === null) return;        // trafienie → openSafety pokazał wsparcie, nie idziemy dalej
+    sessionTask = t;
+  } else {
+    sessionTask = '';
+  }
   if(sessionTask){
     const m = memLoad() || {}; m.lastTask = sessionTask; memSave(m);
   }
@@ -390,29 +396,19 @@ function sceneBreath(){
   `,'');
   setTimeout(()=>maxSpeak(line,false), 500);
   clearTimeout(window._bt);
-  window._bt=setTimeout(sceneAsk, 4600);
-}
-
-/* ===== SCENA 2: CO ROBIMY ===== */
-function sceneAsk(){
-  setDots(0);
-  const line='Co miałeś zacząć? Nie musisz wiedzieć — możemy ruszyć bez tego.';
-  swap(`
-    <div class="max-orb" style="width:110px;height:110px;margin-bottom:18px"><div class="max-orb-core" style="width:60px;height:60px"></div></div>
-    <div class="kicker">Max pyta</div>
-    <div class="max-line" style="margin-bottom:22px">Co miałeś zacząć?<br><span style="font-size:14px;color:var(--mist)">Nie musisz wiedzieć. Możesz pominąć.</span></div>
-    <textarea class="field" id="taskField" rows="2" placeholder="np. napisać maila… albo zostaw puste"></textarea>
-  `,`
-    <button class="btn btn-primary" onclick="beginSteps()">Poprowadź mnie</button>
-    <div class="footnote"><button class="btn-text" onclick="beginSteps()">Nie wiem, po prostu zacznijmy →</button></div>
-  `);
-  setTimeout(()=>maxSpeak(line,false), 400);
+  /* A-3: submitTask już zapytał o zadanie — drugie pytanie sprawiało, że Max
+     wyglądał, jakby nie słuchał, i kasowało pierwszą odpowiedź. Prosto w kroki. */
+  window._bt=setTimeout(beginSteps, 4600);
 }
 
 /* ===== KROKI ===== */
 function beginSteps(){
   const f = document.getElementById('taskField');
-  sessionTask = (f && f.value.trim()) ? f.value.trim() : '';
+  /* A-3: puste albo nieobecne pole NIE kasuje zadania podanego w submitTask. */
+  if(f && f.value.trim()){
+    sessionTask = f.value.trim();
+    const m = memLoad() || {}; m.lastTask = sessionTask; memSave(m);
+  }
   sessionHelped = '';
   idx=0;renderStep();
 }
@@ -478,21 +474,21 @@ function sceneStart(){
     <div class="start-badge">${_starts}. raz ${_r} mimo oporu · ${_dni} ${_dni===1?'dzień':'dni'} razem</div>
   `,`
     <button class="btn btn-fire" onclick="sceneBuddy()">Zostań ze mną 🔥</button>
-    <button class="btn btn-ghost" onclick="sceneHandoff()">Dam radę sam</button>
+    <button class="btn btn-ghost" onclick="sceneHandoff()">Poradzę sobie</button>
   `);
   setTimeout(()=>maxSpeak(line,true),300);
 }
 
 /* ===== CIĄGŁOŚĆ: Max nie znika w ciszy ===== */
 function sceneHandoff(){
-  const line='Spoko, lecisz sam. Ale nie znikam — mam się odezwać za dziesięć minut czy zostać obok?';
+  const line='Spoko, działasz solo. Nie znikam — mam trzymać czas czy zostać obok?';
   swap(`
     <div class="max-orb" style="width:110px;height:110px;margin-bottom:20px"><div class="max-orb-core" style="width:60px;height:60px"></div></div>
     <div class="maxName">Max</div>
-    <div class="max-line"><b>Lecisz sam — super.</b><br>Ale nie znikam ot tak.</div>
+    <div class="max-line"><b>Działasz solo — super.</b><br>Jestem tu, gdyby co.</div>
   `,`
     <button class="btn btn-primary" onclick="sceneBuddy()">Zostań obok 👤</button>
-    <button class="btn btn-ghost" onclick="pingLater()">Odezwij się za 10 min ⏱️</button>
+    <button class="btn btn-ghost" onclick="pingLater()">Trzymaj mi czas ⏱️</button>
     <div class="footnote"><button class="btn-text" onclick="exitCrisis()">Nie trzeba, dzięki</button></div>
   `);
   setTimeout(()=>maxSpeak(line,false),300);
@@ -516,7 +512,7 @@ function pingLater(){
     <button class="btn btn-primary" onclick="saveAnchor('po pierwszej kawie')">Po pierwszej kawie ☕</button>
     <button class="btn btn-primary" onclick="saveAnchor('po otwarciu laptopa')">Po otwarciu laptopa 💻</button>
     <button class="btn btn-primary" onclick="saveAnchor('po powrocie do domu')">Po powrocie do domu 🏠</button>
-    <div class="footnote"><button class="btn-text" onclick="pingConfirm(null)">Pomiń — po prostu za 10 min</button></div>
+    <div class="footnote"><button class="btn-text" onclick="pingConfirm(null)">Pomiń — po prostu trzymaj czas</button></div>
   `);
   setTimeout(()=>maxSpeak(line,false),300);
 }
@@ -534,13 +530,13 @@ function saveAnchor(a){
 function pingConfirm(anchor){
   const cap = anchor ? anchor.charAt(0).toUpperCase()+anchor.slice(1) : null;
   const linia = anchor
-    ? `Zapamiętane. ${cap} — wtedy jestem. Teraz lecisz, ja pilnuję czasu.`
-    : 'Jasne. Sprawdzę Cię za dziesięć minut. Lecisz — ja pilnuję czasu.';
+    ? `Zapamiętane. ${cap} — dobry moment, żeby tu wrócić. Teraz lecisz, ja trzymam czas.`
+    : 'Trzymam czas. Wróć do mnie za jakieś 10 minut — będę tu.';
   swap(`
     <div class="max-orb" style="width:100px;height:100px;margin-bottom:20px"><div class="max-orb-core" style="width:54px;height:54px"></div></div>
     <div class="maxName">Max</div>
-    <div class="max-line"><b>Jasne. Sprawdzę Cię za 10 minut.</b><br>Lecisz. Ja pilnuję czasu.</div>
-    ${anchor ? `<div class="start-badge">Kotwica: ${anchor} — wtedy się odezwę</div>` : ''}
+    <div class="max-line"><b>Trzymam czas.</b><br>Wróć do mnie, kiedy zrobisz kawałek — będę tu.</div>
+    ${anchor ? `<div class="start-badge">Kotwica: ${anchor} — wtedy do mnie wróć</div>` : ''}
   `,`
     <button class="btn btn-primary" onclick="afterSession()">Do zobaczenia 👊</button>
   `);
@@ -560,11 +556,11 @@ function afterSession(){
 /* ===== BODY DOUBLE: Max zostaje obok, aż skończysz ===== */
 function sceneBuddy(){
   setDots(99);
-  const line='Jestem obok. Rób swoje — co jakiś czas zajrzę, żeby sprawdzić, czy lecisz.';
+  const line='Jestem obok. Rób swoje — jestem tu, kiedy tylko zerkniesz na ekran.';
   swap(`
     <div class="max-orb fired"><div class="max-orb-core"></div></div>
     <div class="maxName fired">Max jest obok</div>
-    <div class="max-line"><b>Rób swoje.</b><br>Zajrzę co jakiś czas. Nie musisz nic mówić.</div>
+    <div class="max-line"><b>Rób swoje.</b><br>Jestem obok — nie musisz nic mówić.</div>
     <div class="lightbar-wrap"><div class="lightbar" id="lbar"></div></div>
   `,`
     <button class="btn btn-done" onclick="buddyDone()">Skończyłem ✓</button>
@@ -586,11 +582,11 @@ function buddyDone(){
   swap(`
     <div class="max-orb"><div class="max-orb-core"></div></div>
     <div class="maxName">Max</div>
-    <div class="max-line" style="margin-bottom:8px"><b>Dowiozłeś.</b></div>
-    <div class="now-why-big">Byłem obok, ale to Ty to zrobiłeś. Zapamiętam, że dziś Ci się udało — wróć, kiedy znów będziesz potrzebować towarzystwa.</div>
+    <div class="max-line" style="margin-bottom:8px"><b>Zrobione.</b></div>
+    <div class="now-why-big">Byłem obok, ale to Twoja robota. Zapamiętam, że dziś się udało — wróć, kiedy znów przyda Ci się towarzystwo.</div>
   `,`
     <button class="btn btn-primary" onclick="exitCrisis()">Wracam do siebie</button>
   `);
-  setTimeout(()=>maxSpeak('Dowiozłeś. Byłem obok, ale to Ty to zrobiłeś.',true),300);
+  setTimeout(()=>maxSpeak('Zrobione. Byłem obok, ale to Twoja robota.',true),300);
 }
 

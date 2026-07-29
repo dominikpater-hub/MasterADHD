@@ -10,6 +10,7 @@
 let aiState = 'idle';   // idle | pending | ok | offline
 
 async function tailorSteps(){
+  if(!consLoad().ai){ aiState='idle'; return; }   // A-1b: bez zgody treść zadania nie opuszcza urządzenia
   if(!navigator.onLine){ aiState='offline'; return; }
   aiState='pending';
   const skeleton = steps.map((s,i)=>`${i+1}. ${s.word} (${s.hint})`).join('\n');

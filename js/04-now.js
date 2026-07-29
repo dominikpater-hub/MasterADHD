@@ -20,16 +20,6 @@ function nowSwap(html, acts){
   requestAnimationFrame(()=>requestAnimationFrame(()=>s.classList.add('active')));
   nowActions.innerHTML = acts||'';
 }
-/* Nieużywane od v5 — karta „sprawdź stan" z ekranu głównego zniknęła,
-   a wejście w energię prowadzi teraz przez czat (openChat) lub openEnergy.
-   Zostawione, bo nowAskEnergy() nadal z tego przepływu korzysta. */
-function openNow(){
-  /* Okno z kalendarza — wyłącznie liczba minut, zero treści (P-34). */
-  if(consLoad().gcal && window.GT_TOKEN) calWindow(window.GT_TOKEN);
-  NOW.classList.add('show');
-  requestAnimationFrame(()=>requestAnimationFrame(()=>NOW.classList.add('vis')));
-  nowAskEnergy();
-}
 function exitNow(){
   if('speechSynthesis' in window) speechSynthesis.cancel();
   NOW.classList.remove('vis');
@@ -61,13 +51,13 @@ function nowAskEnergy(){
     </div>
 
     <div class="sl-block">
-      <div class="sl-lab"><span>wyczerpany</span><span>pełen energii</span></div>
+      <div class="sl-lab"><span>bez energii</span><span>dużo energii</span></div>
       <input class="sl" type="range" min="0" max="100" value="50" id="ckEne">
       <div class="sl-name">Ile masz energii</div>
     </div>
 
     <div class="sl-block">
-      <div class="sl-lab"><span>spokojnie</span><span>bardzo spięty</span></div>
+      <div class="sl-lab"><span>spokój</span><span>duże napięcie</span></div>
       <input class="sl" type="range" min="0" max="100" value="50" id="ckTen">
       <div class="sl-name">Ile masz napięcia</div>
     </div>
@@ -149,6 +139,8 @@ function openMap(){
    3. PYTANIE  — jedno, które drąży głębiej
    ============================================================ */
 
+let dumpFirstTask = '';   // A-11: pierwsze zadanie z modelu trzymamy tu, nie wstrzykujemy do onclick
+
 function dumpLoad(){
   try{ return JSON.parse(localStorage.getItem(DUMP_KEY)) || []; }catch(e){ return []; }
 }
@@ -207,12 +199,12 @@ async function processDump(){
     nowSwap(`
       <div class="kicker">Zapisane</div>
       <div class="max-line" style="margin-bottom:8px">Jestem offline.</div>
-      <div class="now-why-big">Zapisałem to, co napisałeś. Poukładam, gdy wrócę do sieci —
-        nic nie przepadło.</div>
+      <div class="now-why-big">Zapisałem Twój wpis — jest u Ciebie, lokalnie. Nic nie przepadło.
+        Wróć z siecią, jeśli chcesz, żebym go z Tobą rozłożył.</div>
     `,`
       <button class="btn btn-primary" onclick="exitNow()">Jasne</button>
     `);
-    setTimeout(()=>maxSpeak('Jestem offline, ale zapisałem. Poukładam, gdy wrócę do sieci.',false),350);
+    setTimeout(()=>maxSpeak('Jestem offline. Twój wpis jest zapisany — nic nie przepadło.',false),350);
     return;
   }
 
@@ -228,23 +220,27 @@ async function processDump(){
   /* Emocja z dziennika trafia do tej samej mapy, co check-iny. */
   if(res.emotion) mapRecord(res.energy || 'mid', 'dump');
 
+  /* A-11: odpowiedź modelu to niezaufane wejście (użytkownik → model → HTML).
+     Escapujemy każde pole; pierwsze zadanie trzymamy w zmiennej, nie w atrybucie onclick. */
+  dumpFirstTask = (res.tasks && res.tasks[0]) || '';
   nowSwap(`
     <div class="kicker">Co usłyszałem</div>
-    <div class="dump-mirror">${res.mirror||''}</div>
-    ${res.emotion ? `<div class="dump-emo">${res.emotion}</div>` : ''}
+    <div class="dump-mirror">${esc(res.mirror||'')}</div>
+    ${res.emotion ? `<div class="dump-emo">${esc(res.emotion)}</div>` : ''}
     ${(res.tasks&&res.tasks.length) ? `
       <div class="dump-sec">Wyłapałem konkrety</div>
-      ${res.tasks.map(t=>`<div class="dump-task">${t}</div>`).join('')}` : ''}
-    ${res.question ? `<div class="dump-q">${res.question}</div>` : ''}
+      ${res.tasks.map(t=>`<div class="dump-task">${esc(t)}</div>`).join('')}` : ''}
+    ${res.question ? `<div class="dump-q">${esc(res.question)}</div>` : ''}
   `,`
     ${(res.tasks&&res.tasks.length)
-      ? `<button class="btn btn-primary" onclick="dumpToSession('${(res.tasks[0]||'').replace(/'/g,"\\'")}')">Ruszmy pierwsze 🔥</button>` : ''}
+      ? `<button class="btn btn-primary" onclick="dumpToSession()">Ruszmy pierwsze 🔥</button>` : ''}
     <button class="btn btn-ghost" onclick="exitNow()">Wystarczy na teraz</button>
   `);
   setTimeout(()=>maxSpeak(res.mirror||'Zapisane.',false),400);
 }
 
 async function analyzeDump(text){
+  if(!consLoad().ai) return null;   // A-1b: treść dziennika (art. 9 RODO) nie wychodzi bez zgody
   if(!navigator.onLine) return null;
   const prompt =
 `Jesteś Max — spokojny przewodnik dla osoby z ADHD. Użytkownik zrzucił myśli:
@@ -279,6 +275,7 @@ Nie diagnozuj. Nie używaj terminów klinicznych. Nie obiecuj poprawy.`;
 
 /* Most dziennik → sesja: wyłowione zadanie wchodzi wprost w kroki. */
 function dumpToSession(task){
+  task = (task != null ? task : dumpFirstTask);   // A-11: domyślnie z bezpiecznego bufora
   exitNow();
   setTimeout(()=>{ startCrisisWithTask(task); }, 500);
 }
@@ -308,7 +305,7 @@ function openChat(){
     mowa  = 'Dobrze Cię widzieć. Od czego dziś zaczniemy?';
   } else {
     naglowek = `Hej. Widzimy się ${m.sessions+1}. raz.`;
-    tresc = m.lastTask ? `Ostatnio stałeś nad: „${m.lastTask}”. Dziś to samo czy coś nowego?`
+    tresc = m.lastTask ? `Ostatnio utknęło Ci przy: „${m.lastTask}”. Dziś to samo czy coś nowego?`
                        : 'O czym dziś pogadamy?';
     mowa  = 'Hej. O czym dziś pogadamy?';
   }

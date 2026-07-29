@@ -45,7 +45,6 @@ function F(klucz){
 }
 /* Imię do wplecenia w zdanie — pusty string, gdy nie podano. */
 function imie(){ const p = profLoad(); return p.name ? p.name : ''; }
-function przecinekImie(){ const n = imie(); return n ? `, ${n}` : ''; }
 
 /* ============================================================
    POWITANIA MAXA — pule wariantów, nie jeden sztywny tekst
@@ -72,7 +71,7 @@ const HELLO_BACK = [
   { g:'Hej. Co u Ciebie dziś?',            s:null },
   { g:'Dobrze Cię widzieć.',               s:null },
   { g:'No i jesteś. Jak leci?',            s:null },
-  { g:'Cześć. Jestem, kiedy będziesz gotów.', s:null },
+  { g:'Cześć. Jestem, kiedy tylko zechcesz.', s:null },
   { g:'Hej. Jak Ci się dziś układa?',      s:null },
   { g:'Tu Max. Bez pośpiechu — jak jest?', s:null },
   { g:'Widzę Cię. Od czego chcesz zacząć?', s:null }
@@ -210,7 +209,7 @@ function openReview(){
     <textarea class="dump-input" id="rvText" rows="3"
       placeholder="co działa, co nie działa, czego brakuje…"></textarea>
   `,`
-    <button class="btn btn-primary" onclick="sendReview()">Wyślij Maxowi</button>
+    <button class="btn btn-primary" onclick="sendReview()">Zapisz uwagę</button>
     <div class="footnote"><button class="btn-text" onclick="exitNow()">Nie teraz</button></div>
   `);
   setTimeout(()=>maxSpeak(cel?`Jak Ci działa ${cel}? Bez lukru.`:'Co mogę zrobić lepiej? Bez lukru.',false),400);
@@ -224,7 +223,8 @@ function pickScore(n){
 
 function sendReview(){
   const el = document.getElementById('rvText');
-  const txt = el ? el.value.trim() : '';
+  const txt = readUserText(el);   // A-9: skan kryzysowy
+  if(txt === null) return;         // trafienie → wsparcie
   if(!rvScore && !txt){ exitNow(); return; }
   const m = memLoad();
   const all = reviewLoad();

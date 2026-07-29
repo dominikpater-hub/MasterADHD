@@ -32,7 +32,7 @@ function openConnect(){
          'Nie powiem Ci, jak się czujesz. Mogę tylko zapytać.')}
 
     <div class="cn-note">
-      Cofnięcie zgody kasuje też to, co dzięki niej zebrałem.
+      Wszystko trzymam na Twoim urządzeniu. Cofnięcie zgody zatrzymuje wysyłanie na zewnątrz.
     </div>
   `,`
     <button class="btn btn-primary" onclick="renderTasks()">Wróć</button>
@@ -97,25 +97,6 @@ async function gtAuth(){
   location.href = u.toString();
 }
 
-/* Wciągnięcie zadań. Treść ląduje w localStorage i nigdzie indziej. */
-async function gtPull(token){
-  try{
-    const r  = await fetch('https://tasks.googleapis.com/tasks/v1/users/@me/lists',
-                 {headers:{Authorization:'Bearer '+token}});
-    const ls = await r.json();
-    for(const l of (ls.items||[])){
-      const r2 = await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${l.id}/tasks?showCompleted=false`,
-                   {headers:{Authorization:'Bearer '+token}});
-      const ts = await r2.json();
-      const have = new Set(taskLoad().map(x=>x.ext).filter(Boolean));
-      for(const t of (ts.items||[])){
-        if(have.has(t.id) || !t.title) continue;
-        const row = taskAdd(t.title, 'gtasks');
-        if(row) taskPatch(row.id, {ext:t.id, due:t.due||null});
-      }
-    }
-  }catch(e){ /* offline albo token wygasł — lista lokalna działa dalej */ }
-}
 
 /* ============================================================
    KALENDARZ — TYLKO OKNO, ZERO TREŚCI (P-34)
@@ -190,7 +171,7 @@ function connectBody(){
 function bodyManual(){
   nowSwap(`
     <div class="kicker">Dziś w nocy</div>
-    <div class="max-line" style="margin-bottom:16px">Ile spałeś?</div>
+    <div class="max-line" style="margin-bottom:16px">Ile snu tej nocy?</div>
     <div class="sl-block">
       <div class="sl-lab"><span>3 h</span><span>10 h</span></div>
       <input class="sl" type="range" min="3" max="10" step="0.5" value="7" id="slSleep">
@@ -214,8 +195,8 @@ function bodyHint(){
   if(!consLoad().body || !b) return '';
   const stare = (Date.now() - b.at) > 20*3600*1000;
   if(stare) return '';
-  if(b.sleep <= 5)  return `<div class="ck-body">Spałeś ${b.sleep} h. Czuć to?</div>`;
-  if(b.sleep >= 8.5) return `<div class="ck-body">Spałeś ${b.sleep} h. Widać to po energii?</div>`;
+  if(b.sleep <= 5)  return `<div class="ck-body">${b.sleep} h snu. Czuć to?</div>`;
+  if(b.sleep >= 8.5) return `<div class="ck-body">${b.sleep} h snu. Widać to po energii?</div>`;
   return '';
 }
 
@@ -298,8 +279,9 @@ function nowPick(level, slid){
 
 function addFromNow(){
   const el = document.getElementById('tkNew');
-  if(!el || !el.value.trim()) return;
-  taskAdd(el.value, 'local');
+  const t = readUserText(el);   // A-9: skan kryzysowy
+  if(!t) return;
+  taskAdd(t, 'local');
   buzz(BUZZ.easier);
   const m = moodLoad(); const last = m[m.length-1];
   nowPick(eneLevel(last ? last.a : 50), last ? {v:last.v, e:last.a, t:last.ten} : null);

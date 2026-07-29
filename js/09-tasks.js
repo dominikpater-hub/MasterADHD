@@ -175,7 +175,7 @@ function explainPick(task, st, windowMin){
 
   if(st.t >= 60 && task.dread <= 2) parts.push('i nie wymaga zbierania się');
   if(windowMin && task.min <= windowMin) parts.push(`zmieścisz to w ${windowMin} min do następnej rzeczy`);
-  if(task.started > 0) parts.push('a już to zaczynałeś, więc wracasz, nie startujesz');
+  if(task.started > 0) parts.push('a to już się zaczęło, więc wracasz, nie ruszasz od zera');
 
   return parts.join(', ') + '.';
 }
@@ -213,7 +213,7 @@ function renderTasks(){
     <div class="tk-sec">Z Twoich zrzutów myśli</div>
     ${dumps.map((d,i)=>`
       <button class="tk-prom" onclick="promoteDump(${d.t})">
-        <span>${esc((d.txt||'').slice(0,80))}</span><i>+ zrób z tego zadanie</i>
+        <span>${esc((d.text||'').slice(0,80))}</span><i>+ zrób z tego zadanie</i>
       </button>`).join('')}` : '';
 
   nowSwap(`
@@ -240,8 +240,9 @@ function eneWord(e){ return e==='low'?'lekkie':e==='high'?'ciężkie':'średnie'
 
 function addTaskUI(){
   const el = document.getElementById('tkNew');
-  if(!el || !el.value.trim()) return;
-  taskAdd(el.value, 'local');
+  const t = readUserText(el);   // A-9: skan kryzysowy na każdym polu tekstowym
+  if(!t) return;                 // puste albo trafienie kryzysowe (openSafety już zadziałał)
+  taskAdd(t, 'local');
   el.value = '';
   buzz(BUZZ.easier);
   renderTasks();
@@ -251,7 +252,8 @@ function promoteDump(ts){
   const arr = dumpLoad();
   const i = arr.findIndex(d=>d.t===ts);
   if(i<0) return;
-  taskAdd(arr[i].txt, 'dump');
+  const row = taskAdd(arr[i].text, 'dump');
+  if(!row) return;                       // pole puste/nieprawidłowe → nie gubimy wpisu
   arr[i].promoted = true; dumpSave(arr);
   buzz(BUZZ.easier);
   renderTasks();

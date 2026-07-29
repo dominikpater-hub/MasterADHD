@@ -17,6 +17,15 @@ function scanCrisis(text){
   if(/nie chcę (się )?zab|nie chcę umrz|nie mam myśli samob/.test(t)) return false; // proste zaprzeczenia
   return CRISIS_WORDS.some(w=>t.includes(w));
 }
+/* A-9: jeden wspólny punkt pobrania tekstu od użytkownika. Skan kryzysowy PRZED
+   jakimkolwiek zapisem i wysłaniem do modelu — nigdy przez wywołanie punktowe,
+   które zawsze zostanie pominięte w drugim polu. Trafienie → wsparcie, zwraca null. */
+function readUserText(el){
+  if(!el) return '';
+  const t = (el.value||'').trim();
+  if(t && scanCrisis(t)){ openSafety(); return null; }
+  return t;
+}
 const HELPLINES=[
   {num:'112', tel:'112', meta:'Bezpośrednie zagrożenie życia', emerg:true},
   {num:'116 123', tel:'116123', meta:'Kryzys emocjonalny, dorośli · 24/7'},
@@ -29,7 +38,7 @@ function openSafety(){
   try{ if('speechSynthesis'in window) speechSynthesis.cancel(); }catch(e){}
   const html=`
     <div class="safety-wrap">
-      <div class="safety-h">Nie jesteś sam. Pomoc jest w zasięgu ręki.</div>
+      <div class="safety-h">Nie musisz być z tym sam na sam. Pomoc jest w zasięgu ręki.</div>
       <div class="safety-sub">Jeśli myślisz o zrobieniu sobie krzywdy albo czujesz, że nie dajesz rady — odezwij się do kogoś, kto pomoże teraz. Te rozmowy są anonimowe i bezpłatne.</div>
       ${HELPLINES.map(h=>`<a class="safety-num${h.emerg?' emerg':''}" href="tel:${h.tel}">
         <span class="sn-big">${h.num}</span>
@@ -104,8 +113,10 @@ function readPatterns(){
     }
   }
 
-  /* 5) Ćwiartki z suwaków nastroju — trzecia rzeka danych. */
-  const moods = moodLoad();
+  /* 5) Ćwiartki z suwaków nastroju — trzecia rzeka danych.
+     A-5: wpisy z ankiety emocji mają v/a = null; bez filtra moodQuadrant(null,null)
+     wrzuca je wszystkie do loNeg i lustro odbija odwrotność. Liczymy tylko realne pomiary. */
+  const moods = moodLoad().filter(x => x.v != null && x.a != null);
   if(moods.length >= 5){
     const q = {hiPos:0, loPos:0, hiNeg:0, loNeg:0};
     moods.forEach(x=>{ q[moodQuadrant(x.v, x.a)]++; });
@@ -119,7 +130,7 @@ function readPatterns(){
     /* Rozjazd Thayera: wyczerpany, a jednocześnie nakręcony. */
     const spiecie = moods.filter(x=>x.v < 40 && x.a > 60).length;
     const spSh = Math.round(spiecie/moods.length*100);
-    if(spSh >= 25) out.push(`Często bywasz jednocześnie wyczerpany i nakręcony — ${spSh}% Twoich zapisów.`);
+    if(spSh >= 25) out.push(`Często masz naraz niską energię i wysokie napięcie — ${spSh}% Twoich zapisów.`);
   }
 
   return out.slice(0,4);
@@ -153,7 +164,6 @@ const BUZZ = {
    dlatego reagujemy na onvoiceschanged i odświeżamy ikonę. */
 let voiceWanted = (function(){ try{ return localStorage.getItem('masteradhd.voice')!=='off'; }catch(e){ return true; } })();
 let plVoice = null;
-let voiceReady = false;
 function plAvailable(){ return !!plVoice; }
 function voiceOn(){ return voiceWanted && plAvailable(); }  // mówimy tylko z polskim głosem
 function refreshMuteIcon(){
@@ -167,7 +177,6 @@ function refreshMuteIcon(){
 function pickVoice(){
   const vs = speechSynthesis.getVoices();
   plVoice = vs.find(v=>/^pl(-|_|$)/i.test(v.lang)) || vs.find(v=>/polish|polski/i.test(v.name)) || null;
-  voiceReady = true;
   refreshMuteIcon();
 }
 if('speechSynthesis' in window){

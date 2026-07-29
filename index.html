@@ -43,7 +43,7 @@
 
     <div class="consent" id="aConsentBox">
       <input type="checkbox" id="aConsent">
-      <label for="aConsent">Akceptuję <a onclick="showTrust();return false">zasady prywatności</a>. Moje dane są moje — mogę je pobrać lub usunąć w każdej chwili.</label>
+      <label for="aConsent">Akceptuję <a onclick="showTrust();return false">zasady prywatności</a>. Moje dane są moje — zostają na moim urządzeniu.</label>
     </div>
     <div class="emsg" id="aConsentErr" style="margin:-4px 0 6px">Zaznacz zgodę, żeby założyć konto.</div>
 
@@ -66,11 +66,11 @@
 <div class="trust" id="trust" onclick="if(event.target===this)hideTrust()">
   <div class="trust-card">
     <h2>🛡️ Twoje dane należą do Ciebie</h2>
-    <div class="trust-item"><span class="ic">🇪🇺</span><div>Dane trzymamy w <b>Unii Europejskiej</b>. Nie opuszczają UE.</div></div>
+    <div class="trust-item"><span class="ic">📱</span><div>Twoje dane <b>nie opuszczają tego urządzenia</b>. Nie wysyłamy ich na żaden serwer.</div></div>
     <div class="trust-item"><span class="ic">🚫</span><div><b>Nie sprzedajemy</b> Twoich danych. Nie ma reklam. Jesteś użytkownikiem, nie towarem.</div></div>
-    <div class="trust-item"><span class="ic">📥</span><div>W każdej chwili możesz <b>pobrać wszystko</b>, co o Tobie wiemy.</div></div>
-    <div class="trust-item"><span class="ic">🗑️</span><div>Możesz <b>usunąć konto i dane</b> na zawsze. Bez pytań.</div></div>
-    <div class="trust-item"><span class="ic">📴</span><div>Max działa <b>offline</b>. Konto to wygoda, nie warunek.</div></div>
+    <div class="trust-item"><span class="ic">📥</span><div>Twoje wpisy są <b>tylko u Ciebie</b>, w tej przeglądarce. Nic nie trzymamy po swojej stronie.</div></div>
+    <div class="trust-item"><span class="ic">🗑️</span><div>Możesz je <b>skasować w każdej chwili</b> — czyszcząc dane aplikacji w przeglądarce.</div></div>
+    <div class="trust-item"><span class="ic">📴</span><div>Sedno Maxa działa <b>bez sieci</b>. Tylko podpowiedzi AI potrzebują połączenia.</div></div>
     <button class="trust-close" onclick="hideTrust()">Rozumiem</button>
   </div>
 </div>
