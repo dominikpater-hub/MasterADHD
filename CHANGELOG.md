@@ -2,6 +2,32 @@
 
 Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 
+## [v18] — wartość
+
+Zweryfikowane w headless Chromium (0 błędów; share target, „wklej listę", kafelek
+ankiety, fallback audio PASS; ścieżka powiadomień z Notification Triggers PASS na
+stubie — headless twardo blokuje realne Notification, więc gałąź „granted" testowana
+przez stub, a „denied" zwraca poprawne `blocked`).
+
+### Dodane
+- **Powiadomienia — nośnik dla pingu/kotwicy (`js/11-notify.js`).** `armReminder()`
+  planuje realne przypomnienie lokalne: przez **Notification Triggers** (przeżywa
+  zamknięcie aplikacji) tam, gdzie wspierane, i uczciwy fallback sesyjny (setTimeout,
+  tylko przy otwartej aplikacji) tam, gdzie nie. Ekran „trzymam czas" dostał przycisk
+  „Przypomnij mi za 10 min 🔔", a copy mówi wprost, jaki nośnik zadziałał. Koniec
+  obietnicy „sprawdzę Cię za 10 minut" bez pokrycia (B-4, C-8).
+- **Realne wejście zadań (C-6 — największe ryzyko produktowe).**
+  - *Share target*: `manifest.share_target` + `handleShareTarget()` — tekst udostępniony
+    z dowolnej aplikacji startuje MasterADHD z `?text=…` i wpada jako zadanie (ze skanem
+    kryzysowym; URL czyszczony po odczycie).
+  - *„Wklej listę"*: pole wielu linii w ekranie zadań → parsowanie po `\n` → wiele zadań
+    naraz. Dziesięć sekund zamiast dziesięciu formularzy.
+- **Ankieta emocji na własnym kafelku (B-7).** Najbogatszy moduł nie jest już schowany
+  w szarej stopce — kafelek „🎯 Nazwij dokładniej" prowadzi wprost do `openSurvey()`.
+- **Pipeline audio Maxa (C-10).** `js/12-audio.js` + `audio/`: `playMax(key, text, fired)`
+  gra nagranie, a przy jego braku spada do TTS. Podpięte kwestie: domknięcie sesji,
+  body-double, offline. `audio/README.md` z listą kwestii do nagrania.
+
 ## [v17] — fundament
 
 Zweryfikowane w headless Chromium (0 błędów; SW aktywny; reload offline serwuje

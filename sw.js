@@ -8,7 +8,7 @@
    offline" przestaje być obietnicą bez pokrycia (audyt A-8).
    Wersję bumpujemy przy każdej zmianie powłoki, żeby wyczyścić stary cache.
    ============================================================ */
-const CACHE = 'masteradhd-shell-v17';
+const CACHE = 'masteradhd-shell-v18';
 const SHELL = [
   './',
   './index.html',
@@ -24,6 +24,8 @@ const SHELL = [
   './js/08-auth.js',
   './js/09-tasks.js',
   './js/10-sensors.js',
+  './js/11-notify.js',
+  './js/12-audio.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon.svg'

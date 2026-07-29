@@ -45,8 +45,11 @@ MasterADHD/
 │   ├── 06-emotions.js    # „Zrzuć emocje" (model Russella), Atlas emocji, ankieta różnicująca
 │   ├── 07-goals.js       # cele/profil, motywacja do regularności, plany jeśli-to
 │   ├── 08-auth.js        # Guardian ID — logowanie (etap 1, bez backendu)
-│   ├── 09-tasks.js       # warstwa zadań, wzbogacanie, DOBÓR (ciągła oś napięcia), „Twoje rzeczy"
-│   └── 10-sensors.js     # połączenia i zgody, eksport/usunięcie danych, kalendarz, czujniki
+│   ├── 09-tasks.js       # zadania, DOBÓR (ciągła oś napięcia), „wklej listę", share target
+│   ├── 10-sensors.js     # połączenia i zgody, eksport/usunięcie danych, kalendarz, czujniki
+│   ├── 11-notify.js      # powiadomienia (przypomnienia lokalne, Notification Triggers + fallback)
+│   └── 12-audio.js       # warstwa audio Maxa: playMax() → nagranie lub fallback do TTS
+├── audio/                # nagrania głosu Maxa (opcjonalne) + README z listą kwestii
 ├── worker/               # proxy AI (Cloudflare Worker) — źródło + instrukcja wdrożenia
 │   ├── src/worker.js
 │   ├── wrangler.toml
@@ -105,8 +108,10 @@ Pełna lista i uzasadnienia: [`docs/AUDYT-v16.1.0.md`](docs/AUDYT-v16.1.0.md), s
   manifest + service worker („offline" jest prawdą, aplikacja instalowalna), eksport + usunięcie
   danych (RODO art. 17/20, w „Połączenia → Twoje dane"), ciągła funkcja napięcia (A-4 —
   oś działa od stanu domyślnego), polityka prywatności (`docs/POLITYKA-PRYWATNOSCI.md`).
-- **v18 — wartość.** Powiadomienia (nośnik dla kotwicy zdarzeniowej), realne wejście zadań
-  (share target + „wklej listę"), własne audio Maxa, ankieta emocji na własnym kafelku.
+- **v18 — wartość. ✅ zrobione.** Powiadomienia (`js/11-notify.js` — realne przypomnienie
+  lokalne przez Notification Triggers, uczciwy fallback sesyjny), realne wejście zadań
+  (share target z dowolnej aplikacji + „wklej listę" w ekranie zadań), pipeline audio Maxa
+  (`js/12-audio.js` + `audio/`), ankieta emocji na własnym kafelku „Nazwij dokładniej".
 - **v19 — skala.** Backend, konto, sync, monetyzacja (free = offline, paid = warstwa AI), DPIA.
 
 ---

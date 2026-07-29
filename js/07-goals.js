@@ -538,7 +538,8 @@ function pingConfirm(anchor){
     <div class="max-line"><b>Trzymam czas.</b><br>Wróć do mnie, kiedy zrobisz kawałek — będę tu.</div>
     ${anchor ? `<div class="start-badge">Kotwica: ${anchor} — wtedy do mnie wróć</div>` : ''}
   `,`
-    <button class="btn btn-primary" onclick="afterSession()">Do zobaczenia 👊</button>
+    <button class="btn btn-primary" onclick="armPingReminder()">Przypomnij mi za 10 min 🔔</button>
+    <div class="footnote"><button class="btn-text" onclick="afterSession()">Nie trzeba — do zobaczenia</button></div>
   `);
   setTimeout(()=>maxSpeak(linia,false),300);
 }
@@ -567,7 +568,7 @@ function sceneBuddy(){
     <div class="footnote"><button class="btn-text" onclick="exitCrisis()">Muszę lecieć</button></div>
   `);
   runLightbar();
-  setTimeout(()=>maxSpeak(line,false),300);
+  setTimeout(()=>playMax('buddy', line, false),300);
   clearTimeout(window._peek);
   window._peek = setTimeout(()=>{ maxSpeak('Jestem. Lecisz?',false); }, 12000);
 }
@@ -587,6 +588,6 @@ function buddyDone(){
   `,`
     <button class="btn btn-primary" onclick="exitCrisis()">Wracam do siebie</button>
   `);
-  setTimeout(()=>maxSpeak('Zrobione. Byłem obok, ale to Twoja robota.',true),300);
+  setTimeout(()=>playMax('close','Zrobione. Byłem obok, ale to Twoja robota.',true),300);
 }
 

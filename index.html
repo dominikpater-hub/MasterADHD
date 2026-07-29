@@ -123,6 +123,7 @@
         <button class="minor" onclick="openMood()"><span class="ico">💗</span>Zrzuć emocje</button>
         <button class="minor" onclick="openEnergy()"><span class="ico">⚡</span>Pokaż energię</button>
         <button class="minor" onclick="openAtlas()"><span class="ico">📖</span>Atlas emocji</button>
+        <button class="minor" onclick="openSurvey()"><span class="ico">🎯</span>Nazwij dokładniej</button>
         <button class="minor" onclick="openTasks()"><span class="ico">📋</span>Twoje rzeczy</button>
         <button class="minor" onclick="openMap()"><span class="ico">🗺️</span>Twoja mapa</button>
       </div>
@@ -182,6 +183,8 @@
 <script src="js/08-auth.js"></script>
 <script src="js/09-tasks.js"></script>
 <script src="js/10-sensors.js"></script>
+<script src="js/11-notify.js"></script>
+<script src="js/12-audio.js"></script>
 <script>
 /* Rejestracja Service Workera — offline + instalacja (audyt A-8). Ciche,
    niekrytyczne: brak SW nie psuje aplikacji. */
@@ -190,6 +193,13 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   });
 }
+/* Share target — tekst udostępniony z innej aplikacji trafia jako zadanie. */
+window.addEventListener('load', () => {
+  try {
+    if (typeof handleShareTarget === 'function' && handleShareTarget() === 'added' &&
+        typeof openTasks === 'function') openTasks();
+  } catch (e) {}
+});
 </script>
 </body>
 </html>

@@ -230,6 +230,9 @@ function renderTasks(){
              onkeydown="if(event.key==='Enter')addTaskUI()">
       <button class="tk-go" onclick="addTaskUI()">Dodaj</button>
     </div>
+    <div class="footnote" style="text-align:left;margin:-6px 0 12px">
+      <button class="btn-text" onclick="openPasteList()">albo wklej całą listę naraz →</button>
+    </div>
 
     ${lista}
     ${zdumpu}
@@ -250,6 +253,51 @@ function addTaskUI(){
   el.value = '';
   buzz(BUZZ.easier);
   renderTasks();
+}
+
+/* C-6 / share target: tekst udostępniony z DOWOLNEJ aplikacji (przeglądarka,
+   notatki, mail) wpada wprost jako zadanie. Nośnik: manifest share_target (GET)
+   → aplikacja startuje z ?text=… . Skan kryzysowy przed zapisem (A-9).
+   Zwraca 'crisis' | 'added' | false. */
+function handleShareTarget(){
+  try{
+    const q = new URLSearchParams(location.search);
+    const shared = [q.get('title'), q.get('text'), q.get('url')].map(x=>x||'').join(' ').trim();
+    if(!shared) return false;
+    history.replaceState(null, '', location.pathname);   // wyczyść URL po odczycie
+    if(typeof scanCrisis==='function' && scanCrisis(shared)){ openSafety(); return 'crisis'; }
+    taskAdd(shared.slice(0,120), 'share');
+    return 'added';
+  }catch(e){ return false; }
+}
+
+/* C-6: najszybsze wejście danych — jedno pole, wiele linii. Osoba z ADHD i tak
+   ma listę rozsypaną gdzie indziej; parsujemy po liniach, zamiast kazać wypełniać
+   dziesięć formularzy. Skan kryzysowy (A-9) na całości przed zapisem. */
+function openPasteList(){
+  markTool('tasks');
+  NOW.classList.add('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>NOW.classList.add('vis')));
+  nowSwap(`
+    <div class="kicker">Wklej listę</div>
+    <div class="max-line" style="margin-bottom:6px">Wrzuć wszystko naraz</div>
+    <div class="now-why-big" style="margin-bottom:12px">Każda linia = jedno zadanie. Skopiuj skądkolwiek, ja rozdzielę i zgadnę resztę.</div>
+    <textarea class="dump-input" id="pasteBox" rows="7"
+      placeholder="zadzwonić do przychodni&#10;odpisać Kasi&#10;zapłacić za prąd&#10;wynieść śmieci"></textarea>
+  `,`
+    <button class="btn btn-primary" onclick="addPastedList()">Dodaj wszystkie</button>
+    <div class="footnote"><button class="btn-text" onclick="openTasks()">Wróć</button></div>
+  `);
+  setTimeout(()=>{ const i=document.getElementById('pasteBox'); if(i) i.focus(); },350);
+}
+function addPastedList(){
+  const el = document.getElementById('pasteBox');
+  const blob = readUserText(el);   // A-9: skan kryzysowy na całości
+  if(blob === null) return;         // trafienie → openSafety pokazał wsparcie
+  const lines = (blob || '').split('\n').map(s=>s.trim()).filter(Boolean);
+  lines.forEach(line => { taskAdd(line, 'paste'); });
+  buzz(BUZZ.done);
+  openTasks();                      // wróć do listy — zadania już tam są
 }
 
 function promoteDump(ts){

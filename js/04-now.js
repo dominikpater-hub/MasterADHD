@@ -204,7 +204,7 @@ async function processDump(){
     `,`
       <button class="btn btn-primary" onclick="exitNow()">Jasne</button>
     `);
-    setTimeout(()=>maxSpeak('Jestem offline. Twój wpis jest zapisany — nic nie przepadło.',false),350);
+    setTimeout(()=>playMax('offline','Jestem offline. Twój wpis jest zapisany — nic nie przepadło.',false),350);
     return;
   }
 
