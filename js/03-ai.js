@@ -22,6 +22,10 @@ const AI_MODEL = 'claude-sonnet-4-6';
 async function callModel(prompt, maxTokens, timeoutMs){
   if(!AI_PROXY_URL) return null;        // brak proxy → nie udajemy, że AI działa
   if(!consLoad().ai) return null;       // A-1b: treść nie wychodzi bez zgody
+  /* v19 monetyzacja: przy działającym backendzie AI jest w planie paid. Bez
+     backendu (self-host z samym proxy) — bez bramki. Twarde wymuszenie jest na
+     proxy (worker/), to tu tylko UX, żeby nie wołać modelu na darmowym planie. */
+  if(typeof syncEnabled === 'function' && syncEnabled() && typeof isPaid === 'function' && !isPaid()) return null;
   if(!navigator.onLine) return null;
   try{
     const ctl = new AbortController();

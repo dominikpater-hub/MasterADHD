@@ -27,12 +27,14 @@ function setMode(m){
 function clearAuthErrors(){
   ['aEmail','aPass'].forEach(f=>A(f).classList.remove('bad'));
   ['aEmailErr','aPassErr','aConsentErr'].forEach(e=>A(e).classList.remove('show'));
+  A('aEmailErr').textContent = 'Wpisz poprawny adres e-mail.';
+  A('aPassErr').textContent  = 'Hasło musi mieć co najmniej 8 znaków.';
 }
 function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 
 function saveSession(s){ try{ localStorage.setItem('guardianid.session.v1', JSON.stringify(s)); }catch(e){} }
 
-function submitAuth(){
+async function submitAuth(){
   clearAuthErrors();
   const email = A('aEmail').value.trim();
   const pass  = A('aPass').value;
@@ -41,12 +43,38 @@ function submitAuth(){
   if(pass.length < 8){ A('aPass').classList.add('bad'); A('aPassErr').classList.add('show'); ok=false; }
   if(authMode==='register' && !A('aConsent').checked){ A('aConsentErr').classList.add('show'); ok=false; }
   if(!ok) return;
-  // ETAP 2 (Supabase): supabase.auth.signUp / signInWithPassword tutaj.
+
+  /* v19: realne konto przez Supabase, gdy backend skonfigurowany.
+     Bez backendu — jak dotąd: lokalna sesja, wszystko offline. */
+  if(typeof syncEnabled === 'function' && syncEnabled()){
+    A('aSubmit').disabled = true;
+    try{
+      const res = authMode==='register' ? await authSignUp(email, pass) : await authSignIn(email, pass);
+      if(res.error){
+        A('aPass').classList.add('bad');
+        A('aPassErr').textContent = (authMode==='register' ? 'Nie udało się założyć konta: ' : 'Nie udało się zalogować: ') + (res.error.message || '');
+        A('aPassErr').classList.add('show');
+        A('aSubmit').disabled = false; return;
+      }
+      const boot = await accountBootstrap(pass);   // klucz E2E + pobranie stanu z chmury
+      saveSession({ userId:(boot.user && boot.user.id) || '?', email, method:'email', createdAt:Date.now(), synced:true });
+      A('aSubmit').disabled = false;
+      enterApp();
+    }catch(e){
+      A('aPassErr').textContent = 'Błąd sieci. Spróbuj ponownie.';
+      A('aPassErr').classList.add('show');
+      A('aSubmit').disabled = false;
+    }
+    return;
+  }
   saveSession({ userId:'local-'+Date.now(), email, method:'email', createdAt:Date.now(), synced:false });
   enterApp();
 }
-function oauth(provider){
-  // ETAP 2: supabase.auth.signInWithOAuth({provider})
+async function oauth(provider){
+  if(typeof syncEnabled === 'function' && syncEnabled()){
+    try{ await authOAuth(provider); return; }   // przekierowanie do dostawcy; powrót obsłuży initAuthGate
+    catch(e){ /* padnij do trybu lokalnego */ }
+  }
   saveSession({ userId:'local-'+Date.now(), email:'(przez '+provider+')', method:provider.toLowerCase(), createdAt:Date.now(), synced:false });
   enterApp();
 }

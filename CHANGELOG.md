@@ -2,6 +2,37 @@
 
 Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 
+## [v19] — skala
+
+Backend, konto, sync, monetyzacja, DPIA. Dostarczone jako **poprawne źródło +
+instrukcja wdrożenia** (backendu/płatności nie da się uruchomić z repo). Wszystko
+domyślnie WYŁĄCZONE — aplikacja działa lokalnie, dopóki nie wpiszesz configu.
+
+Zweryfikowane w headless Chromium: 0 błędów; z sync OFF **zero żądań zewnętrznych**
+(offline-first zachowany); szyfrowanie E2E round-trip PASS (złe hasło nie odszyfruje,
+szyfrogram nie zawiera jawnej treści); (de)serializacja stanu i lokalny fallback
+logowania PASS.
+
+### Dodane
+- **Backend Supabase (`backend/supabase/`).** Migracja SQL: tabela `user_state`
+  (jeden wiersz/użytkownika), **Row Level Security** (każdy widzi tylko swój wiersz),
+  kolumna `plan` zmieniana wyłącznie rolą serwisową. README z wdrożeniem.
+- **Konto + sync + E2E (`js/13-sync.js`).** Supabase Auth (e-mail/hasło, OAuth);
+  synchronizacja stanu z **szyfrowaniem po stronie klienta** (AES-GCM, klucz z hasła
+  przez PBKDF2 — serwer widzi tylko szyfrogram); autosync przy chowaniu aplikacji;
+  panel „Konto i synchronizacja" w Połączeniach. SDK ładowany dynamicznie tylko przy
+  włączonym sync, więc tryb lokalny nie pobiera niczego.
+- **Monetyzacja free/paid (`backend/stripe/`).** Edge Functions: `checkout` (sesja
+  Stripe) i `webhook` (nadaje `paid` rolą serwisową — klient nie może sam sobie
+  zmienić planu). `isPaid()` w kliencie + bramka na `callModel` (aktywna tylko gdy
+  backend włączony). Free = pełne offline, paid = AI + sync.
+- **DPIA (`docs/DPIA.md`).** Ocena skutków przed wdrożeniem backendu/kalendarza:
+  rejestr ryzyk, środki (E2E, RLS, minimalizacja, skan kryzysowy), warunki dopuszczenia.
+
+### Zmienione
+- **Logowanie (`08-auth.js`).** `submitAuth`/`oauth` używają realnego Supabase Auth,
+  gdy backend skonfigurowany, z płynnym fallbackiem do lokalnej sesji, gdy wyłączony.
+
 ## [v18] — wartość
 
 Zweryfikowane w headless Chromium (0 błędów; share target, „wklej listę", kafelek

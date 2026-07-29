@@ -40,9 +40,20 @@ function openConnect(){
       <button class="btn btn-ghost" onclick="exportData()">📥 Pobierz wszystko (JSON)</button>
       <button class="btn btn-ghost cn-danger" onclick="wipeConfirm()">🗑️ Usuń wszystkie dane</button>
     </div>
+
+    <div class="cn-data">
+      <div class="cn-data-h">Konto i synchronizacja</div>
+      ${(typeof syncEnabled==='function' && syncEnabled()) ? `
+        <div class="cn-acct-status" id="cnAcctStatus">Sprawdzam konto…</div>
+        <button class="btn btn-ghost" onclick="syncNowUI()">🔄 Synchronizuj teraz</button>
+        <button class="btn btn-ghost" id="cnUpgrade" onclick="upgradeUI()" style="display:none">⭐ Włącz wersję pełną (AI + sync na wielu urządzeniach)</button>
+        <button class="btn btn-ghost cn-danger" onclick="accountSignOutUI()">Wyloguj</button>`
+      : `<div class="cn-acct-status">Tryb lokalny — dane tylko na tym urządzeniu, w całości offline. Konto i sync między urządzeniami włączysz, konfigurując backend (patrz backend/supabase).</div>`}
+    </div>
   `,`
     <button class="btn btn-primary" onclick="renderTasks()">Wróć</button>
   `);
+  if(typeof syncEnabled==='function' && syncEnabled() && typeof fillAcctStatus==='function') setTimeout(fillAcctStatus, 0);
 }
 
 /* ============================================================

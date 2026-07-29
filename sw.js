@@ -26,6 +26,7 @@ const SHELL = [
   './js/10-sensors.js',
   './js/11-notify.js',
   './js/12-audio.js',
+  './js/13-sync.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon.svg'

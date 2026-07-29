@@ -586,3 +586,4 @@
   .cn-data-h{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mist);font-weight:700;margin-bottom:2px}
   .cn-danger{color:#ffabab;border-color:rgba(255,120,120,.35)}
   .cn-danger:active{background:rgba(255,80,80,.1)}
+  .cn-acct-status{font-size:13px;color:var(--mist);line-height:1.45;margin-bottom:4px}

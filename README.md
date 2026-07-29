@@ -48,15 +48,20 @@ MasterADHD/
 │   ├── 09-tasks.js       # zadania, DOBÓR (ciągła oś napięcia), „wklej listę", share target
 │   ├── 10-sensors.js     # połączenia i zgody, eksport/usunięcie danych, kalendarz, czujniki
 │   ├── 11-notify.js      # powiadomienia (przypomnienia lokalne, Notification Triggers + fallback)
-│   └── 12-audio.js       # warstwa audio Maxa: playMax() → nagranie lub fallback do TTS
+│   ├── 12-audio.js       # warstwa audio Maxa: playMax() → nagranie lub fallback do TTS
+│   └── 13-sync.js        # konto + sync (Supabase) + szyfrowanie E2E + plan free/paid; domyślnie OFF
 ├── audio/                # nagrania głosu Maxa (opcjonalne) + README z listą kwestii
 ├── worker/               # proxy AI (Cloudflare Worker) — źródło + instrukcja wdrożenia
+├── backend/
+│   ├── supabase/         # migracja SQL (RLS) + README — konto i sync (szyfrogram E2E)
+│   └── stripe/           # Edge Functions (checkout + webhook) + README — monetyzacja
 │   ├── src/worker.js
 │   ├── wrangler.toml
 │   └── README.md
 └── docs/
     ├── AUDYT-v16.1.0.md              # pełny audyt (techniczny · treści · potencjału)
     ├── POLITYKA-PRYWATNOSCI.md       # polityka prywatności (RODO, art. 9)
+    ├── DPIA.md                       # ocena skutków dla ochrony danych (przed backendem)
     └── prototype-v16-monolith.html   # zamrożony prototyp jednoplikowy (proweniencja)
 ```
 
@@ -112,7 +117,14 @@ Pełna lista i uzasadnienia: [`docs/AUDYT-v16.1.0.md`](docs/AUDYT-v16.1.0.md), s
   lokalne przez Notification Triggers, uczciwy fallback sesyjny), realne wejście zadań
   (share target z dowolnej aplikacji + „wklej listę" w ekranie zadań), pipeline audio Maxa
   (`js/12-audio.js` + `audio/`), ankieta emocji na własnym kafelku „Nazwij dokładniej".
-- **v19 — skala.** Backend, konto, sync, monetyzacja (free = offline, paid = warstwa AI), DPIA.
+- **v19 — skala. ✅ zrobione (źródło + wdrożenie po Twojej stronie).** Backend Supabase
+  (`backend/supabase/` — schema + RLS), konto i sync z **szyfrowaniem E2E** (`js/13-sync.js` —
+  serwer widzi tylko szyfrogram), monetyzacja free/paid (`backend/stripe/` — Checkout + webhook;
+  free = pełne offline, paid = AI + sync), DPIA (`docs/DPIA.md`). Wszystko domyślnie wyłączone —
+  aplikacja działa lokalnie, dopóki nie wpiszesz configu.
+
+Roadmapa z audytu domknięta. Dalej to już iteracje: audio Maxa (nagrania),
+kalendarz (po zamknięciu warunków z DPIA), testy z użytkownikami.
 
 ---
 
