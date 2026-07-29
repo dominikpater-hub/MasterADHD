@@ -1,0 +1,14 @@
+# zależności
+node_modules/
+# build
+dist/
+# system
+.DS_Store
+Thumbs.db
+# logi / env
+*.log
+.env
+.env.*
+# edytory
+.vscode/
+.idea/

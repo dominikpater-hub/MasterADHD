@@ -1,0 +1,3426 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#16131f">
+<title>MasterADHD · Max</title>
+<style>
+  /* ============================================================
+     MasterADHD — prototyp v2 : TRYB KRYZYSOWY z MAXEM
+     Max = trener-persona. W kryzysie ściszony i konkretny,
+     od momentu startu odpala pełny „no dawaj".
+     Motyw: Fiolet zen (grafit + lawenda/ametyst).
+     Sygnatura: Max JEST oddechem — awatar-światło pulsuje,
+     mówi (tekst + głos), prowadzi przez każdy krok.
+     ============================================================ */
+
+  :root{
+    --void:      #16131f;
+    --void-deep: #0f0d16;
+    --surface:   #211c2e;
+    --surface-2: #2a2338;
+    --mist:      #b8aecb;
+    --pearl:     #efeaf5;
+    --amethyst:  #a67cf0;
+    --amethyst-2:#c9a8ff;
+    --lavender:  #8b6fd6;
+    --spark:     #d9b8ff;
+    --ember:     #ffb26b;  /* iskra energii Maxa przy sukcesie */
+    --line:      rgba(166,124,240,.14);
+    --ok:        #7fd4b8;
+
+    --r:   18px;
+    --r-sm:12px;
+    --ease: cubic-bezier(.4,.0,.2,1);
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
+    background:radial-gradient(120% 90% at 50% -10%, #221a33 0%, var(--void) 46%, var(--void-deep) 100%);
+    color:var(--pearl);min-height:100dvh;
+    overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  }
+
+  #app{position:relative;width:100%;max-width:440px;margin:0 auto;min-height:100dvh;
+    display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+
+  /* ====================== EKRAN GŁÓWNY ====================== */
+  /* FIX v7: treść urosła (gospodarz + guzik + kafelki + czat + recenzja)
+     i .bottom wypadał poza ekran. Bez overflow ekran się nie przewijał. */
+  .home{flex:1;display:flex;flex-direction:column;padding:26px 26px 40px;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0}
+  .brand{display:flex;align-items:center;gap:10px;margin-top:6px}
+  .brand-dot{width:11px;height:11px;border-radius:50%;background:var(--amethyst);
+    box-shadow:0 0 16px 2px rgba(166,124,240,.7);animation:brandpulse 4s var(--ease) infinite}
+  @keyframes brandpulse{0%,100%{opacity:.55;transform:scale(.85)}50%{opacity:1;transform:scale(1.1)}}
+  /* Logo zapisujemy jako MasterADHD — uppercase zjadał wielkość liter (MASTERADHD). */
+  .brand-name{font-size:16px;font-weight:600;letter-spacing:.01em;color:var(--mist)}
+  .brand-tag{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--lavender);opacity:.6;margin-top:2px}
+  .brand-txt{display:flex;flex-direction:column;line-height:1.2}
+  .brand-name b{color:var(--pearl);font-weight:700}
+  /* Znacznik wersji — żeby od razu było widać, czy przeglądarka nie podała kopii z cache. */
+  .ver{margin-left:auto;font-size:10px;letter-spacing:.1em;color:var(--lavender);opacity:.45}
+
+  /* .max-av nadal używane na ekranie logowania */
+  .max-av{width:46px;height:46px;border-radius:50%;flex-shrink:0;position:relative;
+    background:radial-gradient(circle at 40% 35%, var(--amethyst-2), var(--lavender));
+    box-shadow:0 0 22px 2px rgba(166,124,240,.5)}
+  .max-av::after{content:"";position:absolute;inset:-4px;border-radius:50%;
+    border:1.5px solid rgba(166,124,240,.35);animation:avpulse 3.5s var(--ease) infinite}
+  @keyframes avpulse{0%,100%{transform:scale(.9);opacity:.6}50%{transform:scale(1.08);opacity:1}}
+
+  .home-mid{flex:0 0 auto;display:flex;flex-direction:column;
+    justify-content:flex-start;padding:14px 0 0}
+  .home-kicker{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--lavender);font-weight:600;margin-bottom:14px}
+  .home-line{font-size:28px;line-height:1.32;font-weight:300;color:var(--pearl);letter-spacing:-.01em}
+  .home-line b{font-weight:600;color:var(--amethyst-2)}
+
+  /* Cztery narzędzia — siatka 2×2. W jednym rzędzie byłyby za wąskie
+     na etykiety typu „Zrzuć emocje" i łamałyby się na trzy linie. */
+  .minors{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px}
+  .minor{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);
+    padding:14px 12px;color:var(--mist);font-size:12.5px;font-weight:500;text-align:left;cursor:pointer;
+    transition:.2s var(--ease)}
+  .minor:hover,.minor:active{background:var(--surface-2);color:var(--pearl)}
+  .minor .ico{display:block;font-size:17px;margin-bottom:7px;opacity:.85}
+
+  .panic{position:relative;width:100%;padding:22px;border:none;border-radius:var(--r);
+    background:linear-gradient(135deg, var(--lavender), var(--amethyst));color:#fff;font-size:18px;font-weight:650;
+    letter-spacing:.02em;cursor:pointer;overflow:hidden;
+    box-shadow:0 12px 40px -12px rgba(139,111,214,.7), inset 0 1px 0 rgba(255,255,255,.18);
+    transition:transform .18s var(--ease)}
+  .panic:active{transform:translateY(2px) scale(.99)}
+  /* Wariant górny: guzik stoi w polu wzroku, gdzie wcześniej była karta energii. */
+  .panic-top{display:flex;flex-direction:column;gap:5px;align-items:center;
+    margin-top:20px;padding:24px 22px}
+  .panic-top .lab{font-size:19px;font-weight:650}
+  .panic-top .sub{font-size:13.5px;font-weight:400;opacity:.86;letter-spacing:.01em}
+  /* Wejście do czatu — spokojne, nie konkuruje z głównym guzikiem. */
+  .chat-entry{width:100%;display:flex;align-items:center;gap:13px;
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+    border-radius:var(--r);padding:15px 17px;cursor:pointer;text-align:left;
+    color:var(--mist);font-family:inherit;transition:background .22s,border-color .22s}
+  .chat-entry:active{background:rgba(255,255,255,.09)}
+  .chat-entry .co{font-size:21px;line-height:1}
+  .chat-entry .ct{display:flex;flex-direction:column;line-height:1.35}
+  .chat-entry .ct b{font-size:15px;color:var(--pearl);font-weight:600}
+  .chat-entry .ct small{font-size:12.5px;color:var(--lavender);opacity:.75}
+  /* ===== MAX GOSPODARZ — pierwsze, co widać po wejściu ===== */
+  .host{display:flex;flex-direction:column;align-items:center;text-align:center;
+    margin-top:18px;margin-bottom:4px}
+  .host-orb{width:74px;height:74px;border-radius:50%;cursor:pointer;position:relative;
+    background:radial-gradient(circle at 34% 30%, #cbb4ff, var(--amethyst) 62%);
+    box-shadow:0 0 34px -4px rgba(166,124,240,.62);
+    animation:hostBreath 4.6s var(--ease) infinite;transition:transform .2s}
+  .host-orb:active{transform:scale(.94)}
+  .host-orb::after{content:"";position:absolute;inset:-7px;border-radius:50%;
+    border:1px solid rgba(166,124,240,.32)}
+  @keyframes hostBreath{0%,100%{transform:scale(1)}50%{transform:scale(1.055)}}
+  .host-name{margin-top:13px;font-size:10.5px;letter-spacing:.17em;text-transform:uppercase;
+    color:var(--lavender);font-weight:700}
+  .host-say{margin-top:9px;font-size:23px;font-weight:300;color:var(--pearl);
+    line-height:1.3;letter-spacing:-.01em}
+  .host-sub{margin-top:9px;font-size:14.5px;font-weight:300;color:var(--mist);
+    line-height:1.5;max-width:19em;opacity:.9}
+  /* ===== KAFELEK RECENZJI — Max prosi o ocenę ===== */
+
+  /* ===== WARSTWA ZADAŃ (v16) ===== */
+  .tk-add{display:flex;gap:8px;margin-bottom:16px}
+  .tk-in{flex:1;background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r-sm);padding:12px 14px;color:var(--pearl);
+    font:inherit;font-size:15px;outline:none}
+  .tk-in:focus{border-color:var(--amethyst)}
+  .tk-in::placeholder{color:var(--mist);opacity:.5}
+  .tk-go{background:var(--amethyst);border:none;border-radius:var(--r-sm);
+    color:#150f20;font:inherit;font-weight:600;font-size:14px;padding:0 16px;cursor:pointer}
+  .tk-go:active{transform:scale(.97)}
+
+  .tk-row{display:flex;gap:8px;margin-bottom:8px;align-items:stretch}
+  .tk-main{flex:1;text-align:left;background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r-sm);padding:12px 14px;cursor:pointer;
+    display:flex;flex-direction:column;gap:3px}
+  .tk-main:active{background:var(--surface-2)}
+  .tk-t{font-size:15px;color:var(--pearl);line-height:1.35}
+  .tk-meta{font-size:12px;color:var(--lavender);opacity:.8}
+  .tk-x{width:46px;background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r-sm);color:var(--ok);font-size:17px;cursor:pointer}
+  .tk-x:active{background:rgba(127,212,184,.12)}
+
+  .tk-empty{background:var(--surface);border:1px dashed var(--line);
+    border-radius:var(--r-sm);padding:18px;color:var(--mist);font-size:14px;line-height:1.55}
+  .tk-empty b{display:block;color:var(--pearl);margin-bottom:6px;font-size:15px}
+
+  .tk-sec{font-size:12px;color:var(--lavender);letter-spacing:.06em;
+    text-transform:uppercase;margin:20px 0 8px;opacity:.8}
+  .tk-prom{display:flex;justify-content:space-between;align-items:center;gap:10px;
+    width:100%;text-align:left;background:transparent;border:1px dashed var(--line);
+    border-radius:var(--r-sm);padding:10px 12px;margin-bottom:6px;cursor:pointer;
+    color:var(--mist);font:inherit;font-size:13px}
+  .tk-prom i{font-style:normal;color:var(--amethyst-2);font-size:12px;white-space:nowrap}
+  .tk-prom:active{border-color:var(--amethyst)}
+
+  .tk-pick{margin-bottom:18px}
+  .tk-lab{display:block;font-size:12px;color:var(--lavender);margin-bottom:8px}
+  .tk-opts{display:flex;flex-wrap:wrap;gap:6px}
+  .tk-opt{background:var(--surface);border:1px solid var(--line);border-radius:999px;
+    padding:7px 14px;color:var(--mist);font:inherit;font-size:13px;cursor:pointer}
+  .tk-opt.on{background:var(--amethyst);border-color:var(--amethyst);color:#150f20;font-weight:600}
+
+  /* alternatywy przy „zrób to jedno" */
+  .nw-alts{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+  .nw-alts-lab{display:block;font-size:12px;color:var(--lavender);
+    letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;opacity:.75}
+  .nw-alt{display:flex;justify-content:space-between;align-items:center;gap:10px;
+    width:100%;text-align:left;background:transparent;border:1px solid var(--line);
+    border-radius:var(--r-sm);padding:10px 12px;margin-bottom:6px;cursor:pointer;
+    color:var(--mist);font:inherit;font-size:14px}
+  .nw-alt i{font-style:normal;font-size:12px;color:var(--lavender);white-space:nowrap}
+  .nw-alt:active{border-color:var(--amethyst)}
+  .nw-win{float:right;font-size:11px;color:var(--lavender);opacity:.8;font-weight:400}
+
+  /* jedno zdanie z czujnika — zawsze pytanie, nigdy werdykt */
+  .ck-body{background:rgba(166,124,240,.08);border:1px solid var(--line);
+    border-radius:var(--r-sm);padding:10px 12px;margin-bottom:16px;
+    font-size:13px;color:var(--mist)}
+
+  /* zgody */
+  .cn-row{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);
+    padding:14px;margin-bottom:8px}
+  .cn-txt b{display:block;font-size:15px;color:var(--pearl);margin-bottom:3px}
+  .cn-txt small{display:block;font-size:13px;color:var(--mist);line-height:1.45}
+  .cn-warn{display:block;font-style:normal;font-size:12px;color:var(--lavender);margin-top:6px}
+  .cn-sw{flex:0 0 46px;width:46px;height:27px;border-radius:999px;cursor:pointer;
+    background:var(--surface-2);border:1px solid var(--line);position:relative;padding:0}
+  .cn-sw i{position:absolute;top:3px;left:3px;width:19px;height:19px;border-radius:50%;
+    background:var(--mist);transition:.2s var(--ease)}
+  .cn-sw.on{background:var(--amethyst);border-color:var(--amethyst)}
+  .cn-sw.on i{left:22px;background:#150f20}
+  .cn-note{font-size:12px;color:var(--mist);opacity:.7;margin-top:14px;line-height:1.5}
+
+  .review-tile{width:100%;display:flex;align-items:center;gap:12px;
+    background:transparent;border:1px dashed rgba(255,255,255,.14);
+    border-radius:var(--r);padding:14px 16px;cursor:pointer;text-align:left;
+    color:var(--mist);font-family:inherit;transition:border-color .22s,background .22s}
+  .review-tile:active{background:rgba(255,255,255,.05);border-color:var(--lavender)}
+  .review-tile .rv-ico{font-size:19px;line-height:1;opacity:.85}
+  .review-tile .rv-txt{display:flex;flex-direction:column;line-height:1.35}
+  .review-tile .rv-txt b{font-size:14px;color:var(--pearl);font-weight:600}
+  .review-tile .rv-txt small{font-size:12px;color:var(--lavender);opacity:.7}
+  .rv-scale{display:flex;gap:9px;margin-bottom:14px}
+  .rv-dot{width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer;
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+    filter:grayscale(1);opacity:.5;transition:.2s}
+  .rv-dot.on{filter:none;opacity:1;background:rgba(166,124,240,.16);border-color:var(--lavender)}
+  .rv-dot:active{transform:scale(.9)}
+  /* ===== SUWAKI NASTROJU (model kołowy Russella) =====
+     Duży uchwyt (28px) — używa ich ktoś, kto może mieć drżące ręce
+     albo działa w pośpiechu. WCAG zaleca min. 44px na cel dotykowy,
+     tor suwaka daje tę wysokość razem z paddingiem. */
+  .sl-block{width:100%;max-width:21em;margin-bottom:24px}
+  .sl-lab{display:flex;justify-content:space-between;font-size:11px;
+    color:var(--lavender);opacity:.65;margin-bottom:9px;gap:12px}
+  .sl-lab span{max-width:8em;line-height:1.3}
+  .sl-lab span:last-child{text-align:right}
+  .sl{width:100%;height:22px;-webkit-appearance:none;appearance:none;
+    background:transparent;cursor:pointer;margin:0}
+  .sl::-webkit-slider-runnable-track{height:7px;border-radius:99px;
+    background:linear-gradient(90deg,rgba(255,255,255,.09),rgba(166,124,240,.5))}
+  .sl::-moz-range-track{height:7px;border-radius:99px;
+    background:linear-gradient(90deg,rgba(255,255,255,.09),rgba(166,124,240,.5))}
+  .sl::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;
+    border-radius:50%;margin-top:-10.5px;cursor:grab;
+    background:radial-gradient(circle at 36% 32%,#d8c6ff,var(--amethyst) 70%);
+    box-shadow:0 2px 12px rgba(139,111,214,.75),0 0 0 1px rgba(255,255,255,.18)}
+  .sl::-moz-range-thumb{width:28px;height:28px;border:none;border-radius:50%;
+    background:radial-gradient(circle at 36% 32%,#d8c6ff,var(--amethyst) 70%);
+    box-shadow:0 2px 12px rgba(139,111,214,.75)}
+  .sl-name{margin-top:8px;font-size:13px;color:var(--mist);opacity:.8}
+  .mood-guess{min-height:1.4em;font-size:13px;font-style:italic;
+    color:var(--lavender);opacity:.75;margin-top:-6px}
+  .mood-tags{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;max-width:21em}
+  .mood-tag{padding:11px 17px;border-radius:999px;font-size:14px;cursor:pointer;
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+    color:var(--mist);font-family:inherit;transition:.2s}
+  .mood-tag:active{background:rgba(166,124,240,.2);border-color:var(--lavender);color:var(--pearl)}
+
+  /* ===== ATLAS EMOCJI + różnicowanie (nakładka NOW) ===== */
+  .atl-fam{font-size:14px;font-weight:600;color:var(--lavender);opacity:.85;margin:18px 0 9px;text-align:left;width:100%;max-width:22em}
+  .atl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:22em}
+  .atl-chip{padding:12px 13px;border-radius:13px;font-size:14px;cursor:pointer;text-align:left;
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--mist);font-family:inherit;transition:.2s}
+  .atl-chip:active{background:rgba(166,124,240,.18);border-color:var(--lavender)}
+  .atl-card-h{font-size:26px;font-weight:600;color:var(--pearl);margin:2px 0 6px}
+  .atl-opis{font-size:15px;color:var(--mist);line-height:1.5;margin-bottom:16px;max-width:22em}
+  .atl-row{display:flex;gap:12px;padding:10px 0;border-top:1px solid rgba(255,255,255,.1);width:100%;max-width:22em;text-align:left}
+  .atl-row .ak{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--mist);opacity:.55;width:104px;flex:none}
+  .atl-row .av{flex:1;font-size:14.5px;color:var(--mist)}
+  .atl-crux{background:rgba(166,124,240,.1);border-radius:13px;padding:13px 15px;margin-top:14px;width:100%;max-width:22em;text-align:left}
+  .atl-crux .acl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--lavender);margin-bottom:5px}
+  .atl-crux .acq{font-size:16px;color:var(--pearl);line-height:1.35}
+  .atl-near{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;width:100%;max-width:22em;text-align:left}
+  .atl-near span{width:100%;font-size:12px;color:var(--mist);opacity:.6;margin-bottom:2px}
+  .atl-near button{font-size:13px;font-weight:600;color:var(--lavender);background:rgba(166,124,240,.12);
+    border:none;border-radius:999px;padding:6px 12px;cursor:pointer;font-family:inherit}
+  .surv-opts{display:flex;flex-direction:column;gap:9px;width:100%;max-width:22em}
+  .surv-o{display:block;text-align:left;padding:14px 16px;border-radius:14px;cursor:pointer;font-size:16px;font-family:inherit;
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--pearl);transition:.2s}
+  .surv-o:active{background:rgba(166,124,240,.18);border-color:var(--lavender)}
+  .surv-o small{display:block;font-size:13px;color:var(--mist);opacity:.65;margin-top:2px;font-weight:400}
+  /* ===== PROFIL ===== */
+  .prof-btn{margin-left:auto;background:transparent;border:none;color:var(--lavender);
+    font-size:17px;opacity:.5;cursor:pointer;padding:8px;transition:opacity .2s}
+  .prof-btn:active{opacity:1}
+  .pf-sec{width:100%;max-width:21em;font-size:10.5px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--lavender);opacity:.7;margin:20px 0 10px;text-align:left}
+  .pf-opts{display:flex;flex-wrap:wrap;gap:8px;max-width:21em;justify-content:flex-start}
+  .pf-opt{padding:11px 15px;border-radius:12px;font-size:13.5px;cursor:pointer;
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.11);
+    color:var(--mist);font-family:inherit;transition:.2s}
+  .pf-opt.on{background:rgba(166,124,240,.2);border-color:var(--lavender);color:var(--pearl)}
+  .pf-own{width:100%;max-width:21em;margin-top:10px}
+  .pf-hint{font-size:11.5px;color:var(--lavender);opacity:.6;margin-top:7px;text-align:left}
+  /* ===== PASEK KOMPLETNOŚCI MAPY =====
+     Motywacja przez ciekawość („co odblokuję"), nie przez lęk przed utratą. */
+  .prog-box{margin-top:20px;background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08);border-radius:var(--r-sm);padding:14px 16px}
+  .pg-line{font-size:13px;color:var(--mist);opacity:.85}
+  .pg-line b{color:var(--pearl);font-weight:650}
+  .pg-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.08);
+    overflow:hidden;margin:10px 0 9px}
+  .pg-bar i{display:block;height:100%;border-radius:99px;
+    background:linear-gradient(90deg,var(--lavender),var(--amethyst));
+    transition:width .7s cubic-bezier(.2,.8,.3,1)}
+  .pg-sub{font-size:12.5px;color:var(--lavender);opacity:.8;line-height:1.45}
+  .pg-sub b{color:var(--pearl);font-weight:650}
+  /* ===== PLANY JEŚLI-TO (implementation intentions) ===== */
+  .rule-card{width:100%;max-width:20em;background:rgba(166,124,240,.09);
+    border:1px solid rgba(166,124,240,.28);border-radius:var(--r-sm);
+    padding:16px 18px;text-align:left}
+  .rule-if{font-size:14px;color:var(--mist);line-height:1.5;margin-bottom:8px}
+  .rule-then{font-size:14px;color:var(--mist);line-height:1.5;
+    padding-top:8px;border-top:1px solid rgba(255,255,255,.09)}
+  .rule-if b,.rule-then b{color:var(--pearl);font-weight:600}
+  /* Notatka o rozjeździe energia/napięcie w check-inie. */
+  .ck-note{margin-top:14px;font-size:13.5px;color:var(--lavender);
+    background:rgba(255,255,255,.05);border-left:2px solid var(--lavender);
+    border-radius:0 10px 10px 0;padding:11px 14px;max-width:20em;
+    line-height:1.5;text-align:left}
+  .panic::after{content:"";position:absolute;inset:0;
+    background:radial-gradient(60% 120% at 20% 0%, rgba(255,255,255,.22), transparent 60%);opacity:.7}
+  .panic small{display:block;font-size:12.5px;font-weight:500;opacity:.85;margin-top:5px;letter-spacing:.03em}
+
+  /* ====================== NAKŁADKA KRYZYSU ====================== */
+  .crisis{position:fixed;inset:0;z-index:20;display:none;flex-direction:column;
+    height:100dvh;overflow-y:auto;
+    background:radial-gradient(90% 70% at 50% 28%, #201730 0%, var(--void) 55%, var(--void-deep) 100%);
+    padding:calc(env(safe-area-inset-top) + 16px) 26px calc(env(safe-area-inset-bottom) + 24px);
+    opacity:0;transition:opacity .5s var(--ease)}
+  .crisis.show{display:flex}
+  .crisis.vis{opacity:1}
+
+  /* przycisk Pomoc (zawsze widoczny) + ekran wsparcia */
+  .help-top{background:none;border:1px solid rgba(224,120,140,.4);color:#E8879B;font-size:12px;font-weight:600;
+    cursor:pointer;padding:5px 11px;border-radius:999px;margin-left:8px;transition:.2s}
+  .help-top:hover{background:rgba(224,120,140,.12)}
+  .safety-wrap{width:100%;max-width:440px;text-align:left}
+  .safety-h{font-family:var(--serif,Georgia,serif);font-size:24px;font-weight:600;line-height:1.2;margin:4px 0 8px;color:var(--mist,#E8E2F0)}
+  .safety-sub{color:var(--mist,#B9B2C8);opacity:.85;font-size:15px;line-height:1.5;margin-bottom:20px}
+  .safety-num{display:flex;align-items:center;gap:12px;text-decoration:none;
+    background:rgba(255,255,255,.05);border:1px solid var(--line,rgba(255,255,255,.12));border-radius:16px;
+    padding:14px 16px;margin-bottom:9px;color:var(--mist,#E8E2F0)}
+  .safety-num .sn-big{font-weight:700;font-size:19px;min-width:104px}
+  .safety-num .sn-meta{flex:1;font-size:13px;opacity:.7}
+  .safety-num .sn-go{font-size:18px;opacity:.6}
+  .safety-num.emerg .sn-big{color:#E8879B}
+  .safety-fine{font-size:13px;opacity:.65;line-height:1.5;margin-top:10px;color:var(--mist,#B9B2C8)}
+
+  .crisis-top{display:flex;justify-content:space-between;align-items:center;min-height:26px}
+  .crisis-x{background:none;border:none;color:var(--mist);opacity:.5;font-size:15px;cursor:pointer;padding:6px 4px;transition:.2s}
+  .crisis-x:hover{opacity:.9}
+  .muteBtn{background:none;border:none;color:var(--mist);opacity:.5;font-size:16px;cursor:pointer;padding:6px 8px;transition:.2s}
+  .muteBtn:hover{opacity:.9}
+  .stepdots{display:flex;gap:7px}
+  .stepdots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:.3s var(--ease)}
+  .stepdots i.on{background:var(--amethyst);box-shadow:0 0 10px rgba(166,124,240,.8);transform:scale(1.15)}
+  .stepdots i.done{background:var(--lavender)}
+
+  .stage{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;position:relative}
+
+  .scene{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;
+    padding:0 4px;opacity:0;transform:translateY(14px);pointer-events:none;
+    transition:opacity .45s var(--ease), transform .45s var(--ease)}
+  .scene.active{opacity:1;transform:none;pointer-events:auto}
+
+  /* ===== MAX jako awatar-oddech (rdzeń sceny) ===== */
+  .max-orb{width:150px;height:150px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    margin-bottom:26px;position:relative;
+    background:radial-gradient(circle, rgba(166,124,240,.16), transparent 70%)}
+  .max-orb-core{width:82px;height:82px;border-radius:50%;
+    background:radial-gradient(circle at 40% 35%, var(--amethyst-2), var(--lavender));
+    box-shadow:0 0 55px 6px rgba(166,124,240,.5);
+    animation:breathe 4.2s ease-in-out infinite;display:flex;align-items:center;justify-content:center}
+  .max-orb::before,.max-orb::after{content:"";position:absolute;inset:0;border-radius:50%;
+    border:1px solid rgba(166,124,240,.3);animation:breathe 4.2s ease-in-out infinite}
+  .max-orb::after{animation-delay:-2.1s;border-color:rgba(201,168,255,.18)}
+  @keyframes breathe{0%,100%{transform:scale(.78);opacity:.75}50%{transform:scale(1.12);opacity:1}}
+  /* stan „mówienia" — szybszy, żywszy puls */
+  .max-orb-core.talking{animation:talk .5s ease-in-out infinite}
+  @keyframes talk{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+  /* tryb energii (sukces) — Max świeci bursztynem */
+  .max-orb.fired .max-orb-core{background:radial-gradient(circle at 40% 35%, #fff, var(--ember) 45%, var(--amethyst) 90%);
+    box-shadow:0 0 70px 10px rgba(255,178,107,.5)}
+
+  .maxName{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--lavender);font-weight:700;margin-bottom:14px}
+  .maxName.fired{color:var(--ember)}
+
+  /* dymek kwestii Maxa */
+  .max-line{font-size:22px;font-weight:300;color:var(--mist);line-height:1.5;max-width:15em}
+  /* WARSTWA 2 — plakietka nagrody za start. Cicha, nie krzykliwa:
+     ma potwierdzać ruch, nie robić z niego wyniku sportowego. */
+  .start-badge{margin-top:18px;font-size:12px;letter-spacing:.08em;color:var(--lavender);
+    opacity:0;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+    border-radius:999px;padding:7px 15px;display:inline-block;
+    animation:badgeIn .55s cubic-bezier(.2,.8,.3,1) .45s forwards}
+  @keyframes badgeIn{from{opacity:0;transform:translateY(8px) scale(.96)}
+    to{opacity:1;transform:none}}
+  /* WARSTWA 3 — mapa. Spokojna lista obserwacji, zero rankingów i ocen. */
+  .map-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+    border-left:2px solid var(--lavender);border-radius:12px;padding:13px 15px;
+    margin-bottom:9px;font-size:15px;font-weight:300;color:var(--mist);
+    line-height:1.5;text-align:left;max-width:22em}
+  .map-note{margin-top:14px;font-size:12px;color:var(--lavender);opacity:.75;
+    max-width:20em;line-height:1.5;font-style:italic}
+  .map-bar{margin-top:18px;width:200px;height:5px;border-radius:99px;
+    background:rgba(255,255,255,.08);overflow:hidden}
+  .map-fill{height:100%;border-radius:99px;background:var(--lavender);
+    transition:width .6s cubic-bezier(.2,.8,.3,1)}
+  .map-link{margin-top:14px;text-align:center;font-size:13px;color:var(--lavender);
+    opacity:.7;cursor:pointer;padding:10px;letter-spacing:.03em;
+    transition:opacity .25s}
+  .map-link:hover{opacity:1}
+  /* Pole kontekstu dla AI — duże, bo wpisuje je ktoś w stanie utknięcia. */
+  .task-input{width:100%;max-width:20em;background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.14);border-radius:14px;
+    padding:15px 16px;font-size:16px;font-family:inherit;color:var(--pearl);
+    outline:none;transition:border-color .25s,background .25s}
+  .task-input::placeholder{color:rgba(255,255,255,.32)}
+  .task-input:focus{border-color:var(--lavender);background:rgba(255,255,255,.09)}
+  /* Znacznik: użytkownik ma wiedzieć, kiedy krok jest dopasowany, a kiedy ogólny. */
+  .ai-tag{margin-top:12px;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--lavender);opacity:.6}
+  /* Dziennik — pole duże i wygodne, bo pisze do niego ktoś z natłokiem myśli. */
+  .dump-input{width:100%;max-width:22em;background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.14);border-radius:14px;
+    padding:14px 15px;font-size:15.5px;font-family:inherit;color:var(--pearl);
+    line-height:1.55;outline:none;resize:none;
+    transition:border-color .25s,background .25s}
+  .dump-input::placeholder{color:rgba(255,255,255,.28)}
+  .dump-input:focus{border-color:var(--lavender);background:rgba(255,255,255,.09)}
+  .dump-mirror{font-size:19px;font-weight:300;color:var(--pearl);line-height:1.5;
+    max-width:19em;margin-bottom:12px}
+  .dump-emo{display:inline-block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--lavender);background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.1);border-radius:999px;
+    padding:6px 14px;margin-bottom:16px}
+  .dump-sec{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--lavender);opacity:.7;margin:6px 0 9px}
+  .dump-task{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+    border-left:2px solid var(--lavender);border-radius:11px;padding:11px 14px;
+    margin-bottom:7px;font-size:14.5px;color:var(--mist);text-align:left;max-width:20em}
+  .dump-q{margin-top:16px;font-size:15px;font-weight:300;font-style:italic;
+    color:var(--lavender);max-width:19em;line-height:1.5;opacity:.9}
+  /* Przebieg energii — słupki z realnych pomiarów, bez interpolacji. */
+  .en-row{display:flex;align-items:center;gap:11px;width:100%;max-width:20em;margin-bottom:11px}
+  .en-lab{font-size:13px;color:var(--mist);width:5.2em;text-align:left;flex-shrink:0}
+  .en-bar{flex:1;height:8px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}
+  .en-bar i{display:block;height:100%;border-radius:99px;
+    background:linear-gradient(90deg,var(--lavender),var(--amethyst));
+    transition:width .6s cubic-bezier(.2,.8,.3,1)}
+  .en-n{font-size:11px;color:var(--lavender);opacity:.5;width:2.2em;text-align:right;flex-shrink:0}
+  .en-empty{flex:1;font-size:12px;color:var(--lavender);opacity:.35;text-align:left}
+  .max-line b{color:var(--pearl);font-weight:500}
+
+  .kicker{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--lavender);font-weight:600;margin-bottom:16px}
+  .step-word{font-size:38px;line-height:1.15;font-weight:600;color:var(--pearl);letter-spacing:-.02em;max-width:11em;margin-bottom:12px}
+  .step-hint{font-size:15px;color:var(--mist);font-weight:400;max-width:20em;line-height:1.5}
+
+  .lightbar-wrap{width:200px;height:5px;border-radius:99px;background:rgba(166,124,240,.14);overflow:hidden;margin-top:26px}
+  .lightbar{height:100%;width:100%;border-radius:99px;background:linear-gradient(90deg,var(--lavender),var(--amethyst-2));
+    box-shadow:0 0 12px rgba(166,124,240,.7);transform-origin:left}
+
+  .field{width:100%;max-width:340px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+    padding:16px 18px;color:var(--pearl);font-size:16px;font-family:inherit;outline:none;transition:.2s var(--ease);resize:none;line-height:1.4}
+  .field::placeholder{color:var(--mist);opacity:.55}
+  .field:focus{border-color:var(--amethyst);box-shadow:0 0 0 3px rgba(166,124,240,.15)}
+
+  /* iskra startu — Max odpala energię */
+  .spark-core{width:120px;height:120px;border-radius:50%;margin-bottom:26px;position:relative;
+    background:radial-gradient(circle at 42% 38%, #fff, var(--ember) 30%, var(--amethyst) 74%);
+    box-shadow:0 0 80px 16px rgba(255,178,107,.5);animation:sparkpop .8s var(--ease) both}
+  @keyframes sparkpop{0%{transform:scale(0);opacity:0}55%{transform:scale(1.18)}100%{transform:scale(1);opacity:1}}
+  .spark-ray{position:absolute;inset:-40px;border-radius:50%;
+    background:conic-gradient(from 0deg, transparent, rgba(255,178,107,.5), transparent 40%);
+    animation:spin 5s linear infinite;opacity:.6;mix-blend-mode:screen}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .actions{width:100%;display:flex;flex-direction:column;gap:11px;position:relative;z-index:2}
+  .btn{width:100%;padding:19px;border:none;border-radius:var(--r);font-size:17px;font-weight:600;font-family:inherit;
+    cursor:pointer;letter-spacing:.01em;transition:transform .16s var(--ease), background .2s}
+  .btn:active{transform:translateY(2px) scale(.99)}
+  .btn-primary{background:linear-gradient(135deg,var(--lavender),var(--amethyst));color:#fff;
+    box-shadow:0 10px 30px -10px rgba(139,111,214,.7), inset 0 1px 0 rgba(255,255,255,.15)}
+  .btn-fire{background:linear-gradient(135deg,#e8933f,var(--ember));color:#3a1e05;
+    box-shadow:0 10px 30px -10px rgba(255,178,107,.6), inset 0 1px 0 rgba(255,255,255,.25)}
+  .btn-done{background:linear-gradient(135deg,#4c8f78,#7fd4b8);color:#06231a;
+    box-shadow:0 10px 30px -12px rgba(127,212,184,.55)}
+  .btn-ghost{background:transparent;color:var(--mist);border:1px solid var(--line);font-weight:500;font-size:15px;padding:16px}
+  .btn-ghost:hover{color:var(--pearl);border-color:rgba(166,124,240,.3)}
+  .btn-text{background:none;border:none;color:var(--mist);opacity:.6;font-size:14px;font-family:inherit;cursor:pointer;padding:10px;transition:.2s}
+  .btn-text:hover{opacity:1;color:var(--amethyst-2)}
+  .footnote{text-align:center}
+
+  .bottom{flex:0 0 auto;padding-top:18px;padding-bottom:8px}
+  .fade-delay{animation:fadein .6s var(--ease) .35s both}
+  @keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001s !important;transition-duration:.12s !important}
+    .max-orb-core,.brand-dot,.max-av::after{animation:none;opacity:.9}
+  }
+
+  /* Niskie ekrany / otwarty pasek: nie centruj na siłę — płyń od góry,
+     guzik idzie tuż za treścią i jest zawsze osiągalny scrollem. */
+  @media (max-height: 740px){
+    #app{min-height:auto}
+    .home{min-height:100dvh;padding-bottom:48px}
+    .home-mid{padding:8px 0 0}
+    .bottom{padding-top:18px}
+  }
+
+  /* ================== EKRAN LOGOWANIA (Guardian ID) ================== */
+  .auth{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;
+    width:100%;max-width:440px;margin:0 auto;
+    background:radial-gradient(120% 90% at 50% -10%, #221a33 0%, var(--void) 46%, var(--void-deep) 100%);
+    padding:max(env(safe-area-inset-top), 8px) 26px max(env(safe-area-inset-bottom), 16px);
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+    transition:opacity .45s var(--ease), transform .45s var(--ease)}
+  .auth.gone{opacity:0;transform:translateY(-12px);pointer-events:none}
+  .auth-top{display:flex;align-items:center;gap:10px;padding:24px 0 0;
+    flex-shrink:0;position:relative;z-index:2}
+  .auth-shield{margin-left:auto;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--lavender);
+    font-weight:600;display:flex;align-items:center;gap:5px;cursor:pointer;opacity:.85;transition:.2s}
+  .auth-shield:hover{opacity:1}
+  /* FIX: bez margin:auto treść przy przepełnieniu wypływała w górę POD pasek.
+     `justify-content:center` na kontenerze ze scrollem obcina górę zawartości —
+     `margin:auto` centruje, ale nigdy nie tnie. */
+  .auth-wrap{flex:1 0 auto;display:flex;flex-direction:column;
+    justify-content:flex-start;padding:18px 0 30px;margin:auto 0}
+  .auth .max-av{width:60px;height:60px;border-radius:50%;position:relative;margin-bottom:18px;
+    background:radial-gradient(circle at 40% 35%, var(--amethyst-2), var(--lavender));
+    box-shadow:0 0 30px 3px rgba(166,124,240,.5)}
+  .auth .max-av::after{content:"";position:absolute;inset:-5px;border-radius:50%;
+    border:1.5px solid rgba(166,124,240,.35);animation:avpulse 3.5s var(--ease) infinite}
+  /* Max mówi na ekranie logowania — jego kwestia, nie systemowy tekst */
+  .auth-maxname{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--lavender);font-weight:700;margin-bottom:10px}
+  .auth h1{font-size:25px;font-weight:300;line-height:1.32;letter-spacing:-.01em;margin-bottom:9px}
+  .auth h1 b{font-weight:600;color:var(--amethyst-2)}
+  .auth .sub{font-size:14px;color:var(--mist);line-height:1.55;margin-bottom:24px}
+  .tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:5px;margin-bottom:18px}
+  .tab{flex:1;padding:11px;border:none;background:transparent;color:var(--mist);font-family:inherit;font-size:14px;font-weight:600;border-radius:9px;cursor:pointer;transition:.2s var(--ease)}
+  .tab.on{background:var(--surface-2);color:var(--pearl);box-shadow:0 2px 10px -4px rgba(0,0,0,.5)}
+  .fg{margin-bottom:13px}
+  .lbl{display:block;font-size:12px;color:var(--mist);margin-bottom:7px;font-weight:500}
+  .fld{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:15px 16px;color:var(--pearl);font-size:16px;font-family:inherit;outline:none;transition:.2s var(--ease)}
+  .fld::placeholder{color:var(--mist);opacity:.5}
+  .fld:focus{border-color:var(--amethyst);box-shadow:0 0 0 3px rgba(166,124,240,.15)}
+  .fld.bad{border-color:var(--err,#f2a3a3);box-shadow:0 0 0 3px rgba(242,163,163,.12)}
+  .emsg{font-size:12.5px;color:var(--err,#f2a3a3);margin-top:6px;display:none}
+  .emsg.show{display:block}
+  .divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--mist);font-size:12px;opacity:.7}
+  .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+  .oauth{display:flex;flex-direction:column;gap:10px}
+  .btn-oauth{width:100%;padding:14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--pearl);font-size:14.5px;font-weight:500;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:.2s var(--ease)}
+  .btn-oauth:hover{background:var(--surface-2)}
+  .btn-oauth .g{width:18px;height:18px;border-radius:3px;background:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#4285F4}
+  .consent{display:flex;gap:9px;align-items:flex-start;margin:2px 0;font-size:12px;color:var(--mist);line-height:1.45}
+  .consent input{margin-top:2px;accent-color:var(--amethyst);width:15px;height:15px;flex-shrink:0}
+  .consent a{color:var(--amethyst-2);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+  .skip{margin-top:20px;text-align:center}
+  .skip button{background:none;border:none;color:var(--mist);font-size:13.5px;font-family:inherit;cursor:pointer;opacity:.7;transition:.2s;text-decoration:underline;text-underline-offset:3px}
+  .skip button:hover{opacity:1;color:var(--amethyst-2)}
+  .skip .hint{display:block;font-size:11.5px;color:var(--mist);opacity:.55;margin-top:6px}
+  /* panel zaufania */
+  .trust{position:fixed;inset:0;z-index:50;background:rgba(15,13,22,.86);backdrop-filter:blur(6px);display:none;align-items:flex-end;justify-content:center}
+  .trust.show{display:flex}
+  .trust-card{width:100%;max-width:440px;background:var(--surface);border-top:1px solid var(--line);border-radius:22px 22px 0 0;padding:26px 24px calc(env(safe-area-inset-bottom) + 26px);animation:up .35s var(--ease)}
+  @keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .trust h2{font-size:19px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:9px}
+  .trust-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.5;color:var(--mist)}
+  .trust-item:last-child{border-bottom:none}
+  .trust-item b{color:var(--pearl);font-weight:600}
+  .trust-item .ic{font-size:18px;flex-shrink:0;margin-top:1px}
+  .trust-close{width:100%;margin-top:18px;padding:15px;border:none;border-radius:var(--r);background:var(--surface-2);color:var(--pearl);font-family:inherit;font-size:15px;font-weight:600;cursor:pointer}
+
+  /* ================== KARTA „TERAZ" na ekranie głównym ================== */
+  .now-card{margin-top:16px;background:linear-gradient(135deg, rgba(139,111,214,.18), rgba(166,124,240,.08));
+    border:1px solid rgba(166,124,240,.28);border-radius:var(--r);padding:18px;position:relative;overflow:hidden;cursor:pointer;
+    transition:transform .16s var(--ease), border-color .2s}
+  .now-card:active{transform:scale(.99)}
+  .now-card::after{content:"";position:absolute;inset:0;background:radial-gradient(70% 100% at 15% 0%, rgba(201,168,255,.14), transparent 60%);pointer-events:none}
+  .now-eyebrow{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--amethyst-2);font-weight:700;margin-bottom:10px}
+  .now-energy{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:10.5px;letter-spacing:.08em;color:var(--mist);text-transform:none}
+  .now-energy .dot{width:8px;height:8px;border-radius:50%}
+  .now-task{font-size:19px;font-weight:600;color:var(--pearl);line-height:1.3;margin-bottom:5px}
+  .now-why{font-size:13px;color:var(--mist);line-height:1.45}
+  .now-go{margin-top:14px;display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;color:var(--amethyst-2)}
+
+  /* ================== NAKŁADKA TRYBU TERAZ ================== */
+  .now{position:fixed;inset:0;z-index:20;display:none;flex-direction:column;height:100dvh;overflow-y:auto;
+    background:radial-gradient(90% 70% at 50% 26%, #1d1630 0%, var(--void) 55%, var(--void-deep) 100%);
+    padding:calc(env(safe-area-inset-top) + 16px) 26px calc(env(safe-area-inset-bottom) + 24px);
+    opacity:0;transition:opacity .5s var(--ease)}
+  .now.show{display:flex}
+  .now.vis{opacity:1}
+  .now-top{display:flex;justify-content:space-between;align-items:center;min-height:26px}
+  /* FIX: mapa z 3 obserwacjami może przerosnąć ekran — scroll zamiast obcięcia. */
+  .now-stage{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;
+    text-align:center;position:relative;overflow-y:auto;min-height:0;padding:4px 0}
+  .now-scene{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0 4px;
+    opacity:0;transform:translateY(14px);pointer-events:none;transition:opacity .45s var(--ease), transform .45s var(--ease)}
+  .now-scene.active{opacity:1;transform:none;pointer-events:auto}
+  .now-orb{width:96px;height:96px;border-radius:50%;position:relative;margin-bottom:22px;
+    background:radial-gradient(circle at 40% 35%, var(--amethyst-2), var(--lavender));box-shadow:0 0 45px 5px rgba(166,124,240,.5)}
+  .now-orb.talking{animation:talk .5s ease-in-out infinite}
+  .energy-pick{display:flex;gap:12px;margin-top:8px}
+  .energy-btn{flex:1;min-width:92px;padding:18px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);
+    color:var(--pearl);font-family:inherit;cursor:pointer;transition:.2s var(--ease);display:flex;flex-direction:column;align-items:center;gap:8px}
+  .energy-btn:hover{background:var(--surface-2)}
+  .energy-btn .big{font-size:26px}
+  .energy-btn .lab{font-size:13px;font-weight:600}
+  .energy-btn .sub{font-size:11px;color:var(--mist)}
+  .now-task-big{font-size:30px;line-height:1.2;font-weight:600;color:var(--pearl);letter-spacing:-.02em;max-width:12em;margin-bottom:12px}
+  .now-why-big{font-size:15px;color:var(--mist);line-height:1.5;max-width:20em}
+  .now-actions{width:100%;display:flex;flex-direction:column;gap:11px;position:relative;z-index:2}
+</style>
+</head>
+<body>
+
+<!-- ==================== EKRAN LOGOWANIA (Guardian ID) ==================== -->
+<div class="auth" id="auth">
+  <div class="auth-top">
+    <span class="brand-dot"></span>
+    <span class="brand-txt">
+      <span class="brand-name">Master<b>ADHD</b></span>
+      <span class="brand-tag">Master your ADHD</span>
+    </span>
+    <span class="auth-shield" onclick="showTrust()">🛡️ Twoje dane</span>
+  </div>
+  <div class="auth-wrap">
+    <div class="max-av"></div>
+    <div class="auth-maxname">Max · Twój trener</div>
+    <h1 id="aHead">Cześć, jestem Max.<br><b>Zrób konto</b>, a zapamiętam każdą sesję.</h1>
+    <p class="sub" id="aSub">Wszystko, co Ci pomaga, wróci na każdym urządzeniu — nawet gdy zmienisz telefon.</p>
+
+    <div class="tabs">
+      <button class="tab on" id="tabReg" onclick="setMode('register')">Nowe konto</button>
+      <button class="tab" id="tabLog" onclick="setMode('login')">Mam już konto</button>
+    </div>
+
+    <div class="fg">
+      <label class="lbl" for="aEmail">E-mail</label>
+      <input class="fld" id="aEmail" type="email" inputmode="email" autocomplete="email" placeholder="ty@przyklad.pl">
+      <div class="emsg" id="aEmailErr">Wpisz poprawny adres e-mail.</div>
+    </div>
+    <div class="fg">
+      <label class="lbl" for="aPass">Hasło</label>
+      <input class="fld" id="aPass" type="password" autocomplete="new-password" placeholder="min. 8 znaków">
+      <div class="emsg" id="aPassErr">Hasło musi mieć co najmniej 8 znaków.</div>
+    </div>
+
+    <div class="consent" id="aConsentBox">
+      <input type="checkbox" id="aConsent">
+      <label for="aConsent">Akceptuję <a onclick="showTrust();return false">zasady prywatności</a>. Moje dane są moje — mogę je pobrać lub usunąć w każdej chwili.</label>
+    </div>
+    <div class="emsg" id="aConsentErr" style="margin:-4px 0 6px">Zaznacz zgodę, żeby założyć konto.</div>
+
+    <button class="btn btn-primary" id="aSubmit" onclick="submitAuth()" style="margin-top:6px">Załóż konto</button>
+
+    <div class="divider">albo</div>
+    <div class="oauth">
+      <button class="btn-oauth" onclick="oauth('Google')"><span class="g">G</span>Kontynuuj z Google</button>
+      <button class="btn-oauth" onclick="oauth('Apple')"><span style="font-size:16px"></span>Kontynuuj z Apple</button>
+    </div>
+
+    <div class="skip">
+      <button onclick="skipAuth()">Na razie bez konta — po prostu zacznij</button>
+      <span class="hint">Zadziałam offline. Konto dodasz później.</span>
+    </div>
+  </div>
+</div>
+
+<!-- panel zaufania -->
+<div class="trust" id="trust" onclick="if(event.target===this)hideTrust()">
+  <div class="trust-card">
+    <h2>🛡️ Twoje dane należą do Ciebie</h2>
+    <div class="trust-item"><span class="ic">🇪🇺</span><div>Dane trzymamy w <b>Unii Europejskiej</b>. Nie opuszczają UE.</div></div>
+    <div class="trust-item"><span class="ic">🚫</span><div><b>Nie sprzedajemy</b> Twoich danych. Nie ma reklam. Jesteś użytkownikiem, nie towarem.</div></div>
+    <div class="trust-item"><span class="ic">📥</span><div>W każdej chwili możesz <b>pobrać wszystko</b>, co o Tobie wiemy.</div></div>
+    <div class="trust-item"><span class="ic">🗑️</span><div>Możesz <b>usunąć konto i dane</b> na zawsze. Bez pytań.</div></div>
+    <div class="trust-item"><span class="ic">📴</span><div>Max działa <b>offline</b>. Konto to wygoda, nie warunek.</div></div>
+    <button class="trust-close" onclick="hideTrust()">Rozumiem</button>
+  </div>
+</div>
+
+<div id="app">
+
+  <!-- ==================== EKRAN GŁÓWNY ==================== -->
+  <div class="home" id="home">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <span class="brand-txt">
+        <span class="brand-name">Master<b>ADHD</b></span>
+        <span class="brand-tag">Master your ADHD</span>
+      </span>
+      <button class="prof-btn" onclick="openProfile(false)" aria-label="Profil">⚙</button>
+      <button class="help-top" onclick="openSafety()" aria-label="Pomoc w kryzysie">Pomoc</button>
+      <span class="ver">v16</span>
+    </div>
+
+    <!-- ============================================================
+         MAX JEST GOSPODARZEM, DASHBOARD JEST JEGO NARZĘDZIEM.
+         Max wita, mówi co widzi i sam podaje narzędzia — kafelki to nie
+         menu aplikacji, tylko rzeczy, po które Max sięga w rozmowie.
+         Cała treść tej sekcji pochodzi z renderHost() i zależy od tego,
+         ile Max już o użytkowniku wie.
+         ============================================================ -->
+    <div class="host" id="host">
+      <div class="host-orb" id="hostOrb" onclick="openChat()"></div>
+      <div class="host-name" id="hostName">Max</div>
+      <div class="host-say" id="hostSay">Hej. Jestem Max.</div>
+      <div class="host-sub" id="hostSub">Chwila — sprawdzam, co u Ciebie.</div>
+    </div>
+
+    <button class="panic panic-top" onclick="startCrisis()">
+      <span class="lab">Nie mogę zacząć</span>
+      <span class="sub">Poprowadzę Cię — krok po kroku.</span>
+    </button>
+
+    <div class="home-mid">
+      <div class="home-kicker" id="toolsKicker">Czym mogę Cię teraz obsłużyć</div>
+
+      <div class="minors">
+        <button class="minor" onclick="openDump()"><span class="ico">🧠</span>Zrzuć myśli</button>
+        <button class="minor" onclick="openMood()"><span class="ico">💗</span>Zrzuć emocje</button>
+        <button class="minor" onclick="openEnergy()"><span class="ico">⚡</span>Pokaż energię</button>
+        <button class="minor" onclick="openAtlas()"><span class="ico">📖</span>Atlas emocji</button>
+        <button class="minor" onclick="openTasks()"><span class="ico">📋</span>Twoje rzeczy</button>
+        <button class="minor" onclick="openMap()"><span class="ico">🗺️</span>Twoja mapa</button>
+      </div>
+
+      <!-- Motywacja przez kompletność mapy: co odblokuje kolejny wpis. -->
+      <div class="prog-box" id="progBox"></div>
+
+      <button class="chat-entry" onclick="openChat()">
+        <span class="co">💬</span>
+        <span class="ct"><b>Pogadajmy</b><small id="chatHint">o energii, nastroju, o czymkolwiek</small></span>
+      </button>
+    </div>
+
+    <div class="bottom">
+      <!-- Kafelek recenzji: Max sam prosi o ocenę. Pyta o KONKRET
+           (ostatnio używane narzędzie), nie o ogólne „jak Ci się podoba". -->
+      <button class="review-tile" onclick="openReview()">
+        <span class="rv-ico">💭</span>
+        <span class="rv-txt">
+          <b id="rvHead">Masz uwagi? Powiedz mi wprost</b>
+          <small id="rvSub">Buduję to razem z Tobą — każda uwaga coś zmienia.</small>
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== NAKŁADKA TRYBU TERAZ ==================== -->
+  <div class="now" id="now">
+    <div class="now-top">
+      <button class="crisis-x" onclick="exitNow()">✕ wyjdź</button>
+      <button class="muteBtn" onclick="toggleVoice()" title="głos Maxa">🔊</button>
+    </div>
+    <div class="now-stage" id="nowStage"></div>
+    <div class="now-actions" id="nowActions"></div>
+  </div>
+
+  <!-- ==================== NAKŁADKA KRYZYSU ==================== -->
+  <div class="crisis" id="crisis">
+    <div class="crisis-top">
+      <button class="crisis-x" onclick="exitCrisis()">✕ wyjdź</button>
+      <div class="stepdots" id="dots"><i></i><i></i><i></i><i></i></div>
+      <button class="muteBtn" id="muteBtn" onclick="toggleVoice()" title="głos Maxa">🔊</button>
+    </div>
+    <div class="stage" id="stage"></div>
+    <div class="actions" id="actions"></div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   MasterADHD v2 — Max jako persona przez cały przepływ
+   Ton: w kryzysie ściszony i konkretny; od startu pełna energia.
+   Głos: Web Speech API (pl-PL jeśli dostępny). Wyciszalny.
+   ============================================================ */
+
+const crisis  = document.getElementById('crisis');
+const stage   = document.getElementById('stage');
+const actions = document.getElementById('actions');
+const dots    = document.getElementById('dots');
+const muteBtn = document.getElementById('muteBtn');
+
+/* ---------- PAMIĘĆ MAXA (partner, nie chatbot) ---------- */
+const MEM_KEY = 'masteradhd.max.v1';
+function memLoad(){
+  try{ return JSON.parse(localStorage.getItem(MEM_KEY)) || null; }catch(e){ return null; }
+}
+function memSave(m){
+  try{ localStorage.setItem(MEM_KEY, JSON.stringify(m)); }catch(e){}
+}
+/* Buduje kontekstowe powitanie na podstawie ostatniej sesji. */
+function maxGreeting(){
+  const m = memLoad();
+  if(!m || !m.sessions){
+    return { name:'Max · Twój trener',
+      html:`<b>Hej. Jestem Max.</b> Kiedy utkniesz i nie możesz ruszyć — naciśnij duży guzik na dole. Zajmę się resztą.` };
+  }
+  /* WARSTWA 1 — powrót po przerwie. Nagroda idzie za POWRÓT, nie za ciągłość.
+     Zero wyrzutów typu „nie widzieliśmy Cię 3 dni". */
+  const gap = daysSinceLastSeen();
+  if(gap >= 3){
+    const dni = (m.days && m.days.length) ? m.days.length : m.sessions || 1;
+    return { name:'Max',
+      html:`<b>Wracasz.</b> To się liczy bardziej niż ciągłość. Masz za sobą ${dni} ${dni===1?'dzień':'dni'} — nic nie przepadło.` };
+  }
+  // wracający użytkownik — Max pamięta
+  if(m.lastTask && m.lastHelped === 'breakdown'){
+    return { name:`Max · widzimy się ${m.sessions}. raz`,
+      html:`<b>Ostatnim razem pomogło rozbicie zadania.</b> Gdy znów utkniesz — rozbijamy to tak samo.` };
+  }
+  if(m.lastTask){
+    return { name:`Max · pamięta`,
+      html:`<b>Ostatnio utknąłeś przy: „${m.lastTask}”.</b> Dziś też? Naciśnij guzik, ruszymy to razem.` };
+  }
+  return { name:`Max · widzimy się ${m.sessions}. raz`,
+    html:`<b>Dobrze Cię widzieć znowu.</b> Gdy utkniesz — jeden guzik i lecimy krok po kroku.` };
+}
+/* Zapisuje ślad po sesji. */
+function memRecord(patch){
+  const m = memLoad() || { sessions:0, created:Date.now() };
+  m.sessions = (m.sessions||0) + (patch.newSession ? 1 : 0);
+  if(patch.lastTask   !== undefined) m.lastTask   = patch.lastTask;
+  if(patch.lastHelped !== undefined) m.lastHelped = patch.lastHelped;
+  /* WARSTWA 2 — licznik startów. Nagradzamy ruszenie, nie ukończenie. */
+  if(patch.newSession) m.starts = (m.starts||0) + 1;
+  m.lastSeen = Date.now();
+  memSave(m);
+}
+
+/* ---------- WARSTWA 1 — LICZNIK, KTÓRY NIE KARZE ----------
+   Suma dni, nie ciąg. Pominięty dzień nie zeruje — po prostu nie dodaje.
+   Podstawa: Lally 2010 — pominięcie jednego dnia nie łamie krzywej nawyku.
+   Świadomie NIE budujemy zerującego się streaka: uderzałby najmocniej
+   w tych, którzy najczęściej opuszczą dzień. */
+function trackDay(){
+  const m = memLoad() || { sessions:0, created:Date.now() };
+  const today = new Date().toDateString();
+  m.days = m.days || [];
+  if(!m.days.includes(today)) m.days.push(today);
+  memSave(m);
+  return m.days.length;
+}
+/* Ile dni od ostatniej wizyty (do powitania po przerwie). */
+function daysSinceLastSeen(){
+  const m = memLoad();
+  if(!m || !m.lastSeen) return 0;
+  return Math.floor((Date.now() - m.lastSeen) / 86400000);
+}
+
+/* ---------- WARSTWA 3 — MAPA: POSTĘP JAKO SAMOPOZNANIE ----------
+   Nie poziomy i odznaki, tylko rosnący obraz siebie z własnych danych.
+   Karmi kompetencję (SDT), a nie posłuszeństwo.
+   ZASADA NADRZĘDNA: to lustro, nie diagnoza. Formułujemy jako obserwację
+   z danych („X% Twoich wejść"), NIGDY jako etykietę czy ocenę. */
+const DUMP_KEY = 'masteradhd.dump.v1';
+const MOOD_KEY = 'masteradhd.mood.v1';
+const MAP_MIN = 15;   // próg, poniżej którego nie pokazujemy wzorców
+
+/* ============================================================
+   WARSTWA BEZPIECZEŃSTWA (§16) — deterministyczna, offline, przed LLM.
+   Zasada: REAGOWAĆ na sygnał usera, nie WYKRYWAĆ ryzyka. Siatka słów-kluczy
+   to uzupełnienie, NIE system wykrywania — łapie jawne sygnały, nie polega
+   się na niej. Skan działa on-device PRZED wysłaniem tekstu do modelu.
+   Numery zaszyte statycznie (nigdy generowane przez LLM), linki tel: offline.
+   ============================================================ */
+const CRISIS_WORDS=[
+  'zabić się','zabije się','zabiję się','samobójstwo','odebrać sobie życie','odbiorę sobie życie',
+  'skończyć ze sobą','skończę ze sobą','nie chcę żyć','chcę umrzeć','chce umrzeć','lepiej żeby mnie nie było',
+  'zniknąć na zawsze','tnę się','chcę się pociąć','ranię się','samookalecz','nie ma dla mnie ratunku',
+  'wszyscy mieliby lepiej beze mnie','napisałem pożegnanie','mam plan','nie dam rady dłużej','nie widzę wyjścia'
+];
+function scanCrisis(text){
+  if(!text) return false;
+  const t=text.toLowerCase();
+  if(/nie chcę (się )?zab|nie chcę umrz|nie mam myśli samob/.test(t)) return false; // proste zaprzeczenia
+  return CRISIS_WORDS.some(w=>t.includes(w));
+}
+const HELPLINES=[
+  {num:'112', tel:'112', meta:'Bezpośrednie zagrożenie życia', emerg:true},
+  {num:'116 123', tel:'116123', meta:'Kryzys emocjonalny, dorośli · 24/7'},
+  {num:'511 200 200', tel:'511200200', meta:'Kryzys samobójczy · 24/7'},
+  {num:'800 70 2222', tel:'800702222', meta:'Centrum Wsparcia · 24/7'},
+  {num:'116 111', tel:'116111', meta:'Dzieci i młodzież · 24/7'},
+];
+/* Otwiera ekran wsparcia w nakładce kryzysu — statyczny, offline. */
+function openSafety(){
+  try{ if('speechSynthesis'in window) speechSynthesis.cancel(); }catch(e){}
+  const html=`
+    <div class="safety-wrap">
+      <div class="safety-h">Nie jesteś sam. Pomoc jest w zasięgu ręki.</div>
+      <div class="safety-sub">Jeśli myślisz o zrobieniu sobie krzywdy albo czujesz, że nie dajesz rady — odezwij się do kogoś, kto pomoże teraz. Te rozmowy są anonimowe i bezpłatne.</div>
+      ${HELPLINES.map(h=>`<a class="safety-num${h.emerg?' emerg':''}" href="tel:${h.tel}">
+        <span class="sn-big">${h.num}</span>
+        <span class="sn-meta">${h.meta}</span><span class="sn-go">›</span></a>`).join('')}
+      <div class="safety-fine">Wolisz napisać? Czat na <b>116sos.pl</b>. To nie oznaka słabości — to krok naprzód. Max jest tu i zostaje, kiedy będziesz gotowy.</div>
+    </div>`;
+  // użyj nakładki kryzysu jako nośnika (już istnieje, działa offline)
+  crisis.classList.add('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>crisis.classList.add('vis')));
+  stage.innerHTML = `<div class="scene active" style="justify-content:flex-start;padding-top:8px">${html}</div>`;
+  actions.innerHTML = `<button class="btn btn-ghost" onclick="exitCrisis()">Wróć</button>`;
+  if(dots) dots.style.display='none';
+}
+
+
+function mapRecord(energy, helped){
+  const m = memLoad() || { sessions:0, created:Date.now() };
+  m.map = m.map || [];
+  m.map.push({ e:energy, h:new Date().getHours(), d:new Date().getDay(),
+               helped: helped || null, t:Date.now() });
+  if(m.map.length > 400) m.map = m.map.slice(-400);   // sufit lokalny
+  memSave(m);
+}
+
+/* Zwraca listę obserwacji (0–3). Pusta = za mało danych, nic nie zmyślamy. */
+function readPatterns(){
+  const m = memLoad();
+  if(!m || !m.map || m.map.length < MAP_MIN) return [];
+  const map = m.map, n = map.length, out = [];
+
+  // 1) Pora dnia
+  const evening = map.filter(r=>r.h>=20 || r.h<4).length;
+  const morning = map.filter(r=>r.h>=5 && r.h<11).length;
+  const evShare = Math.round(evening/n*100), moShare = Math.round(morning/n*100);
+  if(evShare >= 40)      out.push(`Najczęściej wchodzisz tu wieczorem — ${evShare}% Twoich wejść po 20:00.`);
+  else if(moShare >= 40) out.push(`Najczęściej wchodzisz tu rano — ${moShare}% Twoich wejść przed 11:00.`);
+
+  // 2) Dominująca energia
+  const cnt = {low:0, mid:0, high:0};
+  map.forEach(r=>{ if(cnt[r.e]!==undefined) cnt[r.e]++; });
+  const top = Object.keys(cnt).reduce((a,b)=>cnt[a]>=cnt[b]?a:b);
+  const topShare = Math.round(cnt[top]/n*100);
+  if(topShare >= 45){
+    const nazwa = {low:'niskiej energii', mid:'średniej energii', high:'pełnej mocy'}[top];
+    out.push(`Zwykle sięgasz po pomoc przy ${nazwa} — ${topShare}% razy.`);
+  }
+
+  // 3) Weekend vs tydzień roboczy
+  const wknd = map.filter(r=>r.d===0||r.d===6).length;
+  const wkShare = Math.round(wknd/n*100);
+  if(wkShare >= 45) out.push(`Weekendy bywają dla Ciebie trudniejsze — ${wkShare}% wejść wypada w sobotę lub niedzielę.`);
+  else if(wkShare <= 8) out.push(`Weekendy masz lżejsze — tylko ${wkShare}% wejść wypada wtedy.`);
+
+  /* 4) Emocje i tematy z dziennika — druga rzeka danych do tej samej mapy. */
+  const dumps = dumpLoad();
+  if(dumps.length >= 5){
+    const emos = {};
+    dumps.forEach(d=>{ if(d.emotion) emos[d.emotion]=(emos[d.emotion]||0)+1; });
+    const keys = Object.keys(emos);
+    if(keys.length){
+      const topE = keys.reduce((a,b)=>emos[a]>=emos[b]?a:b);
+      const withEmo = keys.reduce((s,k)=>s+emos[k],0);
+      const sh = Math.round(emos[topE]/withEmo*100);
+      if(sh >= 35) out.push(`W tym, co piszesz, najczęściej wraca: ${topE} — ${sh}% wpisów.`);
+    }
+    const th = {};
+    dumps.forEach(d=>(d.themes||[]).forEach(x=>{ th[x]=(th[x]||0)+1; }));
+    const tk = Object.keys(th);
+    if(tk.length){
+      const topT = tk.reduce((a,b)=>th[a]>=th[b]?a:b);
+      if(th[topT] >= 3) out.push(`Najwięcej miejsca zajmuje u Ciebie: ${topT}.`);
+    }
+  }
+
+  /* 5) Ćwiartki z suwaków nastroju — trzecia rzeka danych. */
+  const moods = moodLoad();
+  if(moods.length >= 5){
+    const q = {hiPos:0, loPos:0, hiNeg:0, loNeg:0};
+    moods.forEach(x=>{ q[moodQuadrant(x.v, x.a)]++; });
+    const kq = Object.keys(q).reduce((a,b)=>q[a]>=q[b]?a:b);
+    const sh = Math.round(q[kq]/moods.length*100);
+    const opis = {
+      hiPos:'w energii i na plusie', loPos:'spokojnie i na plusie',
+      hiNeg:'spięcie przy wysokim pobudzeniu', loNeg:'niska energia i ciężko'
+    }[kq];
+    if(sh >= 35) out.push(`Gdy pokazujesz mi emocje, najczęściej jest to: ${opis} — ${sh}% razy.`);
+    /* Rozjazd Thayera: wyczerpany, a jednocześnie nakręcony. */
+    const spiecie = moods.filter(x=>x.v < 40 && x.a > 60).length;
+    const spSh = Math.round(spiecie/moods.length*100);
+    if(spSh >= 25) out.push(`Często bywasz jednocześnie wyczerpany i nakręcony — ${spSh}% Twoich zapisów.`);
+  }
+
+  return out.slice(0,4);
+}
+/* Renderuje powitanie na ekranie głównym. */
+/* Blok .max-hello zniknął w v7 — Max jest teraz gospodarzem (sekcja .host).
+   Nazwa zostaje jako alias, bo wołają ją enterApp() i start aplikacji. */
+function renderGreeting(){ renderHost(); }
+
+/* ---------- WIBRACJE (mikrobodziec zamknięcia kroku) ---------- */
+/* Vibration API: Android/Chrome tak, iOS Safari nie — bezpieczna detekcja. */
+function buzz(pattern){
+  try{
+    if('vibrate' in navigator && typeof navigator.vibrate === 'function'){
+      navigator.vibrate(pattern);
+    }
+  }catch(e){/* ciche pominięcie */}
+}
+const BUZZ = {
+  enter:  30,          // wejście w kryzys — delikatne „jestem"
+  done:   [0,18,40,18],// zamknięcie kroku — podwójny, satysfakcjonujący puls
+  easier: 12,          // „za trudne" — ledwo muśnięcie
+  start:  [0,25,50,25,50,45] // start — dłuższy, triumfalny wzór
+};
+
+/* ---------- GŁOS MAXA ----------
+   Problem: na wielu urządzeniach (zwł. Android/Samsung) nie ma polskiego głosu
+   TTS. Wtedy przeglądarka czyta polski tekst obcym silnikiem = bełkot z akcentem.
+   Zasada: lepiej CISZA niż niezrozumiały głos. Mówimy TYLKO gdy jest realnie
+   polski głos. Preferencja użytkownika zapamiętana. Głosy ładują się async —
+   dlatego reagujemy na onvoiceschanged i odświeżamy ikonę. */
+let voiceWanted = (function(){ try{ return localStorage.getItem('masteradhd.voice')!=='off'; }catch(e){ return true; } })();
+let plVoice = null;
+let voiceReady = false;
+function plAvailable(){ return !!plVoice; }
+function voiceOn(){ return voiceWanted && plAvailable(); }  // mówimy tylko z polskim głosem
+function refreshMuteIcon(){
+  const label = !plAvailable() ? '🔇' : (voiceWanted ? '🔊' : '🔇');
+  document.querySelectorAll('.muteBtn').forEach(b=>{
+    b.textContent = label;
+    b.title = !plAvailable() ? 'Brak polskiego głosu w tej przeglądarce' : (voiceWanted ? 'Głos Maxa włączony' : 'Głos Maxa wyciszony');
+    b.style.opacity = plAvailable() ? '' : '.35';
+  });
+}
+function pickVoice(){
+  const vs = speechSynthesis.getVoices();
+  plVoice = vs.find(v=>/^pl(-|_|$)/i.test(v.lang)) || vs.find(v=>/polish|polski/i.test(v.name)) || null;
+  voiceReady = true;
+  refreshMuteIcon();
+}
+if('speechSynthesis' in window){
+  pickVoice();
+  speechSynthesis.onvoiceschanged = pickVoice;
+  // niektóre przeglądarki potrzebują chwili, by wypełnić listę głosów
+  setTimeout(pickVoice, 400); setTimeout(pickVoice, 1200);
+}
+function maxSpeak(text, fired){
+  if(!voiceOn() || !('speechSynthesis' in window)) return;   // cisza, gdy brak PL głosu lub wyciszone
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text.replace(/[—•→]/g,' '));
+  u.voice = plVoice;            // zawsze konkretny polski głos (nie null)
+  u.lang = plVoice.lang || 'pl-PL';
+  u.rate = fired ? 1.08 : 0.96;
+  u.pitch = fired ? 1.1 : 1.0;
+  u.volume = 1;
+  const core = document.querySelector('.max-orb-core');
+  if(core){ core.classList.add('talking'); u.onend = ()=>core.classList.remove('talking'); }
+  speechSynthesis.speak(u);
+}
+function toggleVoice(){
+  if(!plAvailable()){
+    // brak polskiego głosu — nie da się włączyć; wyjaśnij zamiast czytać bełkot
+    alert('Ta przeglądarka nie ma polskiego głosu, więc Max czytałby z obcym akcentem. Aby włączyć głos, doinstaluj polski pakiet TTS w ustawieniach systemu (Zamiana tekstu na mowę) i wróć.');
+    return;
+  }
+  voiceWanted = !voiceWanted;
+  try{ localStorage.setItem('masteradhd.voice', voiceWanted ? 'on' : 'off'); }catch(e){}
+  refreshMuteIcon();
+  if(!voiceWanted && 'speechSynthesis' in window) speechSynthesis.cancel();
+}
+
+/* ---------- DANE KROKÓW (placeholder — docelowo AI) ---------- */
+/* Kroki zależne od tego, GDZIE użytkownik jest. Wcześniej Max zawsze kazał
+   wstać i podejść do biurka — nawet komuś pod prysznicem. Max, który nie pyta
+   o kontekst, wygląda jakby nie słuchał. */
+const STEP_SETS = {
+  desk: [
+    { word:'Odsuń wszystko poza jedną rzeczą.', hint:'Telefon ekranem w dół. Zakładki poza tą jedną — zamknij.', somatic:true,
+      max:'Jesteś na miejscu. To odsuńmy wszystko poza jedną rzeczą.' },
+    { word:'Otwórz to, w czym masz zacząć.', hint:'Plik, dokument, aplikacja. Otwórz i zatrzymaj się.',
+      max:'Teraz otwórz to i zatrzymaj się. Nie zaczynaj — tylko otwórz.' },
+    { word:'Zrób najmniejszy możliwy ruch.', hint:'Jedno zdanie. Jedna linijka. Jeden klik.',
+      max:'Ostatni krok. Najmniejszy możliwy ruch. Dalej ja.' }
+  ],
+  couch: [
+    { word:'Postaw stopy na podłodze.', hint:'Nic więcej. Obie stopy, płasko.', somatic:true,
+      max:'Zaczynamy od ciała. Obie stopy na podłodze — tyle.' },
+    { word:'Usiądź prosto i weź jeden oddech.', hint:'Plecy od oparcia. Jeden wdech, jeden wydech.',
+      max:'Teraz plecy od oparcia i jeden spokojny oddech.' },
+    { word:'Wstań i przejdź trzy kroki.', hint:'Dokądkolwiek. Chodzi o ruch, nie o cel.',
+      max:'Wstań i zrób trzy kroki. Gdziekolwiek. Dalej ja.' }
+  ],
+  away: [
+    { word:'Dokończ spokojnie to, co robisz.', hint:'Bez pośpiechu. Nigdzie się nie spieszymy.', somatic:true,
+      max:'Jesteś w trakcie czegoś. Dokończ spokojnie — poczekam.' },
+    { word:'Powiedz na głos jedną rzecz, którą zrobisz.', hint:'Jedno zdanie. Głośno albo w myślach.',
+      max:'Teraz nazwij jedną rzecz, którą zrobisz. Jedno zdanie.' },
+    { word:'Ustaw ją tam, gdzie ją zobaczysz.', hint:'Notatka, wiadomość do siebie, kartka.',
+      max:'Zostaw to sobie tam, gdzie zobaczysz. Wrócimy do tego.' }
+  ],
+  bed: [
+    { word:'Odłóż telefon na chwilę.', hint:'Obok, ekranem w dół. Zaraz wróci.', somatic:true,
+      max:'Zaczynamy lekko. Odłóż telefon na moment — zaraz wróci.' },
+    { word:'Usiądź na brzegu łóżka.', hint:'Tylko usiądź. Nie wstawaj jeszcze.',
+      max:'Teraz usiądź na brzegu. Nie wstawaj — tylko usiądź.' },
+    { word:'Postaw obie stopy na podłodze.', hint:'To wszystko. Reszta sama pójdzie.',
+      max:'Obie stopy na podłodze. To wszystko. Dalej ja.' }
+  ]
+};
+const DEFAULT_STEPS = STEP_SETS.desk;
+const EASIER = {
+  'Wstań i przejdź trzy kroki.': { word:'Postaw jedną stopę na podłodze.', hint:'Tyle wystarczy na teraz. Reszta poczeka.',
+    max:'Spoko. Mniejszy krok: tylko jedna stopa na podłodze.' },
+  'Odsuń wszystko poza jedną rzeczą.': { word:'Zamknij jedną zakładkę.', hint:'Jedną. Nie wszystkie.',
+    max:'Mniejszy krok: zamknij jedną zakładkę. Tyle.' }
+};
+
+let steps=[], idx=0, breakdownGiven={};
+let sessionTask = '';   // co user wpisał w tej sesji
+let sessionHelped = ''; // co pomogło (breakdown/steps)
+
+/* ============================================================
+   WARSTWA AI — TREŚĆ, NIGDY SZKIELET
+   Zgodnie z ADR: Decision Engine jest deterministyczny, AI nigdy nie decyduje.
+   Tu AI dostaje GOTOWE kroki (wybrane regułą miejsce×energia) i tylko
+   przepisuje ich brzmienie pod konkretne zadanie użytkownika.
+   Liczba kroków, kolejność i logika „za trudne" pozostają w regule.
+   Brak sieci / błąd / timeout => zostaje wersja deterministyczna, a Max
+   mówi wprost, że działa offline. Nigdy nie blokujemy użytkownika.
+   ============================================================ */
+let aiState = 'idle';   // idle | pending | ok | offline
+
+async function tailorSteps(){
+  if(!navigator.onLine){ aiState='offline'; return; }
+  aiState='pending';
+  const skeleton = steps.map((s,i)=>`${i+1}. ${s.word} (${s.hint})`).join('\n');
+  const prompt =
+`Jesteś Max — spokojny przewodnik dla osoby z ADHD, która utknęła i nie może zacząć.
+Zadanie użytkownika: "${sessionTask}"
+
+Oto ${steps.length} kroki wybrane przez silnik. NIE zmieniaj ich liczby, kolejności ani sensu.
+Przepisz TYLKO brzmienie, tak by odnosiło się do zadania użytkownika:
+${skeleton}
+
+Zasady:
+- Każdy krok ma być mniejszy niż użytkownik myśli, że musi zrobić.
+- Krok 1 dotyczy ciała lub otoczenia, nie samego zadania.
+- Ostatni krok to najmniejszy możliwy ruch W zadaniu, nie jego ukończenie.
+- Bez oceniania, bez motywacyjnych sloganów, bez wykrzykników.
+- "word": maks 6 słów, tryb rozkazujący. "hint": jedno krótkie zdanie.
+- "max": jedno zdanie, które Max powie na głos.
+
+Zwróć WYŁĄCZNIE JSON, bez markdown:
+{"steps":[{"word":"...","hint":"...","max":"..."}]}`;
+
+  try{
+    const ctl = new AbortController();
+    const to = setTimeout(()=>ctl.abort(), 9000);
+    const r = await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST", headers:{"Content-Type":"application/json"}, signal:ctl.signal,
+      body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:1000,
+        messages:[{role:"user",content:prompt}] })
+    });
+    clearTimeout(to);
+    const data = await r.json();
+    const txt = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const parsed = JSON.parse(txt.replace(/```json|```/g,'').trim());
+    if(parsed && Array.isArray(parsed.steps) && parsed.steps.length === steps.length){
+      /* Nadpisujemy WYŁĄCZNIE treść. somatic i cała reszta szkieletu zostaje. */
+      steps = steps.map((s,i)=>({ ...s,
+        word: parsed.steps[i].word || s.word,
+        hint: parsed.steps[i].hint || s.hint,
+        max:  parsed.steps[i].max  || s.max }));
+      aiState='ok';
+      if(idx===0 && document.querySelector('#stage .scene')) renderStep();
+    } else { aiState='offline'; }
+  }catch(e){ aiState='offline'; }
+}
+
+/* ============================================================
+   TRYB TERAZ — most plan↔działanie
+   Max czyta energię → dobiera zadanie do stanu → jedna rzecz.
+   „Biorę się" → płynnie w tryb kryzysowy (rozbicie na kroki).
+   ============================================================ */
+const NOW = document.getElementById('now');
+const nowStage = document.getElementById('nowStage');
+const nowActions = document.getElementById('nowActions');
+/* Propozycje są ogólne i uczciwe — Max nie ma dostępu do Twojej skrzynki,
+   kalendarza ani listy zadań, więc nie udaje, że wie co konkretnie wisi.
+   Dobiera CIĘŻAR do energii, a konkret podajesz Ty. */
+/* NOW_TASKS usunięte w v16 — Max nie wymyśla zadań, dobiera je
+   z listy użytkownika. Patrz: WARSTWA ZADAŃ na końcu pliku. */
+let nowCurrent = null;
+function nowSwap(html, acts){
+  const old = nowStage.querySelector('.now-scene.active');
+  if(old){ old.classList.remove('active'); setTimeout(()=>old.remove(),450); }
+  const s=document.createElement('div'); s.className='now-scene'; s.innerHTML=html;
+  nowStage.appendChild(s);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>s.classList.add('active')));
+  nowActions.innerHTML = acts||'';
+}
+/* Nieużywane od v5 — karta „sprawdź stan" z ekranu głównego zniknęła,
+   a wejście w energię prowadzi teraz przez czat (openChat) lub openEnergy.
+   Zostawione, bo nowAskEnergy() nadal z tego przepływu korzysta. */
+function openNow(){
+  /* Okno z kalendarza — wyłącznie liczba minut, zero treści (P-34). */
+  if(consLoad().gcal && window.GT_TOKEN) calWindow(window.GT_TOKEN);
+  NOW.classList.add('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>NOW.classList.add('vis')));
+  nowAskEnergy();
+}
+function exitNow(){
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  NOW.classList.remove('vis');
+  setTimeout(()=>{ NOW.classList.remove('show'); nowStage.innerHTML=''; nowActions.innerHTML='';
+    renderHost();   // Max przelicza, co powiedzieć — mógł się właśnie czegoś dowiedzieć
+  },460);
+}
+/* ============================================================
+   GŁÓWNY POMIAR — TRZY SUWAKI ZAMIAST TRZECH PRZYCISKÓW
+   Wcześniej jedna oś (niska/średnia/wysoka energia) gubiła stan, który
+   u osób z ADHD jest bardzo częsty: WYCZERPANY I JEDNOCZEŚNIE NAKRĘCONY.
+   Model Thayera rozdziela to na dwie niezależne osie — energetic arousal
+   (energia↔zmęczenie) i tense arousal (napięcie↔spokój). Do tego walencja
+   z modelu kołowego Russella. Trzy suwaki, ~20 s, bez wymuszania nazwy.
+   KOMPATYBILNOŚĆ: mapRecord() nadal dostaje low/mid/high, więc stare
+   zapisy i cała mapa działają bez migracji.
+   ============================================================ */
+function nowAskEnergy(){
+  const line='Zanim wskażę, co teraz — pokaż mi, jak masz.';
+  nowSwap(`
+    <div class="kicker">Max sprawdza stan</div>
+    <div class="max-line" style="margin-bottom:18px">Jak masz teraz?</div>
+    ${bodyHint()}
+
+    <div class="sl-block">
+      <div class="sl-lab"><span>ciężko</span><span>dobrze</span></div>
+      <input class="sl" type="range" min="0" max="100" value="50" id="ckVal">
+      <div class="sl-name">Jak się czujesz</div>
+    </div>
+
+    <div class="sl-block">
+      <div class="sl-lab"><span>wyczerpany</span><span>pełen energii</span></div>
+      <input class="sl" type="range" min="0" max="100" value="50" id="ckEne">
+      <div class="sl-name">Ile masz energii</div>
+    </div>
+
+    <div class="sl-block">
+      <div class="sl-lab"><span>spokojnie</span><span>bardzo spięty</span></div>
+      <input class="sl" type="range" min="0" max="100" value="50" id="ckTen">
+      <div class="sl-name">Ile masz napięcia</div>
+    </div>
+  `,`
+    <button class="btn btn-primary" onclick="checkinDone()">Gotowe</button>
+  `);
+  setTimeout(()=>maxSpeak(line,false),400);
+}
+
+/* Suwak energii mapujemy na stary poziom, żeby reguła doboru zadania
+   i cała mapa działały bez zmian. */
+function eneLevel(e){ return e >= 66 ? 'high' : e >= 34 ? 'mid' : 'low'; }
+
+function checkinDone(){
+  const v = +document.getElementById('ckVal').value;
+  const e = +document.getElementById('ckEne').value;
+  const t = +document.getElementById('ckTen').value;
+  const level = eneLevel(e);
+  const mm = memLoad() || {}; mm.lastLevel = level; memSave(mm);
+  /* Pełny zapis do dziennika nastrojów — karmi mapę i wykrywanie rozjazdu. */
+  const all = moodLoad();
+  all.push({ t:Date.now(), v, a:e, ten:t, tag:null, src:'checkin',
+             h:new Date().getHours(), d:new Date().getDay() });
+  moodSave(all);
+  buzz(BUZZ.easier);
+  nowPick(level, {v, e, t});
+}
+
+/* ===== WARSTWA 3 — EKRAN „TWOJA MAPA" ===== */
+function openMap(){
+  markTool('map');
+  const m = memLoad();
+  const n = (m && m.map) ? m.map.length : 0;
+  const dni = (m && m.days) ? m.days.length : 0;
+  const pats = readPatterns();
+
+  NOW.classList.add('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>NOW.classList.add('vis')));
+
+  if(n < MAP_MIN){
+    const brak = MAP_MIN - n;
+    nowSwap(`
+      <div class="kicker">Twoja mapa</div>
+      <div class="max-line" style="margin-bottom:6px">Mapa się rysuje.</div>
+      <div class="now-why-big">Masz ${n} ${n===1?'punkt':'punktów'} i ${dni} ${dni===1?'dzień':'dni'} razem.
+        Jeszcze ${brak} ${brak===1?'wejście':'wejść'} i pokażę Ci, co się powtarza.</div>
+      <div class="map-bar"><div class="map-fill" style="width:${Math.round(n/MAP_MIN*100)}%"></div></div>
+    `,`
+      <button class="btn btn-primary" onclick="exitNow()">Jasne</button>
+    `);
+    setTimeout(()=>maxSpeak('Mapa się rysuje. Jeszcze kilka wejść i pokażę Ci, co się powtarza.',false),350);
+    return;
+  }
+
+  nowSwap(`
+    <div class="kicker">Twoja mapa · ${n} punktów</div>
+    <div class="max-line" style="margin-bottom:14px">Co widzę w Twoich danych</div>
+    ${pats.map(p=>`<div class="map-item">${p}</div>`).join('')}
+    <div class="map-note">To obserwacja z Twoich wejść, nie diagnoza.
+      Ty wiesz najlepiej, co z tym zrobić.</div>
+  `,`
+    <button class="btn btn-primary" onclick="exitNow()">Dzięki, Max</button>
+  `);
+  setTimeout(()=>maxSpeak('To, co widzę w Twoich danych. Nie diagnoza — obserwacja.',false),400);
+}
+
+/* ============================================================
+   ZRZUĆ MYŚLI — INTELIGENTNY DZIENNIK
+   Wzorzec z TellSelf: użytkownik pisze swobodnie, AI wyciąga strukturę.
+   Zero formularzy, zero skal nastroju do wypełniania.
+
+   RÓŻNICA WOBEC TELLSELF: oni wysyłają wpis na serwer i kasują go po minutach,
+   więc nie mają na czym budować mapy. U nas wpis ZOSTAJE lokalnie —
+   do AI leci tylko na czas analizy. To karmi mapę i pamięć Maxa.
+
+   AI robi trzy rzeczy naraz:
+   1. LUSTRO   — odbija i nazywa emocję (affect labeling, Lieberman 2007)
+   2. ZADANIA  — wyciąga z tekstu konkretne rzeczy do zrobienia
+   3. PYTANIE  — jedno, które drąży głębiej
+   ============================================================ */
+
+function dumpLoad(){
+  try{ return JSON.parse(localStorage.getItem(DUMP_KEY)) || []; }catch(e){ return []; }
+}
+function dumpSave(arr){
+  try{ localStorage.setItem(DUMP_KEY, JSON.stringify(arr.slice(-300))); }catch(e){}
+}
+
+function openDump(){
+  markTool('dump');
+  NOW.classList.add('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>NOW.classList.add('vis')));
+  const n = dumpLoad().length;
+  nowSwap(`
+    <div class="kicker">Zrzuć myśli</div>
+    <div class="max-line" style="margin-bottom:6px">Co Ci siedzi w głowie?</div>
+    <div class="now-why-big" style="margin-bottom:14px">Pisz jak leci. Bez ładnych zdań, bez porządku.
+      Ja poukładam.</div>
+    <textarea class="dump-input" id="dumpInput" rows="6"
+      placeholder="wszystko naraz, mail wisi od trzech dni, nie mogę się zebrać, jutro dentysta…"></textarea>
+    ${n ? `<div class="ai-tag">${n} ${n===1?'wpis':'wpisów'} w dzienniku</div>` : ''}
+  `,`
+    <button class="btn btn-primary" onclick="processDump()">Gotowe</button>
+    <div class="footnote"><button class="btn-text" onclick="exitNow()">Anuluj</button></div>
+  `);
+  setTimeout(()=>{
+    maxSpeak('Pisz jak leci. Bez ładnych zdań — ja poukładam.',false);
+    const i=document.getElementById('dumpInput'); if(i) i.focus();
+  },400);
+}
+
+async function processDump(){
+  const el = document.getElementById('dumpInput');
+  const text = el ? el.value.trim() : '';
+  if(!text){ exitNow(); return; }
+
+  /* BEZPIECZEŃSTWO (§16): skan on-device PRZED zapisem i wysłaniem do modelu.
+     Sygnał kryzysu → ekran wsparcia lokalnie, tekst NIE wychodzi do LLM. */
+  if(scanCrisis(text)){ exitNow(); setTimeout(openSafety, 320); return; }
+
+  buzz(BUZZ.done);
+
+  /* Wpis zapisujemy ZAWSZE i NATYCHMIAST — niezależnie od tego, czy AI odpowie.
+     Dane użytkownika nie mogą zależeć od dostępności sieci. */
+  const entry = { t:Date.now(), text, h:new Date().getHours(), d:new Date().getDay() };
+  const all = dumpLoad(); all.push(entry); dumpSave(all);
+
+  nowSwap(`
+    <div class="max-orb"><div class="max-orb-core"></div></div>
+    <div class="maxName">Max</div>
+    <div class="max-line">Czytam…</div>
+  `,'');
+
+  const res = await analyzeDump(text);
+  if(!res){
+    /* Offline — Max mówi wprost. Wpis i tak jest zapisany. */
+    nowSwap(`
+      <div class="kicker">Zapisane</div>
+      <div class="max-line" style="margin-bottom:8px">Jestem offline.</div>
+      <div class="now-why-big">Zapisałem to, co napisałeś. Poukładam, gdy wrócę do sieci —
+        nic nie przepadło.</div>
+    `,`
+      <button class="btn btn-primary" onclick="exitNow()">Jasne</button>
+    `);
+    setTimeout(()=>maxSpeak('Jestem offline, ale zapisałem. Poukładam, gdy wrócę do sieci.',false),350);
+    return;
+  }
+
+  /* Wzbogacamy zapisany wpis o to, co wyciągnęła AI — to karmi mapę. */
+  const arr = dumpLoad();
+  const last = arr[arr.length-1];
+  if(last && last.t === entry.t){
+    last.emotion = res.emotion || null;
+    last.themes  = res.themes  || [];
+    last.tasks   = res.tasks   || [];
+    dumpSave(arr);
+  }
+  /* Emocja z dziennika trafia do tej samej mapy, co check-iny. */
+  if(res.emotion) mapRecord(res.energy || 'mid', 'dump');
+
+  nowSwap(`
+    <div class="kicker">Co usłyszałem</div>
+    <div class="dump-mirror">${res.mirror||''}</div>
+    ${res.emotion ? `<div class="dump-emo">${res.emotion}</div>` : ''}
+    ${(res.tasks&&res.tasks.length) ? `
+      <div class="dump-sec">Wyłapałem konkrety</div>
+      ${res.tasks.map(t=>`<div class="dump-task">${t}</div>`).join('')}` : ''}
+    ${res.question ? `<div class="dump-q">${res.question}</div>` : ''}
+  `,`
+    ${(res.tasks&&res.tasks.length)
+      ? `<button class="btn btn-primary" onclick="dumpToSession('${(res.tasks[0]||'').replace(/'/g,"\\'")}')">Ruszmy pierwsze 🔥</button>` : ''}
+    <button class="btn btn-ghost" onclick="exitNow()">Wystarczy na teraz</button>
+  `);
+  setTimeout(()=>maxSpeak(res.mirror||'Zapisane.',false),400);
+}
+
+async function analyzeDump(text){
+  if(!navigator.onLine) return null;
+  const prompt =
+`Jesteś Max — spokojny przewodnik dla osoby z ADHD. Użytkownik zrzucił myśli:
+"""${text}"""
+
+Zwróć WYŁĄCZNIE JSON, bez markdown:
+{"mirror":"...","emotion":"...","energy":"low|mid|high","themes":["..."],"tasks":["..."],"question":"..."}
+
+- mirror: 1-2 zdania. Odbij to, co usłyszałeś, jego słowami. Bez oceniania, bez pocieszania na siłę.
+- emotion: JEDNO polskie słowo nazywające dominującą emocję (np. przeciążenie, lęk, wstyd, frustracja, nuda, spokój).
+- energy: oszacuj poziom energii z tonu wpisu.
+- themes: 1-3 obszary życia, których dotyczy (np. praca, dom, zdrowie, relacje).
+- tasks: konkretne rzeczy do zrobienia wyłowione z tekstu, każda jako krótka fraza (maks 6 słów).
+  Pusta tablica, jeśli nie ma żadnych. NIE wymyślaj zadań, których nie ma w tekście.
+- question: JEDNO krótkie pytanie, które drąży głębiej. Otwarte, nie oceniające, bez "dlaczego".
+
+Nie diagnozuj. Nie używaj terminów klinicznych. Nie obiecuj poprawy.`;
+  try{
+    const ctl = new AbortController();
+    const to = setTimeout(()=>ctl.abort(), 12000);
+    const r = await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST", headers:{"Content-Type":"application/json"}, signal:ctl.signal,
+      body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:1000,
+        messages:[{role:"user",content:prompt}] })
+    });
+    clearTimeout(to);
+    const data = await r.json();
+    const txt = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    return JSON.parse(txt.replace(/```json|```/g,'').trim());
+  }catch(e){ return null; }
+}
+
+/* Most dziennik → sesja: wyłowione zadanie wchodzi wprost w kroki. */
+function dumpToSession(task){
+  exitNow();
+  setTimeout(()=>{ startCrisisWithTask(task); }, 500);
+}
+
+/* ============================================================
+   CZAT Z MAXEM — wejście do rozmowy
+   Powitanie rozróżnia nowego użytkownika od bywalca: pierwszy raz
+   to wyjaśnienie czym Max jest, kolejne to kontynuacja znajomości.
+   Tryb TERAZ (energia → jedno zadanie) mieszka tutaj, nie na kaflu.
+   ============================================================ */
+function openChat(){
+  markTool('chat');
+  NOW.classList.add('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>NOW.classList.add('vis')));
+  const m = memLoad();
+  const wraca = !!(m && m.sessions);
+  const gap = daysSinceLastSeen();
+
+  let naglowek, tresc, mowa;
+  if(!wraca){
+    naglowek = 'Cześć. Jestem Max.';
+    tresc = 'Nie jestem listą zadań ani terapeutą. Jestem trenerem nastroju — pomagam nazwać, co się dzieje, i ruszyć najmniejszym możliwym krokiem.';
+    mowa  = 'Cześć. Jestem Max. Pomagam nazwać, co się dzieje, i ruszyć najmniejszym krokiem.';
+  } else if(gap >= 3){
+    naglowek = 'Dobrze Cię widzieć.';
+    tresc = 'Trochę Cię nie było — i to w porządku. Od czego dziś zaczniemy?';
+    mowa  = 'Dobrze Cię widzieć. Od czego dziś zaczniemy?';
+  } else {
+    naglowek = `Hej. Widzimy się ${m.sessions+1}. raz.`;
+    tresc = m.lastTask ? `Ostatnio stałeś nad: „${m.lastTask}”. Dziś to samo czy coś nowego?`
+                       : 'O czym dziś pogadamy?';
+    mowa  = 'Hej. O czym dziś pogadamy?';
+  }
+
+  nowSwap(`
+    <div class="now-orb"></div>
+    <div class="kicker">Max · trener nastroju</div>
+    <div class="max-line" style="margin-bottom:8px">${naglowek}</div>
+    <div class="now-why-big">${tresc}</div>
+  `,`
+    <button class="btn btn-primary" onclick="nowAskEnergy()">Sprawdź moją energię ⚡</button>
+    <button class="btn btn-primary" onclick="exitNow();setTimeout(openDump,480)">Mam mętlik w głowie 🧠</button>
+    <button class="btn btn-ghost" onclick="exitNow();setTimeout(startCrisis,480)">Nie mogę zacząć</button>
+    <div class="footnote"><button class="btn-text" onclick="exitNow()">Później</button></div>
+  `);
+  setTimeout(()=>maxSpeak(mowa,false),400);
+  const o=nowStage.querySelector('.now-orb');
+  if(o){o.classList.add('talking');setTimeout(()=>o.classList.remove('talking'),2600);}
+}
+
+/* Kafelek „Pokaż energię" — energia płynie, więc pokazujemy jej przebieg,
+   a nie jednorazowy pomiar. Póki brak danych, prowadzi do sprawdzenia stanu.
+   DO ZROBIENIA: pełna ankieta energii po researchu (PANAS, chronotyp). */
+function openEnergy(){
+  markTool('energy');
+  const m = memLoad();
+  const map = (m && m.map) ? m.map : [];
+  NOW.classList.add('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>NOW.classList.add('vis')));
+
+  if(map.length < 5){
+    nowSwap(`
+      <div class="kicker">Twoja energia</div>
+      <div class="max-line" style="margin-bottom:8px">Za mało danych.</div>
+      <div class="now-why-big">Mam ${map.length} ${map.length===1?'pomiar':'pomiarów'}.
+        Sprawdźmy, jak masz teraz — z czasem pokażę Ci, jak Twoja energia płynie w ciągu dnia.</div>
+    `,`
+      <button class="btn btn-primary" onclick="nowAskEnergy()">Sprawdź teraz ⚡</button>
+      <div class="footnote"><button class="btn-text" onclick="exitNow()">Później</button></div>
+    `);
+    setTimeout(()=>maxSpeak('Za mało danych. Sprawdźmy, jak masz teraz.',false),350);
+    return;
+  }
+
+  /* Przebieg energii wg pory dnia — z realnych pomiarów, bez zgadywania. */
+  const pory = [
+    {n:'Rano',      od:5,  do:11},
+    {n:'Południe',  od:11, do:16},
+    {n:'Wieczór',   od:16, do:21},
+    {n:'Noc',       od:21, do:29}
+  ];
+  const val = {low:1, mid:2, high:3};
+  const wiersze = pory.map(p=>{
+    const w = map.filter(r=>{ const h=r.h<5?r.h+24:r.h; return h>=p.od && h<p.do; });
+    if(!w.length) return `<div class="en-row"><span class="en-lab">${p.n}</span>
+      <span class="en-empty">brak danych</span></div>`;
+    const sr = w.reduce((s,r)=>s+(val[r.e]||2),0)/w.length;
+    const proc = Math.round((sr-1)/2*100);
+    return `<div class="en-row"><span class="en-lab">${p.n}</span>
+      <span class="en-bar"><i style="width:${Math.max(proc,6)}%"></i></span>
+      <span class="en-n">${w.length}×</span></div>`;
+  }).join('');
+
+  nowSwap(`
+    <div class="kicker">Twoja energia · ${map.length} pomiarów</div>
+    <div class="max-line" style="margin-bottom:14px">Jak płynie w ciągu dnia</div>
+    ${wiersze}
+    <div class="map-note">To średnia z Twoich wejść, nie diagnoza.
+      Im więcej pomiarów, tym wierniejszy obraz.</div>
+  `,`
+    <button class="btn btn-primary" onclick="nowAskEnergy()">Sprawdź teraz ⚡</button>
+    <div class="footnote"><button class="btn-text" onclick="exitNow()">Zamknij</button></div>
+  `);
+  setTimeout(()=>maxSpeak('Tak Twoja energia płynie w ciągu dnia. Średnia z Twoich wejść.',false),400);
+}
+
+/* ============================================================
+   PROFIL — FORMY GRAMATYCZNE
+   Polszczyzna wymusza rodzaj w czasie przeszłym („stałeś" / „stałaś"),
+   więc bez tego Max albo kogoś misgenderuje, albo brzmi urzędowo.
+   Cztery tryby: f (żeńskie), m (męskie), n (neutralne/bezosobowe),
+   own (własne formy wpisane przez użytkownika).
+   Domyślnie 'n' — dopóki użytkownik nie powie, Max nie zakłada.
+   ============================================================ */
+const PROGI = [
+  { n:5,  co:'przebieg Twojej energii w ciągu dnia' },
+  { n:15, co:'pierwsze wzorce — pory dnia i to, co wraca' },
+  { n:30, co:'różnicę między dniami tygodnia' },
+  { n:60, co:'jak Twoje emocje zmieniają się w czasie' }
+];
+
+const PROFILE_KEY = 'masteradhd.profile.v1';
+function profLoad(){
+  try{ return JSON.parse(localStorage.getItem(PROFILE_KEY)) || {gender:'n'}; }
+  catch(e){ return {gender:'n'}; }
+}
+function profSave(p){ try{ localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); }catch(e){} }
+
+/* Słownik form. Neutralne używa konstrukcji bezosobowych — nie „stałxś",
+   tylko przeformułowania, które po polsku brzmią naturalnie. */
+const FORMS = {
+  m: { stales:'stałeś', ruszyles:'ruszyłeś', gotowy:'gotowy', sam:'sam',
+       zrobiles:'zrobiłeś', mogl:'mógłbyś', pokazales:'pokazałeś',
+       wrociles:'wróciłeś', zaczales:'zacząłeś' },
+  f: { stales:'stałaś', ruszyles:'ruszyłaś', gotowy:'gotowa', sam:'sama',
+       zrobiles:'zrobiłaś', mogl:'mogłabyś', pokazales:'pokazałaś',
+       wrociles:'wróciłaś', zaczales:'zaczęłaś' },
+  /* Neutralne: konstrukcje bezosobowe. Uwaga — nie wolno tu wstawiać form
+     typu „było", bo zmieniają podmiot zdania („Ostatnio było nad X" jest
+     niegramatyczne). Każda forma musi działać w zdaniu, w którym jej używamy. */
+  n: { stales:'utknęło Ci', ruszyles:'jest ruch', gotowy:'gotowi', sam:'samodzielnie',
+       zrobiles:'zrobione', mogl:'da się', pokazales:'pokazało się',
+       wrociles:'jest powrót', zaczales:'jest start' }
+};
+
+/* F('stales') → forma zgodna z profilem. Własne formy nadpisują słownik. */
+function F(klucz){
+  const p = profLoad();
+  if(p.gender === 'own' && p.forms && p.forms[klucz]) return p.forms[klucz];
+  return (FORMS[p.gender] || FORMS.n)[klucz] || FORMS.n[klucz] || '';
+}
+/* Imię do wplecenia w zdanie — pusty string, gdy nie podano. */
+function imie(){ const p = profLoad(); return p.name ? p.name : ''; }
+function przecinekImie(){ const n = imie(); return n ? `, ${n}` : ''; }
+
+/* ============================================================
+   POWITANIA MAXA — pule wariantów, nie jeden sztywny tekst
+   Max to gospodarz, nie tabliczka. Wariant losuje się RAZ NA DZIEŃ
+   (ziarno z daty), żeby w obrębie jednego dnia był spójny, ale kolejne
+   dni brzmiały inaczej. „Potwór" to metafora ADHD — czegoś, co się
+   tresuje i oswaja, nie leczy. Nigdy nie jest to etykieta użytkownika.
+   ============================================================ */
+const HELLO_NEW = [
+  { g:'Cześć, tu Max!',
+    s:'Spędź ze mną 15 minut, a pomogę Ci wytresować Twojego potwora.' },
+  { g:'Hej. Jestem Max.',
+    s:'Nie jestem listą zadań. Jestem od tego, żeby ruszyć — nawet gdy nic się nie chce.' },
+  { g:'O, nowa twarz.',
+    s:'Jestem Max. Pokaż mi, jak masz dziś, a znajdę najmniejszy możliwy krok.' },
+  { g:'Cześć! Tu Max.',
+    s:'Twój potwór nie jest wrogiem. Trzeba go tylko poznać — zacznijmy dziś.' },
+  { g:'Dobrze, że jesteś.',
+    s:'Jestem Max. Nie oceniam, nie planuję za Ciebie. Prowadzę — krok po kroku.' }
+];
+
+const HELLO_BACK = [
+  { g:'Cześć, tu Max. Jak jesteś?',        s:null },
+  { g:'Hej. Co u Ciebie dziś?',            s:null },
+  { g:'Dobrze Cię widzieć.',               s:null },
+  { g:'No i jesteś. Jak leci?',            s:null },
+  { g:'Cześć. Jestem, kiedy będziesz gotów.', s:null },
+  { g:'Hej. Jak Ci się dziś układa?',      s:null },
+  { g:'Tu Max. Bez pośpiechu — jak jest?', s:null },
+  { g:'Widzę Cię. Od czego chcesz zacząć?', s:null }
+];
+
+const HELLO_RETURN = [
+  { g:'Dobrze Cię widzieć.',   s:'Trochę Cię nie było — nic nie przepadło.' },
+  { g:'O, jesteś!',            s:'Przerwa to nie porażka. Wracamy spokojnie.' },
+  { g:'Cześć. Tęskniłem.',     s:'Nic nie zginęło — wszystko czeka tam, gdzie zostawiliśmy.' },
+  { g:'Hej, nieznajomy.',      s:'Żadnych wyrzutów. Po prostu zaczynamy od nowa.' }
+];
+
+/* Ziarno z daty — ten sam wariant przez cały dzień, inny jutro. */
+function daySeed(){
+  const d = new Date();
+  return d.getFullYear()*10000 + (d.getMonth()+1)*100 + d.getDate();
+}
+function pickHello(pula, przesun){
+  return pula[(daySeed() + (przesun||0)) % pula.length];
+}
+
+/* ============================================================
+   MAX JAKO GOSPODARZ
+   Max nie jest kafelkiem w dashboardzie — dashboard jest jego narzędziem.
+   renderHost() decyduje, co Max mówi na wejściu i które narzędzie podsuwa,
+   na podstawie tego, co REALNIE wie: liczba spotkań, ostatnie zadanie,
+   przerwa, dane w mapie, wpisy w dzienniku.
+   Zasada: Max mówi tylko to, co ma w danych. Nigdy nie zgaduje.
+   ============================================================ */
+function renderHost(){
+  const say  = document.getElementById('hostSay');
+  const sub  = document.getElementById('hostSub');
+  const kick = document.getElementById('toolsKicker');
+  const hint = document.getElementById('chatHint');
+  if(!say) return;
+
+  const m     = memLoad();
+  const dumps = dumpLoad();
+  const mapN  = (m && m.map) ? m.map.length : 0;
+  const ses   = (m && m.sessions) ? m.sessions : 0;
+  const gap   = daysSinceLastSeen();
+
+  let g, s2, k = 'Czym mogę Cię teraz obsłużyć', h = 'o energii, nastroju, o czymkolwiek';
+
+  if(!ses){
+    const w = pickHello(HELLO_NEW);
+    g = w.g; s2 = w.s;
+    k = 'Od czego zacząć';
+    h = 'powiedz mi, co się dzieje';
+  } else if(gap >= 3){
+    const w = pickHello(HELLO_RETURN, ses);
+    g  = w.g;
+    s2 = `${w.s} Mam ${mapN} ${mapN===1?'zapis':'zapisów'} i wracamy tam, gdzie skończyliśmy.`;
+    k  = 'Wróćmy do tego spokojnie';
+  } else if(mapN >= MAP_MIN || dumps.length >= 5){
+    /* Max ma dość danych, żeby coś zauważyć — i od razu to mówi. */
+    const pats = readPatterns();
+    g  = pickHello(HELLO_BACK, ses).g;
+    s2 = pats.length ? pats[0] : `Zbieram Twoje wzorce — mam już ${mapN} zapisów.`;
+    k  = 'Zajrzyjmy głębiej';
+    h  = 'chcesz, żebym to rozwinął?';
+  } else if(m && m.lastTask){
+    g  = pickHello(HELLO_BACK, ses).g;
+    /* Przyimek zależy od formy: „stałeś NAD X" vs „utknęło Ci NA X". */
+    const pg = profLoad().gender;
+    const fraza = (pg==='n') ? `${F('stales')} na: „${m.lastTask}”`
+                             : `${F('stales')} nad: „${m.lastTask}”`;
+    s2 = `Ostatnio ${fraza}. Możemy do tego wrócić — albo dziś zająć się czymś innym. Ty decydujesz.`;
+    k  = 'Co dziś bierzemy';
+  } else {
+    g  = pickHello(HELLO_BACK, ses).g;
+    s2 = `Poznaję Cię — mam ${mapN} ${mapN===1?'zapis':'zapisów'}. Jeszcze chwila i zacznę widzieć wzorce.`;
+    k  = 'Czym mogę Cię teraz obsłużyć';
+  }
+
+  /* Imię wplatamy w powitanie, jeśli podane. */
+  const nm = imie();
+  if(nm && g.endsWith('.')) g = g.slice(0,-1) + `, ${nm}.`;
+  else if(nm && g.endsWith('?')) g = g.slice(0,-1) + `, ${nm}?`;
+
+  say.textContent = g;
+  sub.textContent = s2;
+  renderProgress();
+  if(kick) kick.textContent = k;
+  if(hint) hint.textContent = h;
+
+  /* Kafelek recenzji pyta o KONKRET, nie o ogólne wrażenia —
+     „co sądzisz o dzienniku" daje użyteczniejszą odpowiedź niż „jak Ci się podoba". */
+  const rvH = document.getElementById('rvHead');
+  const rvS = document.getElementById('rvSub');
+  if(rvH && m && m.lastTool){
+    const nazwy = { dump:'dzienniku', energy:'wykresie energii', map:'mapie',
+                    steps:'krokach', chat:'rozmowie ze mną' };
+    const n = nazwy[m.lastTool];
+    if(n){
+      rvH.textContent = `Co sądzisz o ${n}?`;
+      rvS.textContent = 'Powiedz wprost — poprawię to, co nie działa.';
+    }
+  }
+}
+
+/* Ślad ostatnio użytego narzędzia — karmi pytanie o recenzję. */
+function markTool(name){
+  const m = memLoad() || { sessions:0, created:Date.now() };
+  m.lastTool = name; memSave(m);
+}
+
+/* ============================================================
+   RECENZJE — Max sam prosi o ocenę
+   Zbierane lokalnie, żeby dało się je potem wyeksportować.
+   ============================================================ */
+const REVIEW_KEY = 'masteradhd.reviews.v1';
+function reviewLoad(){ try{ return JSON.parse(localStorage.getItem(REVIEW_KEY))||[]; }catch(e){ return []; } }
+function reviewSave(a){ try{ localStorage.setItem(REVIEW_KEY, JSON.stringify(a.slice(-200))); }catch(e){} }
+
+function openReview(){
+  const m = memLoad();
+  const nazwy = { dump:'dziennik', energy:'wykres energii', map:'mapa',
+                  steps:'kroki', chat:'rozmowa ze mną' };
+  const cel = (m && m.lastTool && nazwy[m.lastTool]) ? nazwy[m.lastTool] : null;
+
+  NOW.classList.add('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>NOW.classList.add('vis')));
+  nowSwap(`
+    <div class="kicker">Max pyta</div>
+    <div class="max-line" style="margin-bottom:8px">${cel ? `Jak Ci działa ${cel}?` : 'Co mogę zrobić lepiej?'}</div>
+    <div class="now-why-big" style="margin-bottom:14px">Bez lukru. Jeśli coś jest bez sensu — napisz, że jest bez sensu.</div>
+    <div class="rv-scale" id="rvScale">
+      <button class="rv-dot" onclick="pickScore(1)">😖</button>
+      <button class="rv-dot" onclick="pickScore(2)">😕</button>
+      <button class="rv-dot" onclick="pickScore(3)">😐</button>
+      <button class="rv-dot" onclick="pickScore(4)">🙂</button>
+      <button class="rv-dot" onclick="pickScore(5)">😃</button>
+    </div>
+    <textarea class="dump-input" id="rvText" rows="3"
+      placeholder="co działa, co nie działa, czego brakuje…"></textarea>
+  `,`
+    <button class="btn btn-primary" onclick="sendReview()">Wyślij Maxowi</button>
+    <div class="footnote"><button class="btn-text" onclick="exitNow()">Nie teraz</button></div>
+  `);
+  setTimeout(()=>maxSpeak(cel?`Jak Ci działa ${cel}? Bez lukru.`:'Co mogę zrobić lepiej? Bez lukru.',false),400);
+}
+
+let rvScore = 0;
+function pickScore(n){
+  rvScore = n; buzz(BUZZ.easier);
+  document.querySelectorAll('.rv-dot').forEach((b,i)=>b.classList.toggle('on', i < n));
+}
+
+function sendReview(){
+  const el = document.getElementById('rvText');
+  const txt = el ? el.value.trim() : '';
+  if(!rvScore && !txt){ exitNow(); return; }
+  const m = memLoad();
+  const all = reviewLoad();
+  all.push({ t:Date.now(), score:rvScore||null, text:txt||null,
+             tool:(m&&m.lastTool)||null, ses:(m&&m.sessions)||0 });
+  reviewSave(all);
+  buzz(BUZZ.done);
+  rvScore = 0;
+  nowSwap(`
+    <div class="max-orb"><div class="max-orb-core"></div></div>
+    <div class="maxName">Max</div>
+    <div class="max-line" style="margin-bottom:8px">Zapisane.</div>
+    <div class="now-why-big">Dzięki. Takie rzeczy naprawdę zmieniają to, co budujemy.</div>
+  `,`
+    <button class="btn btn-primary" onclick="exitNow()">Wracamy</button>
+  `);
+  setTimeout(()=>maxSpeak('Zapisane. Dzięki — to realnie zmienia to, co budujemy.',false),350);
+}
+
+/* ============================================================
+   ZRZUĆ EMOCJE — model kołowy afektu Russella (walencja × pobudzenie)
+   Dwa suwaki zamiast listy przycisków. Podstawa: Russell (1980), Circumplex
+   Model of Affect; wdrożenie wzorowane na Affective Slider / SAM.
+   DLACZEGO SUWAKI: osoby z ADHD często mają trudność z nazwaniem emocji
+   (aleksytymia) — suwak nie wymaga słowa, tylko wskazania. Etykieta jest
+   OPCJONALNA i wybierana z gotowej siatki (rozpoznanie zamiast przypominania).
+   Polskie brzmienia są robocze — wymagają debriefingu kognitywnego.
+   ============================================================ */
+function moodLoad(){ try{ return JSON.parse(localStorage.getItem(MOOD_KEY))||[]; }catch(e){ return []; } }
+function moodSave(a){ try{ localStorage.setItem(MOOD_KEY, JSON.stringify(a.slice(-400))); }catch(e){} }
+
+/* Cztery ćwiartki modelu kołowego — etykiety dobierane do pozycji suwaków. */
+const MOOD_GRID = {
+  hiPos: ['podekscytowany','radosny','pełen energii','dumny'],
+  loPos: ['spokojny','rozluźniony','zadowolony','wyciszony'],
+  hiNeg: ['spięty','zdenerwowany','zły','przeciążony'],
+  loNeg: ['przygnębiony','smutny','zmęczony','pusty']
+};
+
+/* ============================================================
+   ATLAS EMOCJI (§18) — głęboka warstwa afektywna OBOK suwaków Russella.
+   Suwaki = szybki zrzut (nie wymaga słowa). Atlas = różnicowanie po OCENIE
+   poznawczej — rozdziela emocje, które w modelu kołowym leżą w tym samym
+   kwadrancie (strach vs ekscytacja, wstyd vs wina). Jeden słownik pod dwie
+   powierzchnie: przeglądalny atlas + prowadzone różnicowanie.
+   Pola scoringu: val(-1..1), obj(rdzeń), pew(0..1 rozlane..konkretne).
+   ============================================================ */
+const FAMS=[
+  {id:'strach',nm:'Strach i lęk',em:'🌫️'},{id:'gniew',nm:'Gniew i pokrewne',em:'⚡'},
+  {id:'smutek',nm:'Smutek i strata',em:'🌧️'},{id:'samo',nm:'Emocje o sobie',em:'🫥'},
+  {id:'wstret',nm:'Wstręt',em:'🤢'},{id:'poz',nm:'Pozytywne',em:'☀️'},
+  {id:'porown',nm:'Porównanie z innymi',em:'👁️'},{id:'inne',nm:'Inne stany',em:'🍂'},
+];
+const ATLAS=[
+  {id:'strach',nm:'Strach',em:'😨',fam:'strach',val:-1,obj:'zagrozenie',pew:1,spr:'okoliczności',tend:'ucieczka, unikanie',myli:['lek','ekscytacja'],pyt:'Czy wiesz konkretnie, czego się boisz, i czy to jest TERAZ?',opis:'Reakcja na konkretne, obecne zagrożenie. Wysokie pobudzenie, ciało gotowe do ucieczki.'},
+  {id:'lek',nm:'Lęk',em:'🌫️',fam:'strach',val:-1,obj:'zagrozenie',pew:0,spr:'nic konkretnego',tend:'hiperczujność, zamartwianie',myli:['strach','przec'],pyt:'Czy to rozlane i o przyszłość, bez konkretnego obiektu?',opis:'Zagrożenie niepewne, przyszłe, bez wyraźnego obiektu. Myśli wybiegają w przód.'},
+  {id:'panika',nm:'Panika',em:'💥',fam:'strach',val:-1,obj:'zagrozenie',pew:.5,spr:'nic konkretnego',tend:'ucieczka natychmiastowa',myli:['lek','strach'],pyt:'Czy ciało reaguje szybciej, niż zdążysz pomyśleć?',opis:'Skok lęku, który przejmuje ciało — serce, oddech, potrzeba ucieczki. Fala, która mija.'},
+  {id:'gniew',nm:'Gniew',em:'🔥',fam:'gniew',val:-1,obj:'przeszkoda',pew:1,spr:'ktoś inny',tend:'ruch przeciw — usunąć przeszkodę',myli:['frust','pogarda'],pyt:'Czy jest ktoś, kogo obwiniasz, i czujesz siłę, by działać?',opis:'Ktoś stanął w drodze celu i to jego wina. Energia skierowana na zewnątrz.'},
+  {id:'frust',nm:'Frustracja',em:'⚡',fam:'gniew',val:-1,obj:'przeszkoda',pew:.7,spr:'okoliczności',tend:'napór na przeszkodę',myli:['gniew','irytacja'],pyt:'Czy to raczej zablokowana droga niż konkretny winowajca?',opis:'Przeszkoda w celu — ale niekoniecznie osoba. Chce się przebić.'},
+  {id:'irytacja',nm:'Irytacja',em:'😤',fam:'gniew',val:-1,obj:'przeszkoda',pew:.6,spr:'okoliczności',tend:'odsunięcie drażniącego bodźca',myli:['frust','gniew'],pyt:'Czy to drobne i powtarzalne, nie wielkie?',opis:'Drobne, powtarzalne drażnienie. Niżej niż gniew.'},
+  {id:'pogarda',nm:'Pogarda',em:'😒',fam:'gniew',val:-1,obj:'inni',pew:1,spr:'ktoś inny',tend:'dystansowanie, patrzenie z góry',myli:['gniew','wstret'],pyt:'Czy patrzysz na kogoś „z góry”, chłodno, bez impulsu ataku?',opis:'Zimna emocja wyższości. Nie atakuje — odsuwa i dewaluuje.'},
+  {id:'smutek',nm:'Smutek',em:'🌧️',fam:'smutek',val:-1,obj:'strata',pew:1,spr:'okoliczności',tend:'wycofanie, szukanie wsparcia',myli:['przygnebienie','rozczarowanie'],pyt:'Czy coś zostało utracone i nie da się tego cofnąć?',opis:'Reakcja na nieodwracalną stratę. Niskie pobudzenie, potrzeba wycofania.'},
+  {id:'rozczarowanie',nm:'Rozczarowanie',em:'😞',fam:'smutek',val:-1,obj:'strata',pew:.8,spr:'okoliczności',tend:'rewizja oczekiwań',myli:['smutek','zal'],pyt:'Czy coś nie spełniło oczekiwań, które miałeś?',opis:'Rzeczywistość rozminęła się z oczekiwaniem. Nie utrata na zawsze.'},
+  {id:'zal',nm:'Żal',em:'😔',fam:'smutek',val:-1,obj:'strata',pew:.9,spr:'ja sam',tend:'rozpamiętywanie „gdybym…”',myli:['wina','rozczarowanie'],pyt:'Czy wracasz do własnego wyboru — „gdybym zrobił inaczej”?',opis:'Kontrfaktyczne rozpamiętywanie własnej decyzji.'},
+  {id:'przygnebienie',nm:'Przygnębienie',em:'🌫️',fam:'smutek',val:-1,obj:'brak',pew:.4,spr:'nic konkretnego',tend:'wycofanie, spadek napędu',myli:['smutek','nuda'],pyt:'Czy to ciągnie się dłużej i bez wyraźnej przyczyny?',opis:'Przewlekłe, rozlane obniżenie bez jednego powodu. (Jeśli trwa i gaśnie radość — warto z kimś porozmawiać.)'},
+  {id:'wstyd',nm:'Wstyd',em:'🫥',fam:'samo',val:-1,obj:'ja',pew:.9,spr:'ja sam',tend:'ukrycie, zniknięcie',myli:['wina','upokorzenie'],pyt:'Czy to myśl „jestem zły/wadliwy”, a nie „zrobiłem coś złego”?',opis:'Negatywna ocena całego „ja”. Ciało się kurczy, chce zniknąć.'},
+  {id:'wina',nm:'Wina',em:'😣',fam:'samo',val:-1,obj:'ja',pew:.9,spr:'ja sam',tend:'naprawa, przeprosiny',myli:['wstyd','zal'],pyt:'Czy chodzi o konkretne zachowanie, które chcesz naprawić?',opis:'Negatywna ocena konkretnego czynu. Ciągnie do naprawienia.'},
+  {id:'zazenowanie',nm:'Zażenowanie',em:'😳',fam:'samo',val:-1,obj:'ja',pew:.6,spr:'ja sam',tend:'gesty pojednawcze, rumieniec',myli:['wstyd'],pyt:'Czy to przelotne potknięcie wobec ludzi, nie sprawa moralna?',opis:'Przypadkowe naruszenie konwencji przy świadkach. Lekkie, przelotne.'},
+  {id:'upokorzenie',nm:'Upokorzenie',em:'💢',fam:'samo',val:-1,obj:'ja',pew:.9,spr:'ktoś inny',tend:'mieszanka: wycofanie i gniew',myli:['wstyd','gniew'],pyt:'Czy czujesz to jako NIESPRAWIEDLIWĄ krzywdę od kogoś?',opis:'Ściągnięcie w dół przez kogoś, odbierane jako niezasłużone.'},
+  {id:'wstret',nm:'Wstręt',em:'🤢',fam:'wstret',val:-1,obj:'zagrozenie',pew:1,spr:'okoliczności',tend:'odrzucenie, odsunięcie',myli:['pogarda'],pyt:'Czy jest komponent „obrzydliwe” — reakcja ciała, mdłości?',opis:'Jedna z niewielu emocji z realnym śladem w ciele (mdłości, grymas).'},
+  {id:'radosc',nm:'Radość',em:'😊',fam:'poz',val:1,obj:'dobro',pew:1,spr:'okoliczności',tend:'otwarcie, dzielenie się',myli:['ekscytacja','ulga'],pyt:'Czy to lekkie, jasne uniesienie tu i teraz?',opis:'Wysokie, przyjemne pobudzenie. Ciało otwarte.'},
+  {id:'zadowolenie',nm:'Zadowolenie',em:'☺️',fam:'poz',val:1,obj:'dobro',pew:1,spr:'okoliczności',tend:'odpoczynek',myli:['radosc','ulga'],pyt:'Czy to ciche „jest dobrze”, bez fajerwerków?',opis:'Niskie, spokojne dobro. Nasycenie, nie ekscytacja.'},
+  {id:'ekscytacja',nm:'Ekscytacja',em:'🤩',fam:'poz',val:1,obj:'dobro',pew:.7,spr:'okoliczności',tend:'zbliżenie do okazji',myli:['radosc','strach'],pyt:'Czy to samo wysokie pobudzenie, ale przed czymś DOBRYM?',opis:'Napięcie zbliżenia — jak strach, ale wobec okazji. Ta sama energia, inny znak.'},
+  {id:'duma',nm:'Duma',em:'😌',fam:'poz',val:1,obj:'ja',pew:1,spr:'ja sam',tend:'wyprostowanie',myli:['radosc'],pyt:'Czy przypisujesz to własnemu wysiłkowi i osiągnięciu?',opis:'Pozytywna ocena siebie za osiągnięcie z wysiłku.'},
+  {id:'ulga',nm:'Ulga',em:'😮‍💨',fam:'poz',val:1,obj:'dobro',pew:.9,spr:'okoliczności',tend:'rozluźnienie, wydech',myli:['radosc','zadowolenie'],pyt:'Czy właśnie minęło coś, czego się bałeś?',opis:'Zagrożenie minęło. Napięcie schodzi.'},
+  {id:'wdziecznosc',nm:'Wdzięczność',em:'🙏',fam:'poz',val:1,obj:'dobro',pew:.9,spr:'ktoś inny',tend:'zbliżenie, odwzajemnienie',myli:['radosc'],pyt:'Czy ktoś dał Ci coś dobrego, co doceniasz?',opis:'Odpowiedź na dobro otrzymane od kogoś.'},
+  {id:'zawisc',nm:'Zawiść',em:'😖',fam:'porown',val:-1,obj:'inni',pew:.8,spr:'ktoś inny',tend:'w górę lub w dół',myli:['zazdrosc'],pyt:'Czy KTOŚ MA coś, czego Ty chcesz (układ dwóch osób)?',opis:'Brak tego, co ma inny, w ważnej dla Ciebie dziedzinie.'},
+  {id:'zazdrosc',nm:'Zazdrość',em:'💔',fam:'porown',val:-1,obj:'inni',pew:.8,spr:'ktoś inny',tend:'ochrona relacji',myli:['zawisc'],pyt:'Czy boisz się UTRATY relacji na rzecz rywala (układ trzech osób)?',opis:'Lęk przed utratą bliskiej relacji na rzecz kogoś trzeciego.'},
+  {id:'zaskoczenie',nm:'Zaskoczenie',em:'😯',fam:'inne',val:0,obj:'zmiana',pew:.5,spr:'nic konkretnego',tend:'orientacja, zatrzymanie',myli:['strach','radosc'],pyt:'Czy coś naruszyło Twoje oczekiwania — zanim oceniłeś, dobre to czy złe?',opis:'Neutralna, bardzo krótka. Zwykle przechodzi w inną emocję.'},
+  {id:'nuda',nm:'Nuda',em:'🍂',fam:'inne',val:-1,obj:'brak',pew:.6,spr:'okoliczności',tend:'poszukiwanie bodźca',myli:['przygnebienie','frust'],pyt:'Czy brakuje zaczepienia, a energia jest?',opis:'Brak zaczepienia uwagi. W ADHD częsty zapalnik.'},
+  {id:'przec',nm:'Przeciążenie',em:'🌊',fam:'inne',val:-1,obj:'przeszkoda',pew:.7,spr:'okoliczności',tend:'zamrożenie',myli:['lek','frust'],pyt:'Czy to „za dużo naraz”, wszystkie karty otwarte?',opis:'Za wiele otwartych pętli naraz. System się zatyka.'},
+];
+const atlasById=id=>ATLAS.find(e=>e.id===id);
+function objLabel(o){return{zagrozenie:'zagrożenie',przeszkoda:'przeszkoda w celu',strata:'strata',ja:'moje „ja”',inni:'inni ludzie',dobro:'coś dobrego',brak:'brak / rozlane',zmiana:'nagła zmiana'}[o]||o;}
+
+function openMood(){
+  markTool('mood');
+  NOW.classList.add('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>NOW.classList.add('vis')));
+  nowSwap(`
+    <div class="kicker">Zrzuć emocje</div>
+    <div class="max-line" style="margin-bottom:4px">Jak Ci teraz?</div>
+    <div class="now-why-big" style="margin-bottom:20px">Nie musisz tego nazywać. Wystarczy, że pokażesz.</div>
+
+    <div class="sl-block">
+      <div class="sl-lab"><span>bardzo nieprzyjemnie</span><span>bardzo przyjemnie</span></div>
+      <input class="sl" type="range" min="0" max="100" value="50" id="slVal" oninput="moodPreview()">
+      <div class="sl-name">Jak się czujesz</div>
+    </div>
+
+    <div class="sl-block">
+      <div class="sl-lab"><span>spokojnie, suchy dok</span><span>bardzo pobudzony</span></div>
+      <input class="sl" type="range" min="0" max="100" value="50" id="slAro" oninput="moodPreview()">
+      <div class="sl-name">Ile masz w sobie pobudzenia</div>
+    </div>
+
+    <div class="mood-guess" id="moodGuess"></div>
+  `,`
+    <button class="btn btn-primary" onclick="moodNext()">Dalej</button>
+    <div class="footnote"><button class="btn-text" onclick="exitNow()">Nie teraz</button></div>
+  `);
+  setTimeout(()=>{ maxSpeak('Jak Ci teraz? Nie musisz tego nazywać — wystarczy, że pokażesz.',false); moodPreview(); },400);
+}
+
+/* Podpowiedź nazwy na podstawie ćwiartki — Max proponuje, nie narzuca. */
+function moodQuadrant(v, a){
+  if(v >= 50) return a >= 50 ? 'hiPos' : 'loPos';
+  return a >= 50 ? 'hiNeg' : 'loNeg';
+}
+function moodPreview(){
+  const v = +document.getElementById('slVal').value;
+  const a = +document.getElementById('slAro').value;
+  const el = document.getElementById('moodGuess');
+  if(!el) return;
+  /* Blisko środka nie zgadujemy — to uczciwsze niż wciskanie etykiety. */
+  if(Math.abs(v-50) < 12 && Math.abs(a-50) < 12){ el.textContent = ''; return; }
+  const q = MOOD_GRID[moodQuadrant(v,a)];
+  el.textContent = `brzmi jak: ${q[0]}`;
+}
+
+function moodNext(){
+  const v = +document.getElementById('slVal').value;
+  const a = +document.getElementById('slAro').value;
+  buzz(BUZZ.easier);
+  const q = MOOD_GRID[moodQuadrant(v,a)];
+  nowSwap(`
+    <div class="kicker">Zrzuć emocje</div>
+    <div class="max-line" style="margin-bottom:6px">Nazwiesz to?</div>
+    <div class="now-why-big" style="margin-bottom:16px">Opcjonalnie. Jeśli żadne nie pasuje — pomiń.</div>
+    <div class="mood-tags">
+      ${q.map(t=>`<button class="mood-tag" onclick="saveMood(${v},${a},'${t}')">${t}</button>`).join('')}
+    </div>
+  `,`
+    <button class="btn btn-ghost" onclick="saveMood(${v},${a},null)">Nie umiem nazwać</button>
+    <div class="footnote"><button class="btn-text" onclick="exitNow();setTimeout(openSurvey,480)">Chcę nazwać dokładniej →</button></div>
+  `);
+  setTimeout(()=>maxSpeak('Nazwiesz to? Jeśli nie — spokojnie, pomiń.',false),350);
+}
+
+function saveMood(v, a, tag){
+  const all = moodLoad();
+  all.push({ t:Date.now(), v, a, tag:tag||null, h:new Date().getHours(), d:new Date().getDay() });
+  moodSave(all);
+  /* Pobudzenie mapujemy na skalę energii, żeby zasilić wspólną mapę. */
+  mapRecord(a >= 66 ? 'high' : a >= 34 ? 'mid' : 'low', 'mood');
+  buzz(BUZZ.done);
+  const n = all.length;
+  nowSwap(`
+    <div class="max-orb"><div class="max-orb-core"></div></div>
+    <div class="maxName">Max</div>
+    <div class="max-line" style="margin-bottom:8px">Zapisane.</div>
+    <div class="now-why-big">${tag ? `„${tag}” — zanotowane. ` : ''}To już ${n}. taki zapis. Z tego rośnie Twoja mapa.</div>
+  `,`
+    <button class="btn btn-primary" onclick="exitNow()">Gotowe</button>
+  `);
+  setTimeout(()=>maxSpeak('Zapisane. Z tego rośnie Twoja mapa.',false),350);
+}
+
+/* ============================================================
+   ATLAS — przeglądalny (nakładka NOW). Rodziny → emocja → karta.
+   ============================================================ */
+let SURV = {val:null,obj:null,pew:null,cands:[]};
+function openAtlas(){
+  markTool('atlas');
+  NOW.classList.add('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>NOW.classList.add('vis')));
+  atlasList();
+}
+function atlasList(){
+  nowSwap(`
+    <div class="kicker">Atlas emocji</div>
+    <div class="max-line" style="margin-bottom:4px">Poznaj każdą emocję.</div>
+    <div class="now-why-big" style="margin-bottom:16px">Każda ma swój podpis — po czym ją poznać i z czym się myli.</div>
+    ${FAMS.map(f=>{
+      const es=ATLAS.filter(e=>e.fam===f.id);
+      return `<div class="atl-fam">${f.em} ${f.nm}</div>
+        <div class="atl-grid">${es.map(e=>`<button class="atl-chip" onclick="atlasCard('${e.id}',false)">${e.em} ${e.nm}</button>`).join('')}</div>`;
+    }).join('')}
+  `,`<button class="btn btn-ghost" onclick="exitNow()">Zamknij</button>`);
+}
+function atlasCard(id, fromSurvey){
+  const e=atlasById(id); if(!e) return;
+  const near=e.myli.map(m=>atlasById(m)).filter(Boolean);
+  nowSwap(`
+    ${fromSurvey?`<div class="kicker">To chyba to</div>`:`<div class="kicker">Atlas · ${e.nm}</div>`}
+    <div class="atl-card-h">${e.em} <b>${e.nm}</b></div>
+    <div class="atl-opis">${e.opis}</div>
+    <div class="atl-row"><span class="ak">Co za tym stoi</span><span class="av">${e.spr}</span></div>
+    <div class="atl-row"><span class="ak">Rdzeń</span><span class="av">${objLabel(e.obj)}</span></div>
+    <div class="atl-row"><span class="ak">Ciągnie do</span><span class="av">${e.tend}</span></div>
+    <div class="atl-crux"><div class="acl">Pytanie różnicujące</div><div class="acq">${e.pyt}</div></div>
+    ${near.length?`<div class="atl-near"><span>Łatwo pomylić z:</span>${near.map(n=>`<button onclick="atlasCard('${n.id}',${fromSurvey})">${n.em} ${n.nm}</button>`).join('')}</div>`:''}
+  `, fromSurvey
+      ? `<button class="btn btn-primary" onclick="saveSurvey('${e.id}')">Tak, to nazwij</button>
+         <button class="btn btn-ghost" onclick="survStep3()">Nie, wróćmy do wyboru</button>`
+      : `<button class="btn btn-ghost" onclick="atlasList()">‹ Wszystkie emocje</button>`);
+}
+
+/* ============================================================
+   ZRZUĆ EMOCJE — GŁĘBIEJ: różnicowanie po ocenie poznawczej.
+   Dostępne jako opcja w „Zrzuć emocje” (obok szybkich suwaków Russella).
+   ============================================================ */
+function openSurvey(){
+  markTool('survey');
+  SURV={val:null,obj:null,pew:null,cands:[]};
+  NOW.classList.add('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>NOW.classList.add('vis')));
+  survStep0();
+}
+function survStep0(){
+  nowSwap(`
+    <div class="kicker">Zrzuć emocje · głębiej</div>
+    <div class="max-line" style="margin-bottom:4px">Zacznijmy od grubsza. Jak to jest?</div>
+    <div class="now-why-big" style="margin-bottom:18px">Nie musisz trafić idealnie — zawęzimy razem.</div>
+    <div class="surv-opts">
+      <button class="surv-o" onclick="survVal('minus')">🌧️ <b>Nieprzyjemne</b><small>ciężkie, chcę, żeby minęło</small></button>
+      <button class="surv-o" onclick="survVal('plus')">☀️ <b>Przyjemne</b><small>dobre, chcę tego więcej</small></button>
+      <button class="surv-o" onclick="survVal('mix')">🌗 <b>Jedno i drugie</b><small>albo trudno powiedzieć</small></button>
+    </div>
+  `,`<button class="btn btn-ghost" onclick="exitNow()">Nie teraz</button>`);
+}
+function survVal(v){ SURV.val=v; buzz(BUZZ.easier); nowSwap(`
+    <div class="kicker">Zrzuć emocje · głębiej</div>
+    <div class="max-line" style="margin-bottom:4px">Co jest w centrum?</div>
+    <div class="now-why-big" style="margin-bottom:18px">Wokół czego to się kręci?</div>
+    <div class="surv-opts">
+      ${[['zagrozenie','⚠️','Zagrożenie','coś może się źle skończyć'],['przeszkoda','🧱','Przeszkoda','coś stoi mi na drodze'],['strata','🍂','Strata','coś się skończyło / nie wyszło'],['ja','🪞','Ja sam','chodzi o mnie, jaki jestem'],['inni','👥','Inni ludzie','ktoś inny, porównanie, relacja'],['dobro','✨','Coś dobrego','wydarzyło się coś fajnego'],['zmiana','⚡','Nagła zmiana','coś mnie zaskoczyło']].map(([id,em,n,d])=>`<button class="surv-o" onclick="survObj('${id}')">${em} <b>${n}</b><small>${d}</small></button>`).join('')}
+    </div>
+  `,`<button class="btn btn-ghost" onclick="exitNow()">Nie teraz</button>`); }
+function survObj(o){ SURV.obj=o; buzz(BUZZ.easier); nowSwap(`
+    <div class="kicker">Zrzuć emocje · głębiej</div>
+    <div class="max-line" style="margin-bottom:4px">Jak wyraźne to jest?</div>
+    <div class="now-why-big" style="margin-bottom:18px">Wiesz dokładnie, o co chodzi — czy to rozlane?</div>
+    <div class="surv-opts">
+      <button class="surv-o" onclick="survPew(1)">🎯 <b>Konkretne i teraz</b><small>wiem dokładnie, o co chodzi</small></button>
+      <button class="surv-o" onclick="survPew(0.5)">🌥️ <b>Coś pomiędzy</b><small>trochę wiem, trochę nie</small></button>
+      <button class="surv-o" onclick="survPew(0)">🌫️ <b>Rozlane, niepewne</b><small>nie umiem wskazać palcem</small></button>
+    </div>
+  `,`<button class="btn btn-ghost" onclick="exitNow()">Nie teraz</button>`); }
+function survPew(p){ SURV.pew=p; SURV.cands=scoreEmotions(); survStep3(); }
+function scoreEmotions(){
+  const {val,obj,pew}=SURV;
+  return ATLAS.map(e=>{ let s=0;
+    if(val!==null){ if(val==='mix') s+=0; else if((val==='plus')===(e.val>0)) s+=3; else if(e.val===0) s+=1; else s-=2; }
+    if(obj && e.obj===obj) s+=4;
+    if(pew!==null) s+=(1-Math.abs(e.pew-pew))*2;
+    return {e,s};
+  }).sort((a,b)=>b.s-a.s).slice(0,4).map(x=>x.e);
+}
+function survStep3(){ buzz(BUZZ.easier); nowSwap(`
+    <div class="kicker">Zrzuć emocje · głębiej</div>
+    <div class="max-line" style="margin-bottom:4px">To może być któreś z tych.</div>
+    <div class="now-why-big" style="margin-bottom:16px">Dotknij najbliższego — pokażę Ci różnicę.</div>
+    <div class="surv-opts">
+      ${SURV.cands.map(e=>`<button class="surv-o" onclick="atlasCard('${e.id}',true)">${e.em} <b>${e.nm}</b><small>${e.opis.split('.')[0]}</small></button>`).join('')}
+    </div>
+  `,`<button class="btn btn-ghost" onclick="survStep0()">Zacznij od nowa</button>`); }
+function saveSurvey(id){
+  const all=moodLoad();
+  all.push({ t:Date.now(), v:null, a:null, tag:id, granular:true, h:new Date().getHours(), d:new Date().getDay() });
+  moodSave(all);
+  buzz(BUZZ.done);
+  const e=atlasById(id);
+  nowSwap(`
+    <div class="max-orb"><div class="max-orb-core"></div></div>
+    <div class="maxName">Max</div>
+    <div class="max-line" style="margin-bottom:8px">„${e.nm}” — nazwane.</div>
+    <div class="now-why-big">Im precyzyjniej nazywasz, tym łatwiej to ogarnąć. Z tego rośnie Twoja mapa.</div>
+  `,`<button class="btn btn-primary" onclick="exitNow()">Gotowe</button>`);
+  setTimeout(()=>maxSpeak('Nazwane. Im precyzyjniej nazywasz, tym łatwiej to ogarnąć.',false),350);
+}
+
+
+/* ============================================================
+   CELE / PROFIL — co użytkownik chce osiągnąć.
+   Trzy pytania, wszystkie opcjonalne. Max pyta raz, przy pierwszym wejściu,
+   i potem można wrócić z ekranu głównego.
+   ============================================================ */
+const CELE = {
+  start:   { ico:'🚀', txt:'Zacząć to, co odkładam' },
+  emocje:  { ico:'💗', txt:'Ogarnąć emocje' },
+  rytm:    { ico:'🔁', txt:'Złapać jakiś rytm' },
+  siebie:  { ico:'🪞', txt:'Zrozumieć siebie' }
+};
+
+function openProfile(first){
+  markTool('profile');
+  const p = profLoad();
+  NOW.classList.add('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>NOW.classList.add('vis')));
+  nowSwap(`
+    <div class="kicker">${first ? 'Zanim zaczniemy' : 'Twój profil'}</div>
+    <div class="max-line" style="margin-bottom:6px">Jak mam się do Ciebie zwracać?</div>
+    <div class="now-why-big" style="margin-bottom:18px">Wszystko opcjonalne. Możesz pominąć i wrócić kiedy chcesz.</div>
+
+    <input class="task-input" id="pfName" type="text" maxlength="24"
+      placeholder="imię (opcjonalnie)" value="${(p.name||'').replace(/"/g,'&quot;')}">
+
+    <div class="pf-sec">Formy, których mam używać</div>
+    <div class="pf-opts">
+      <button class="pf-opt${p.gender==='f'?' on':''}"   onclick="pickGender('f')">zrobiłaś</button>
+      <button class="pf-opt${p.gender==='m'?' on':''}"   onclick="pickGender('m')">zrobiłeś</button>
+      <button class="pf-opt${p.gender==='n'?' on':''}"   onclick="pickGender('n')">neutralnie</button>
+      <button class="pf-opt${p.gender==='own'?' on':''}" onclick="pickGender('own')">własne</button>
+    </div>
+    <div class="pf-own" id="pfOwn" style="display:${p.gender==='own'?'block':'none'}">
+      <input class="task-input" id="pfOwnVal" type="text" maxlength="20"
+        placeholder="np. zrobiłoś" value="${((p.forms&&p.forms.zrobiles)||'').replace(/"/g,'&quot;')}">
+      <div class="pf-hint">Wpisz formę czasu przeszłego — resztę dopasuję.</div>
+    </div>
+
+    <div class="pf-sec">Po co tu jesteś?</div>
+    <div class="pf-opts">
+      ${Object.keys(CELE).map(k=>`<button class="pf-opt${p.goal===k?' on':''}"
+        onclick="pickGoal('${k}')">${CELE[k].ico} ${CELE[k].txt}</button>`).join('')}
+    </div>
+  `,`
+    <button class="btn btn-primary" onclick="saveProfile()">Zapisz</button>
+    <div class="footnote"><button class="btn-text" onclick="exitNow()">${first?'Pomiń':'Anuluj'}</button></div>
+  `);
+  setTimeout(()=>maxSpeak('Jak mam się do Ciebie zwracać? Wszystko opcjonalne.',false),400);
+}
+
+let pfG = null, pfGoal = null;
+function pickGender(g){
+  pfG = g; buzz(BUZZ.easier);
+  document.querySelectorAll('.pf-opts')[0].querySelectorAll('.pf-opt')
+    .forEach((b,i)=>b.classList.toggle('on', ['f','m','n','own'][i] === g));
+  const own = document.getElementById('pfOwn');
+  if(own) own.style.display = (g === 'own') ? 'block' : 'none';
+}
+function pickGoal(k){
+  pfGoal = k; buzz(BUZZ.easier);
+  const keys = Object.keys(CELE);
+  document.querySelectorAll('.pf-opts')[1].querySelectorAll('.pf-opt')
+    .forEach((b,i)=>b.classList.toggle('on', keys[i] === k));
+}
+
+function saveProfile(){
+  const p = profLoad();
+  const n  = document.getElementById('pfName');
+  const ov = document.getElementById('pfOwnVal');
+  if(n) p.name = n.value.trim() || null;
+  if(pfG) p.gender = pfG;
+  if(pfGoal) p.goal = pfGoal;
+  if(p.gender === 'own' && ov && ov.value.trim()){
+    /* Z jednej formy wyprowadzamy resztę po końcówce — proste, ale działa
+       dla typowych form typu „zrobiłoś" → „stałoś", „ruszyłoś". */
+    const w = ov.value.trim();
+    const konc = w.slice(-2);
+    p.forms = { zrobiles:w, stales:'stał'+konc, ruszyles:'ruszył'+konc,
+                pokazales:'pokazał'+konc, wrociles:'wrócił'+konc,
+                gotowy:'gotow'+konc.slice(-1), sam:'sam'+konc.slice(-1) };
+  }
+  profSave(p);
+  buzz(BUZZ.done);
+  const pow = p.name ? `Dzięki, ${p.name}.` : 'Zapisane.';
+  nowSwap(`
+    <div class="max-orb"><div class="max-orb-core"></div></div>
+    <div class="maxName">Max</div>
+    <div class="max-line" style="margin-bottom:8px">${pow}</div>
+    <div class="now-why-big">Będę o tym pamiętał. Możesz to zmienić w każdej chwili.</div>
+  `,`
+    <button class="btn btn-primary" onclick="exitNow()">Lecimy</button>
+  `);
+  setTimeout(()=>maxSpeak(pow + ' Będę o tym pamiętał.',false),350);
+}
+
+/* ============================================================
+   MOTYWACJA DO REGULARNOŚCI — dwa mechanizmy równolegle
+   1. KOMPLETNOŚĆ MAPY: „jeszcze 6 wpisów i pokażę Ci X" — działa na
+      ciekawość i kompetencję (SDT), nie na lęk przed utratą.
+   2. LICZNIK DNI: suma dni razem, wybaczający. Przerwa nie cofa —
+      po prostu nie posuwa (Lally 2010: pominięty dzień nie łamie krzywej).
+   Świadomie NIE budujemy zerującego się streaka: karałby najmocniej tych,
+   którzy najczęściej opuszczą dzień, czyli naszą grupę docelową.
+   ============================================================ */
+/* Ile punktów danych łącznie — TYLKO źródła, które realnie karmią mapę.
+   UWAGA: sesji kroków tu NIE liczymy. „0 zapisów · 1 dzień razem" to nie
+   sprzeczność, tylko informacja: byłeś, ale nic nie zostawiłeś dla mapy.
+   Dni i zapisy mierzą co innego i mają się rozjeżdżać — to jest sygnał,
+   a nie błąd. Wliczenie sesji rozmyłoby obietnicę „jeszcze N wpisów
+   i pokażę Ci wzorce", bo część tych wpisów nie niosłaby danych. */
+function dataCount(){
+  const m = memLoad();
+  return ((m && m.map) ? m.map.length : 0) + dumpLoad().length + moodLoad().length;
+}
+/* Następny próg albo null, gdy wszystkie osiągnięte. */
+function nextProg(){
+  const n = dataCount();
+  return PROGI.find(p => n < p.n) || null;
+}
+
+function renderProgress(){
+  const el = document.getElementById('progBox');
+  if(!el) return;
+  const m    = memLoad();
+  const dni  = (m && m.days) ? m.days.length : 0;
+  const n    = dataCount();
+  const next = nextProg();
+
+  if(!next){
+    el.innerHTML = `<div class="pg-line"><b>${n}</b> zapisów · <b>${dni}</b> ${dni===1?'dzień':'dni'} razem</div>
+      <div class="pg-sub">Mapa jest pełna. Każdy kolejny wpis ją tylko wyostrza.</div>`;
+    return;
+  }
+
+  /* Rozjazd dni vs zapisy to użyteczny sygnał: bywasz, ale nic nie zostawiasz.
+     Max mówi o tym wprost — bez wyrzutów, jako zaproszenie. */
+  if(n === 0 && dni > 0){
+    el.innerHTML = `
+      <div class="pg-line"><b>0</b> zapisów · <b>${dni}</b> ${dni===1?'dzień':'dni'} razem</div>
+      <div class="pg-bar"><i style="width:0%"></i></div>
+      <div class="pg-sub">Bywasz tu, ale mapa jest jeszcze pusta.
+        Wystarczy <b>jeden</b> wpis, żeby zaczęła się rysować.</div>`;
+    return;
+  }
+  const brak = next.n - n;
+  const proc = Math.round(n / next.n * 100);
+  el.innerHTML = `
+    <div class="pg-line"><b>${n}</b> zapisów · <b>${dni}</b> ${dni===1?'dzień':'dni'} razem</div>
+    <div class="pg-bar"><i style="width:${Math.min(proc,100)}%"></i></div>
+    <div class="pg-sub">Jeszcze <b>${brak}</b> ${brak===1?'wpis':'wpisów'}, a pokażę Ci ${next.co}.</div>`;
+}
+
+/* ============================================================
+   PLANY JEŚLI-TO (implementation intentions)
+   Najmocniej udokumentowana technika w całym researchu:
+   Gollwitzer & Sheeran (2006), d≈0.65 na 94 testach; aktualizacja 2024 —
+   642 testy. Format „JEŚLI [sytuacja], TO [ruch]" pre-ładuje połączenie
+   bodziec→reakcja, więc w momencie utknięcia nie trzeba decydować.
+
+   RÓŻNICA WOBEC SILNIKA: to jest reguła UŻYTKOWNIKA, nie produktu.
+   Przy kolejnym utknięciu Max najpierw pokazuje jego własny plan,
+   dopiero potem swoją propozycję. Z czasem Max mówi coraz mniej.
+   ============================================================ */
+const RULES_KEY = 'masteradhd.rules.v1';
+function rulesLoad(){ try{ return JSON.parse(localStorage.getItem(RULES_KEY))||[]; }catch(e){ return []; } }
+function rulesSave(a){ try{ localStorage.setItem(RULES_KEY, JSON.stringify(a.slice(-40))); }catch(e){} }
+
+/* Czy mamy plan pasujący do bieżącego stanu (miejsce + poziom energii)? */
+function findRule(place, level){
+  const rs = rulesLoad();
+  return rs.find(r => r.place === place && r.level === level)
+      || rs.find(r => r.place === place)
+      || null;
+}
+
+/* Propozycja planu po ukończeniu sesji — moment, w którym użytkownik
+   właśnie doświadczył, co zadziałało. Najlepszy czas na zapis reguły. */
+function offerRule(){
+  const m = memLoad() || {};
+  const place = m.lastPlace || 'away';
+  const opisM = { desk:'siedzę przy biurku', couch:'siedzę na kanapie',
+                  bed:'leżę w łóżku', away:'jestem w ruchu' }[place];
+  const krok = (steps && steps[0]) ? steps[0].word : 'zrobię najmniejszy ruch';
+  nowSwap(`
+    <div class="kicker">Zapiszmy to sobie</div>
+    <div class="max-line" style="margin-bottom:10px">Plan na następny raz</div>
+    <div class="rule-card">
+      <div class="rule-if">JEŚLI utknę i <b>${opisM}</b></div>
+      <div class="rule-then">TO <b>${krok.toLowerCase().replace(/\.$/,'')}</b></div>
+    </div>
+    <div class="now-why-big" style="margin-top:12px">Następnym razem przypomnę Ci to, zanim cokolwiek zaproponuję.</div>
+  `,`
+    <button class="btn btn-primary" onclick="saveRule('${place}','${krok.replace(/'/g,"\\'")}')">Zapisz plan</button>
+    <div class="footnote"><button class="btn-text" onclick="exitCrisis()">Nie teraz</button></div>
+  `);
+  setTimeout(()=>maxSpeak('Zapiszmy plan na następny raz. Przypomnę Ci go, zanim cokolwiek zaproponuję.',false),400);
+}
+
+function saveRule(place, krok){
+  const m = memLoad() || {};
+  const rs = rulesLoad();
+  const lvl = m.lastLevel || 'mid';
+  /* Nadpisujemy plan dla tej samej pary miejsce+energia, nie mnożymy duplikatów. */
+  const i = rs.findIndex(r => r.place === place && r.level === lvl);
+  const rule = { place, level:lvl, then:krok, t:Date.now(), used:0 };
+  if(i >= 0) rs[i] = rule; else rs.push(rule);
+  rulesSave(rs);
+  buzz(BUZZ.done);
+  nowSwap(`
+    <div class="max-orb"><div class="max-orb-core"></div></div>
+    <div class="maxName">Max</div>
+    <div class="max-line" style="margin-bottom:8px">Zapisane.</div>
+    <div class="now-why-big">Masz teraz ${rs.length} ${rs.length===1?'plan':'planów'}. Im więcej ich znasz, tym mniej mnie potrzebujesz.</div>
+  `,`
+    <button class="btn btn-primary" onclick="exitCrisis()">Lecimy</button>
+  `);
+  setTimeout(()=>maxSpeak('Zapisane. Im więcej takich planów znasz, tym mniej mnie potrzebujesz.',false),350);
+}
+
+function startCrisis(){
+  markTool('steps');
+  buzz(BUZZ.enter);
+  if(dots) dots.style.display='';   // przywróć kropki (mogły być ukryte przez ekran wsparcia)
+  idx=0; breakdownGiven={};
+  sessionTask=''; aiState='idle';   // czysty start, bez śladów poprzedniej sesji
+  crisis.classList.add('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>crisis.classList.add('vis')));
+  sceneWhere();
+}
+
+/* ===== KONTEKST: Max pyta GDZIE jesteś, zanim powie co robić =====
+   Bez tego kroki były ślepe — „wstań i podejdź do biurka" nawet komuś,
+   kto jest pod prysznicem albo w autobusie. */
+function sceneWhere(){
+  setDots(0);
+  const line='Zanim ruszymy — gdzie teraz jesteś? Dobiorę kroki do miejsca.';
+  swap(`
+    <div class="max-orb"><div class="max-orb-core"></div></div>
+    <div class="maxName">Max</div>
+    <div class="max-line"><b>Gdzie teraz jesteś?</b><br>Dobiorę kroki do miejsca.</div>
+  `,`
+    <button class="btn btn-primary" onclick="pickPlace('desk')">Przy biurku 💻</button>
+    <button class="btn btn-primary" onclick="pickPlace('couch')">Na kanapie 🛋️</button>
+    <button class="btn btn-primary" onclick="pickPlace('bed')">W łóżku 🛏️</button>
+    <button class="btn btn-primary" onclick="pickPlace('away')">Gdzie indziej 🚶</button>
+  `);
+  setTimeout(()=>maxSpeak(line,false),400);
+}
+
+function pickPlace(place){
+  buzz(BUZZ.easier);
+  steps = JSON.parse(JSON.stringify(STEP_SETS[place] || STEP_SETS.desk));
+  const m = memLoad() || {}; m.lastPlace = place; memSave(m);
+  /* Najpierw WŁASNY plan użytkownika, dopiero potem propozycja Maxa.
+     To jest cel całej mechaniki: Max ma z czasem mówić coraz mniej. */
+  const r = findRule(place, m.lastLevel || 'mid');
+  if(r){ showOwnRule(r); return; }
+  sceneWhatTask();
+}
+
+/* Przypomnienie planu — użytkownik decyduje, czy z niego korzysta. */
+function showOwnRule(r){
+  const opis = { desk:'siedzisz przy biurku', couch:'siedzisz na kanapie',
+                 bed:'leżysz w łóżku', away:'jesteś w ruchu' }[r.place] || 'utykasz';
+  swap(`
+    <div class="kicker">Twój własny plan</div>
+    <div class="max-line" style="margin-bottom:12px">Masz to już zapisane</div>
+    <div class="rule-card">
+      <div class="rule-if">JEŚLI utykasz i <b>${opis}</b></div>
+      <div class="rule-then">TO <b>${r.then.toLowerCase().replace(/\.$/,'')}</b></div>
+    </div>
+  `,`
+    <button class="btn btn-primary" onclick="useOwnRule()">Robię to</button>
+    <button class="btn btn-ghost" onclick="sceneWhatTask()">Dziś inaczej</button>
+  `);
+  setTimeout(()=>maxSpeak('Masz to już zapisane. Robisz po swojemu?',false),400);
+}
+
+function useOwnRule(){
+  const m = memLoad() || {};
+  const r = findRule(m.lastPlace || 'away', m.lastLevel || 'mid');
+  if(r){ const rs = rulesLoad();
+    const i = rs.findIndex(x=>x.place===r.place && x.level===r.level);
+    if(i>=0){ rs[i].used = (rs[i].used||0)+1; rulesSave(rs); } }
+  buzz(BUZZ.done);
+  sceneStart();
+}
+
+/* ===== KONTEKST DLA AI: co konkretnie stoi =====
+   Max nie ma dostępu do skrzynki ani kalendarza — pyta wprost.
+   Pole jest opcjonalne: pominięcie zostawia kroki deterministyczne. */
+function sceneWhatTask(){
+  const m = memLoad();
+  const last = (m && m.lastTask) ? m.lastTask : '';
+  const line='Nad czym dziś stoisz? Możesz pominąć — poprowadzę i tak.';
+  swap(`
+    <div class="max-orb"><div class="max-orb-core"></div></div>
+    <div class="maxName">Max</div>
+    <div class="max-line" style="margin-bottom:16px"><b>Nad czym stoisz?</b><br>Dopasuję kroki. Możesz pominąć.</div>
+    <input class="task-input" id="taskInput" type="text" maxlength="90"
+      placeholder="np. mail do klienta, sprzątanie kuchni…"
+      value="${last.replace(/"/g,'&quot;')}"
+      onkeydown="if(event.key==='Enter')submitTask()">
+  `,`
+    <button class="btn btn-primary" onclick="submitTask()">Dalej</button>
+    <div class="footnote"><button class="btn-text" onclick="submitTask(true)">Pomiń — po prostu prowadź</button></div>
+  `);
+  setTimeout(()=>{ maxSpeak(line,false); const i=document.getElementById('taskInput'); if(i) i.focus(); },400);
+}
+
+function submitTask(skip){
+  const el = document.getElementById('taskInput');
+  sessionTask = (!skip && el) ? el.value.trim() : '';
+  if(sessionTask){
+    const m = memLoad() || {}; m.lastTask = sessionTask; memSave(m);
+  }
+  buzz(BUZZ.easier);
+  if(sessionTask) tailorSteps();   // AI przeformułuje kroki pod zadanie
+  sceneBreath();
+}
+
+/* Wejście z trybu TERAZ: kryzys niesie konkretne zadanie, od razu w kroki */
+function startCrisisWithTask(task){
+  /* Nie pytamy trzeci raz z rzędu — bierzemy ostatnio wskazane miejsce.
+     Przy pierwszym użyciu (brak lastPlace) wpadamy w neutralny zestaw „gdzie indziej”,
+     który nie zakłada, że użytkownik siedzi przy biurku. */
+  const m = memLoad();
+  const place = (m && m.lastPlace) ? m.lastPlace : 'away';
+  steps = JSON.parse(JSON.stringify(STEP_SETS[place] || STEP_SETS.away));
+  idx=0; breakdownGiven={}; sessionTask = task || ''; aiState='idle';
+  crisis.classList.add('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>crisis.classList.add('vis')));
+  if(sessionTask) tailorSteps();   // zadanie znamy z trybu TERAZ — dopasuj kroki
+  // krótki oddech, potem prosto w kroki (bez pytania „co robimy" — już wiemy)
+  sceneBreathThenSteps();
+}
+function sceneBreathThenSteps(){
+  setDots(0);
+  const line='Dobra. Bierzemy: '+sessionTask+'. Jeden oddech i ruszamy.';
+  swap(`
+    <div class="max-orb"><div class="max-orb-core"></div></div>
+    <div class="maxName">Max</div>
+    <div class="max-line fade-delay"><b>Bierzemy to.</b><br>Jeden oddech ze mną i ruszamy.</div>
+  `,'');
+  setTimeout(()=>maxSpeak(line,false),500);
+  clearTimeout(window._bt);
+  window._bt=setTimeout(beginSteps, 4200);
+}
+function exitCrisis(){
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  clearTimeout(window._peek); clearTimeout(window._bt);
+  crisis.classList.remove('vis');
+  setTimeout(()=>{crisis.classList.remove('show');stage.innerHTML='';actions.innerHTML='';setDots(-1)},460);
+}
+
+function setDots(active){
+  const arr=dots.querySelectorAll('i');
+  arr.forEach((d,i)=>{
+    d.className='';
+    if(active===99){d.className='done';return;}
+    if(i<active)d.className='done';else if(i===active)d.className='on';
+  });
+}
+
+function swap(html, actsHtml){
+  const old=stage.querySelector('.scene.active');
+  if(old){old.classList.remove('active');setTimeout(()=>old.remove(),450);}
+  const s=document.createElement('div');
+  s.className='scene';s.innerHTML=html;
+  stage.appendChild(s);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>s.classList.add('active')));
+  actions.innerHTML=actsHtml||'';
+}
+
+/* ===== SCENA 1: MAX + ODDECH ===== */
+function sceneBreath(){
+  setDots(0);
+  /* Uczciwość zamiast udawania: jeśli AI nie odpowiedziało, Max mówi to wprost,
+     zamiast cicho podać ogólne kroki i sprawiać wrażenie, że słuchał. */
+  const off = (sessionTask && aiState==='offline');
+  const line = off
+    ? 'Jestem offline, więc poprowadzę Cię ogólnie — ale poprowadzę.'
+    : 'Dobra. Jestem tu. Weź ze mną jeden oddech.';
+  swap(`
+    <div class="max-orb"><div class="max-orb-core"></div></div>
+    <div class="maxName">Max</div>
+    <div class="max-line fade-delay">${off
+      ? '<b>Jestem offline.</b><br>Poprowadzę Cię ogólnie — ale poprowadzę.'
+      : '<b>Dobra. Jestem tu.</b><br>Weź ze mną jeden oddech.'}</div>
+  `,'');
+  setTimeout(()=>maxSpeak(line,false), 500);
+  clearTimeout(window._bt);
+  window._bt=setTimeout(sceneAsk, 4600);
+}
+
+/* ===== SCENA 2: CO ROBIMY ===== */
+function sceneAsk(){
+  setDots(0);
+  const line='Co miałeś zacząć? Nie musisz wiedzieć — możemy ruszyć bez tego.';
+  swap(`
+    <div class="max-orb" style="width:110px;height:110px;margin-bottom:18px"><div class="max-orb-core" style="width:60px;height:60px"></div></div>
+    <div class="kicker">Max pyta</div>
+    <div class="max-line" style="margin-bottom:22px">Co miałeś zacząć?<br><span style="font-size:14px;color:var(--mist)">Nie musisz wiedzieć. Możesz pominąć.</span></div>
+    <textarea class="field" id="taskField" rows="2" placeholder="np. napisać maila… albo zostaw puste"></textarea>
+  `,`
+    <button class="btn btn-primary" onclick="beginSteps()">Poprowadź mnie</button>
+    <div class="footnote"><button class="btn-text" onclick="beginSteps()">Nie wiem, po prostu zacznijmy →</button></div>
+  `);
+  setTimeout(()=>maxSpeak(line,false), 400);
+}
+
+/* ===== KROKI ===== */
+function beginSteps(){
+  const f = document.getElementById('taskField');
+  sessionTask = (f && f.value.trim()) ? f.value.trim() : '';
+  sessionHelped = '';
+  idx=0;renderStep();
+}
+function renderStep(){
+  const st=steps[idx];
+  setDots(idx);
+  const tag = st.somatic ? `<div class="kicker">Krok 1 · ciało, nie głowa</div>` : `<div class="kicker">Krok ${idx+1} z ${steps.length}</div>`;
+  swap(`
+    ${tag}
+    <div class="step-word">${st.word}</div>
+    <div class="step-hint">${st.hint}</div>
+    ${(aiState==='ok' && sessionTask)
+      ? `<div class="ai-tag">✦ dopasowane do: ${sessionTask}</div>` : ''}
+    <div class="lightbar-wrap"><div class="lightbar" id="lbar"></div></div>
+  `,`
+    <button class="btn btn-done" onclick="stepDone()">Zrobione ✓</button>
+    <div class="footnote"><button class="btn-text" onclick="tooHard()">To za trudne teraz</button></div>
+  `);
+  if(st.max) setTimeout(()=>maxSpeak(st.max,false),350);
+  runLightbar();
+}
+function runLightbar(){
+  const bar=document.getElementById('lbar');if(!bar)return;
+  bar.style.transition='none';bar.style.transform='scaleX(1)';
+  requestAnimationFrame(()=>{bar.style.transition='transform 45s linear';bar.style.transform='scaleX(0)';});
+}
+function stepDone(){buzz(BUZZ.done);idx++;if(idx>=steps.length)sceneStart();else renderStep();}
+function tooHard(){
+  buzz(BUZZ.easier);
+  sessionHelped = 'breakdown';   // rozbicie kroku pomogło — Max to zapamięta
+  const st=steps[idx];
+  if(EASIER[st.word] && !breakdownGiven[idx]){
+    steps[idx]=EASIER[st.word];breakdownGiven[idx]=true;renderStep();
+  }else{
+    steps[idx]={word:'Zrób z tego połowę.',hint:'Weź najmniejszy możliwy kawałek. Sam wybierz jaki.',
+      max:'Bez stresu. Weź z tego najmniejszy kawałek, jaki dasz radę.'};
+    renderStep();
+  }
+}
+
+/* ===== MOMENT STARTU: Max odpala energię ===== */
+function sceneStart(){
+  buzz(BUZZ.start);
+  // Max zapamiętuje tę sesję → następnym razem powita kontekstowo
+  memRecord({ newSession:true, lastTask: sessionTask || undefined,
+              lastHelped: sessionHelped || 'steps' });
+  /* WARSTWA 1+2 — nagroda natychmiastowa, w tej samej sekundzie co ruch.
+     Mózg ADHD stromo dyskontuje odroczone nagrody (delay discounting d=0.43,
+     Jackson & MacKillop 2016) — więc zero punktów „do wydania później". */
+  const _dni    = trackDay();
+  const _m      = memLoad();
+  const _starts = (_m && _m.starts) ? _m.starts : 1;
+  setDots(99);
+  const _pg = profLoad().gender;
+  /* Neutralne nie odmienia się przez osobę — używamy bezosobowego okrzyku. */
+  const _r  = (_pg==='n') ? 'ruszyło' : F('ruszyles');
+  const _r1 = _r.charAt(0).toUpperCase()+_r.slice(1);
+  const line=`${_r1}! Widzisz? Najtrudniejsze już za Tobą. No dawaj, teraz lecimy!`;
+  swap(`
+    <div class="spark-core"><div class="spark-ray"></div></div>
+    <div class="maxName fired">Max</div>
+    <div class="max-line"><b>${_r1}!</b><br>Najtrudniejsze już za Tobą. No dawaj!</div>
+    <div class="start-badge">${_starts}. raz ${_r} mimo oporu · ${_dni} ${_dni===1?'dzień':'dni'} razem</div>
+  `,`
+    <button class="btn btn-fire" onclick="sceneBuddy()">Zostań ze mną 🔥</button>
+    <button class="btn btn-ghost" onclick="sceneHandoff()">Dam radę sam</button>
+  `);
+  setTimeout(()=>maxSpeak(line,true),300);
+}
+
+/* ===== CIĄGŁOŚĆ: Max nie znika w ciszy ===== */
+function sceneHandoff(){
+  const line='Spoko, lecisz sam. Ale nie znikam — mam się odezwać za dziesięć minut czy zostać obok?';
+  swap(`
+    <div class="max-orb" style="width:110px;height:110px;margin-bottom:20px"><div class="max-orb-core" style="width:60px;height:60px"></div></div>
+    <div class="maxName">Max</div>
+    <div class="max-line"><b>Lecisz sam — super.</b><br>Ale nie znikam ot tak.</div>
+  `,`
+    <button class="btn btn-primary" onclick="sceneBuddy()">Zostań obok 👤</button>
+    <button class="btn btn-ghost" onclick="pingLater()">Odezwij się za 10 min ⏱️</button>
+    <div class="footnote"><button class="btn-text" onclick="exitCrisis()">Nie trzeba, dzięki</button></div>
+  `);
+  setTimeout(()=>maxSpeak(line,false),300);
+}
+
+/* ===== WARSTWA 4 — KOTWICA ZDARZENIOWA, NIE GODZINOWA =====
+   Habit stacking + implementation intentions (Gollwitzer & Sheeran, d≈0.65):
+   nawyk przypina się do istniejącego zdarzenia, nie do godziny na zegarze.
+   „Po pierwszej kawie" działa lepiej niż „o 9:00", bo cue jest realny,
+   a nie arbitralny — i nie wymaga pamiętania o czasie (time blindness). */
+function pingLater(){
+  buzz(BUZZ.easier);
+  const m = memLoad();
+  if(m && m.anchor){ pingConfirm(m.anchor); return; }
+  const line='Jasne. A powiedz — kiedy zwykle utykasz? Nie o której. Po czym.';
+  swap(`
+    <div class="max-orb" style="width:100px;height:100px;margin-bottom:20px"><div class="max-orb-core" style="width:54px;height:54px"></div></div>
+    <div class="maxName">Max</div>
+    <div class="max-line"><b>Kiedy zwykle utykasz?</b><br>Nie o której — <i>po czym</i>.</div>
+  `,`
+    <button class="btn btn-primary" onclick="saveAnchor('po pierwszej kawie')">Po pierwszej kawie ☕</button>
+    <button class="btn btn-primary" onclick="saveAnchor('po otwarciu laptopa')">Po otwarciu laptopa 💻</button>
+    <button class="btn btn-primary" onclick="saveAnchor('po powrocie do domu')">Po powrocie do domu 🏠</button>
+    <div class="footnote"><button class="btn-text" onclick="pingConfirm(null)">Pomiń — po prostu za 10 min</button></div>
+  `);
+  setTimeout(()=>maxSpeak(line,false),300);
+}
+
+/* Zapis kotwicy = pierwsza połowa planu JEŚLI-TO.
+   Max ma potem gotowe: „JEŚLI po kawie, TO check-in". */
+function saveAnchor(a){
+  const m = memLoad() || { sessions:0, created:Date.now() };
+  m.anchor = a;
+  memSave(m);
+  buzz(BUZZ.done);
+  pingConfirm(a);
+}
+
+function pingConfirm(anchor){
+  const cap = anchor ? anchor.charAt(0).toUpperCase()+anchor.slice(1) : null;
+  const linia = anchor
+    ? `Zapamiętane. ${cap} — wtedy jestem. Teraz lecisz, ja pilnuję czasu.`
+    : 'Jasne. Sprawdzę Cię za dziesięć minut. Lecisz — ja pilnuję czasu.';
+  swap(`
+    <div class="max-orb" style="width:100px;height:100px;margin-bottom:20px"><div class="max-orb-core" style="width:54px;height:54px"></div></div>
+    <div class="maxName">Max</div>
+    <div class="max-line"><b>Jasne. Sprawdzę Cię za 10 minut.</b><br>Lecisz. Ja pilnuję czasu.</div>
+    ${anchor ? `<div class="start-badge">Kotwica: ${anchor} — wtedy się odezwę</div>` : ''}
+  `,`
+    <button class="btn btn-primary" onclick="afterSession()">Do zobaczenia 👊</button>
+  `);
+  setTimeout(()=>maxSpeak(linia,false),300);
+}
+
+/* Po sesji: jeśli użytkownik nie ma jeszcze planu dla tego stanu,
+   proponujemy zapis. Moment jest kluczowy — właśnie doświadczył,
+   co zadziałało, więc reguła nie jest abstrakcyjna. */
+function afterSession(){
+  const m = memLoad() || {};
+  const r = findRule(m.lastPlace || 'away', m.lastLevel || 'mid');
+  if(r){ exitCrisis(); return; }
+  offerRule();
+}
+
+/* ===== BODY DOUBLE: Max zostaje obok, aż skończysz ===== */
+function sceneBuddy(){
+  setDots(99);
+  const line='Jestem obok. Rób swoje — co jakiś czas zajrzę, żeby sprawdzić, czy lecisz.';
+  swap(`
+    <div class="max-orb fired"><div class="max-orb-core"></div></div>
+    <div class="maxName fired">Max jest obok</div>
+    <div class="max-line"><b>Rób swoje.</b><br>Zajrzę co jakiś czas. Nie musisz nic mówić.</div>
+    <div class="lightbar-wrap"><div class="lightbar" id="lbar"></div></div>
+  `,`
+    <button class="btn btn-done" onclick="buddyDone()">Skończyłem ✓</button>
+    <div class="footnote"><button class="btn-text" onclick="exitCrisis()">Muszę lecieć</button></div>
+  `);
+  runLightbar();
+  setTimeout(()=>maxSpeak(line,false),300);
+  clearTimeout(window._peek);
+  window._peek = setTimeout(()=>{ maxSpeak('Jestem. Lecisz?',false); }, 12000);
+}
+/* Domknięcie sesji body-double — świętuje UKOŃCZENIE (rzadki moment: doszedł
+   do końca), zapisuje ślad i wychodzi łagodnie. */
+function buddyDone(){
+  clearTimeout(window._peek);
+  setDots(-1);
+  buzz(BUZZ.done);
+  memRecord({ lastHelped:'buddy' });
+  trackDay();
+  swap(`
+    <div class="max-orb"><div class="max-orb-core"></div></div>
+    <div class="maxName">Max</div>
+    <div class="max-line" style="margin-bottom:8px"><b>Dowiozłeś.</b></div>
+    <div class="now-why-big">Byłem obok, ale to Ty to zrobiłeś. Zapamiętam, że dziś Ci się udało — wróć, kiedy znów będziesz potrzebować towarzystwa.</div>
+  `,`
+    <button class="btn btn-primary" onclick="exitCrisis()">Wracam do siebie</button>
+  `);
+  setTimeout(()=>maxSpeak('Dowiozłeś. Byłem obok, ale to Ty to zrobiłeś.',true),300);
+}
+
+/* ============================================================
+   GUARDIAN ID — logowanie (etap 1, bez backendu)
+   Guzik realnie odsłania ekran główny Maxa. Sesja → localStorage
+   'guardianid.session.v1' (tu wejdzie token Supabase w etapie 2).
+   ============================================================ */
+let authMode = 'register';
+const A = id => document.getElementById(id);
+
+function setMode(m){
+  authMode = m;
+  A('tabReg').classList.toggle('on', m==='register');
+  A('tabLog').classList.toggle('on', m==='login');
+  A('aConsentBox').style.display = m==='register' ? 'flex' : 'none';
+  A('aPass').autocomplete = m==='register' ? 'new-password' : 'current-password';
+  if(m==='register'){
+    A('aHead').innerHTML = 'Cześć, jestem Max.<br><b>Zrób konto</b>, a zapamiętam każdą sesję.';
+    A('aSub').textContent = 'Wszystko, co Ci pomaga, wróci na każdym urządzeniu — nawet gdy zmienisz telefon.';
+    A('aSubmit').textContent = 'Załóż konto';
+  }else{
+    // uwaga #2 użytkownika: to mówi MAX, w pierwszej osobie
+    A('aHead').innerHTML = 'Dobrze Cię widzieć.<br><b>Zaloguj się</b>, a przypomnę Ci nasze sesje.';
+    A('aSub').textContent = 'Wróćmy tam, gdzie stanęliśmy. Pamiętam, na czym skończyliśmy.';
+    A('aSubmit').textContent = 'Zaloguj się';
+  }
+  clearAuthErrors();
+}
+function clearAuthErrors(){
+  ['aEmail','aPass'].forEach(f=>A(f).classList.remove('bad'));
+  ['aEmailErr','aPassErr','aConsentErr'].forEach(e=>A(e).classList.remove('show'));
+}
+function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+function saveSession(s){ try{ localStorage.setItem('guardianid.session.v1', JSON.stringify(s)); }catch(e){} }
+
+function submitAuth(){
+  clearAuthErrors();
+  const email = A('aEmail').value.trim();
+  const pass  = A('aPass').value;
+  let ok = true;
+  if(!validEmail(email)){ A('aEmail').classList.add('bad'); A('aEmailErr').classList.add('show'); ok=false; }
+  if(pass.length < 8){ A('aPass').classList.add('bad'); A('aPassErr').classList.add('show'); ok=false; }
+  if(authMode==='register' && !A('aConsent').checked){ A('aConsentErr').classList.add('show'); ok=false; }
+  if(!ok) return;
+  // ETAP 2 (Supabase): supabase.auth.signUp / signInWithPassword tutaj.
+  saveSession({ userId:'local-'+Date.now(), email, method:'email', createdAt:Date.now(), synced:false });
+  enterApp();
+}
+function oauth(provider){
+  // ETAP 2: supabase.auth.signInWithOAuth({provider})
+  saveSession({ userId:'local-'+Date.now(), email:'(przez '+provider+')', method:provider.toLowerCase(), createdAt:Date.now(), synced:false });
+  enterApp();
+}
+function skipAuth(){
+  saveSession({ userId:'guest', method:'guest', createdAt:Date.now(), synced:false });
+  enterApp();
+}
+
+/* KLUCZOWE: realne przejście z logowania do ekranu głównego Maxa */
+function enterApp(){
+  const auth = A('auth');
+  auth.classList.add('gone');
+  setTimeout(()=>{ auth.style.display='none'; }, 460);
+  renderGreeting(); // Max wita kontekstowo na ekranie głównym
+  refreshMuteIcon();
+  /* Nowy użytkownik: Max pyta o imię i formy, zanim zacznie mówić w czasie
+     przeszłym. Pytamy raz — potem tylko przez ⚙ w nagłówku. */
+  const p = profLoad();
+  if(!p.asked){
+    p.asked = true; profSave(p);
+    setTimeout(()=>openProfile(true), 900);
+  }
+}
+
+/* Jeśli już zalogowany/gość — pomiń ekran logowania od razu */
+(function initAuthGate(){
+  let s=null; try{ s=JSON.parse(localStorage.getItem('guardianid.session.v1')); }catch(e){}
+  if(s && s.method){ A('auth').style.display='none'; }
+})();
+
+/* panel zaufania */
+function showTrust(){ document.getElementById('trust').classList.add('show'); }
+function hideTrust(){ document.getElementById('trust').classList.remove('show'); }
+
+/* Enter wysyła formularz logowania */
+['aEmail','aPass'].forEach(f=>A(f).addEventListener('keydown',e=>{ if(e.key==='Enter') submitAuth(); }));
+
+/* dostępność */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(document.getElementById('trust').classList.contains('show')){ hideTrust(); return; }
+    if(NOW.classList.contains('show')){ exitNow(); return; }
+    if(crisis.classList.contains('show')) exitCrisis();
+  }
+});
+
+/* powitanie Maxa zależne od pamięci — partner, nie chatbot */
+renderGreeting();
+
+/* ============================================================
+   WARSTWA ZADAŃ — v16
+   ------------------------------------------------------------
+   Powód istnienia: do v15 Max mówił „weź tę rzecz, którą odkładasz
+   najdłużej". To nie jest zadanie, to jest opis problemu. Użytkownik
+   nadal musiał sam wybrać, a wybieranie jest właśnie tą czynnością,
+   która mu nie wychodzi.
+
+   Od v16 „zrób to jedno" wskazuje KONKRETNĄ rzecz z listy użytkownika.
+
+   Zasada nadrzędna: Max nigdy nie wymyśla zadania. Jeśli lista jest
+   pusta, mówi wprost, że jest pusta, i prosi o jedną rzecz. Wymyślone
+   zadanie brzmi jak porada z internetu i kosztuje zaufanie.
+
+   Trzy źródła treści, w kolejności zaufania:
+     1. lokalne zadania wpisane wprost          (zawsze, offline)
+     2. zrzuty myśli awansowane na zadania      (zawsze, offline)
+     3. Google Tasks                            (za zgodą, opcjonalnie)
+
+   Kalendarz NIE jest źródłem zadań. Zgodnie z P-34 czytamy z niego
+   wyłącznie metadane czasowe — po to, żeby wiedzieć ILE MASZ OKNA,
+   nie po to, żeby wiedzieć, co w nim jest.
+   ============================================================ */
+
+const TASK_KEY  = 'masteradhd.tasks.v1';
+const CONS_KEY  = 'masteradhd.consent.v1';
+const BODY_KEY  = 'masteradhd.body.v1';
+
+function taskLoad(){ try{ return JSON.parse(localStorage.getItem(TASK_KEY)) || []; }catch(e){ return []; } }
+function taskSave(a){ try{ localStorage.setItem(TASK_KEY, JSON.stringify(a.slice(-400))); }catch(e){} }
+
+/* Zgody. Wszystkie domyślnie WYŁĄCZONE (P-36, privacy by design).
+   Cofnięcie jednym ruchem — patrz openConnect(). */
+function consLoad(){
+  try{ return Object.assign({gtasks:false, gcal:false, ai:false, body:false},
+       JSON.parse(localStorage.getItem(CONS_KEY))||{}); }
+  catch(e){ return {gtasks:false, gcal:false, ai:false, body:false}; }
+}
+function consSave(c){ try{ localStorage.setItem(CONS_KEY, JSON.stringify(c)); }catch(e){} }
+
+/* ============================================================
+   WZBOGACANIE ZADAŃ — HEURYSTYKI LOKALNE
+   ------------------------------------------------------------
+   Konkurencja (Orli, aidd) każe to robić modelowi w chmurze. My robimy
+   to najpierw lokalnie, bo treść zadania nie musi opuszczać telefonu,
+   żeby dało się zgadnąć, ile zajmie.
+
+   Trzy wymiary, bo trzy wymiary ma check-in:
+     min   — ile to zajmie (dopasowanie do okna)
+     ene   — ile energii wymaga (dopasowanie do suwaka energii)
+     dread — ile kosztuje wejście w to (dopasowanie do suwaka napięcia)
+
+   „dread" to nie trudność. Telefon do urzędu bywa trywialny i zajmuje
+   trzy minuty, a mimo to leży miesiącami. Odkładanie napędza opór przed
+   startem, nie nakład pracy — i dlatego to osobna oś.
+   ============================================================ */
+const VERB_FAST = /\b(zadzwo|wy[śs][lł]|odpis|odpowie|potwierd|zap[łl]a|przele|kup|zam[óo]w|um[óo]w|zapisz si|anuluj|odwo[łl]a|podpis|wyrzu|podl(a|e)|wstaw|w[łl][ąa]cz|napij|przewietrz)/i;
+const VERB_MID  = /\b(napis|przygot|ogarn|posprz[ąa]t|zr[óo]b|wype[łl]ni|uporz[ąa]dk|przejrz|sprawd[źz]|spakow|spakuj|ugot|umy|poukr|zbier)/i;
+const VERB_SLOW = /\b(doko[ńn]cz|przerob|przeanaliz|zaplan|nau(cz|k)|opracow|przepis|zaprojekt|policz|rozlicz|raport|projekt|prezentacj|remont|ogarn[ąa][ćc] ca)/i;
+const DREAD_HI  = /\b(urz[ąa]d|skarbow|zus|pit|podat|rozlicz|faktur|windyk|komorni|s[ąa]d|prawni|reklamacj|odwo[łl]anie|umow|wypowiedzen|rozmow[ea] z|szef|lekarz|dentyst|przychodni|badani|wynik|d[łl]ug|kredyt|bank|ubezpiecz)/i;
+const DREAD_LO  = /\b(podl(a|e)|wyrzu|umy|posprz[ąa]t|spacer|woda|napij|przewietr|po[śs]ciel|kwiat)/i;
+
+/* Zwraca metadane zgadnięte z samego tytułu. Nic nie wychodzi z urządzenia. */
+function guessMeta(title){
+  const s = (title||'').toLowerCase();
+  let min = 25, ene = 'mid', dread = 2, why = 'średnia rzecz';
+
+  if(VERB_SLOW.test(s)){ min = 60; ene = 'high'; why = 'to wygląda na dłuższą robotę'; }
+  else if(VERB_FAST.test(s)){ min = 8;  ene = 'low';  why = 'to wygląda na krótką rzecz'; }
+  else if(VERB_MID.test(s)){ min = 25; ene = 'mid';  why = 'średnia rzecz'; }
+
+  if(DREAD_HI.test(s)){ dread = 4; }
+  else if(DREAD_LO.test(s)){ dread = 1; }
+
+  /* Bardzo długi tytuł = zwykle sklejone kilka rzeczy w jedną. */
+  if((title||'').length > 70){ min = Math.max(min, 45); ene = 'high'; }
+
+  return {min, ene, dread, why, guessed:true};
+}
+
+/* Dodanie zadania. Metadane zgadujemy od razu, żeby użytkownik nie
+   musiał wypełniać formularza — to główny powód, dla którego ludzie
+   porzucają Motion i Todoist. */
+function taskAdd(title, src){
+  const t = (title||'').trim();
+  if(!t) return null;
+  const arr = taskLoad();
+  const meta = guessMeta(t);
+  const row = { id:'t'+Date.now()+Math.floor(Math.random()*999), t:t, src:src||'local',
+                min:meta.min, ene:meta.ene, dread:meta.dread, guessed:true,
+                added:Date.now(), started:0, done:false, offered:0, lastOffer:0 };
+  arr.push(row); taskSave(arr);
+  return row;
+}
+function taskById(id){ return taskLoad().find(x=>x.id===id) || null; }
+function taskPatch(id, patch){
+  const arr = taskLoad(); const i = arr.findIndex(x=>x.id===id);
+  if(i<0) return; Object.assign(arr[i], patch); taskSave(arr);
+}
+function tasksOpen(){ return taskLoad().filter(x=>!x.done); }
+
+/* ============================================================
+   DOBÓR — TU SIEDZI CAŁA PRZEWAGA
+   ------------------------------------------------------------
+   Konkurencja pyta wprost „jaka energia, 1–5?" (aidd) albo czyta ją
+   z opaski (Lifestack, Focuzed). My mamy trzy osie z check-inu, więc
+   dobieramy dokładniej — a przede wszystkim mamy NAPIĘCIE, którego
+   nie ma nikt.
+
+   Reguła, która z tego wynika i której nie da się wyprowadzić z samej
+   energii: przy wysokim napięciu odpadają rzeczy o dużym dread,
+   NAWET jeśli energii jest dużo. Nakręcony człowiek nie zadzwoni do
+   urzędu. Zrobi za to porządek w szufladzie.
+   ============================================================ */
+const ENE_VAL = {low:1, mid:2, high:3};
+
+function scoreTask(task, st, windowMin){
+  const uEne = st.e <= 33 ? 1 : st.e <= 66 ? 2 : 3;   /* 0–100 → 1–3 */
+  let s = 100;
+
+  /* 1. Dopasowanie energii. Zadanie cięższe niż stan boli mocniej
+        niż zadanie lżejsze — dlatego kara asymetryczna. */
+  const d = ENE_VAL[task.ene] - uEne;
+  s -= d > 0 ? d * 34 : Math.abs(d) * 9;
+
+  /* 2. Napięcie kontra opór przed wejściem. */
+  if(st.t >= 60) s -= task.dread * 16;
+  else if(st.t <= 30) s += (4 - task.dread) * 4;
+
+  /* 3. Okno czasowe z kalendarza, jeśli jest. Nie proponujemy
+        godzinnej rzeczy przed spotkaniem za 20 minut. */
+  if(windowMin && task.min > windowMin) s -= 45;
+  if(windowMin && task.min <= windowMin * 0.6) s += 8;
+
+  /* 4. Świeżość — to samo zadanie odrzucone trzy razy z rzędu
+        przestaje być propozycją, a zaczyna być wyrzutem. */
+  const dni = (Date.now() - (task.lastOffer||0)) / 86400000;
+  if(task.offered > 0 && dni < 1) s -= task.offered * 12;
+
+  /* 5. Rzecz zaczęta wcześniej i nieskończona ma pierwszeństwo —
+        wracanie jest tańsze niż zaczynanie. */
+  if(task.started > 0) s += 14;
+
+  /* 6. Wiek. Coś, co leży trzeci tydzień, ma delikatny priorytet,
+        ale bez presji — 12 punktów, nie 50. */
+  const wiek = (Date.now() - task.added) / 86400000;
+  s += Math.min(wiek, 21) * 0.6;
+
+  return s;
+}
+
+/* Zwraca {pick, alts, reason} albo null, gdy nie ma z czego wybierać. */
+function pickReal(st, windowMin){
+  const open = tasksOpen();
+  if(!open.length) return null;
+  const ranked = open
+    .map(t => ({t, s: scoreTask(t, st, windowMin)}))
+    .sort((a,b) => b.s - a.s);
+  return {
+    pick: ranked[0].t,
+    alts: ranked.slice(1,3).map(r=>r.t),
+    reason: explainPick(ranked[0].t, st, windowMin)
+  };
+}
+
+/* Uzasadnienie w formacie „jeśli-to" — implementation intentions,
+   d=0,65 (Gollwitzer & Sheeran 2006). Max mówi, DLACZEGO ta rzecz,
+   bo dobór bez uzasadnienia brzmi jak losowanie. */
+function explainPick(task, st, windowMin){
+  const parts = [];
+  if(st.e <= 33 && task.ene === 'low') parts.push('energii jest mało, a to rzecz na kilka minut');
+  else if(st.e >= 67 && task.ene === 'high') parts.push('masz moc, więc bierzemy najcięższe');
+  else if(task.ene === 'mid') parts.push('to średnia rzecz, w sam raz na teraz');
+  else parts.push('to pasuje do tego, jak masz');
+
+  if(st.t >= 60 && task.dread <= 2) parts.push('i nie wymaga zbierania się');
+  if(windowMin && task.min <= windowMin) parts.push(`zmieścisz to w ${windowMin} min do następnej rzeczy`);
+  if(task.started > 0) parts.push('a już to zaczynałeś, więc wracasz, nie startujesz');
+
+  return parts.join(', ') + '.';
+}
+
+/* ============================================================
+   EKRAN „TWOJE RZECZY"
+   ============================================================ */
+function openTasks(){
+  markTool('tasks');
+  NOW.classList.add('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>NOW.classList.add('vis')));
+  renderTasks();
+}
+
+function renderTasks(){
+  const open = tasksOpen();
+  const dumps = dumpLoad().filter(d => !d.promoted).slice(-6).reverse();
+
+  const lista = open.length ? open.map(t=>`
+    <div class="tk-row">
+      <button class="tk-main" onclick="taskDetail('${t.id}')">
+        <span class="tk-t">${esc(t.t)}</span>
+        <span class="tk-meta">${t.min} min · ${eneWord(t.ene)}${t.guessed?' · zgadnięte':''}</span>
+      </button>
+      <button class="tk-x" onclick="taskDone('${t.id}')" aria-label="Zrobione">✓</button>
+    </div>`).join('') : `
+    <div class="tk-empty">
+      <b>Lista jest pusta.</b>
+      Dopóki nic tu nie ma, nie wskażę Ci konkretnej rzeczy — a wymyślać nie będę.
+    </div>`;
+
+  /* Zrzuty myśli to gotowe źródło zadań, które już zbieracie.
+     Awans jednym dotknięciem — bez przepisywania. */
+  const zdumpu = dumps.length ? `
+    <div class="tk-sec">Z Twoich zrzutów myśli</div>
+    ${dumps.map((d,i)=>`
+      <button class="tk-prom" onclick="promoteDump(${d.t})">
+        <span>${esc((d.txt||'').slice(0,80))}</span><i>+ zrób z tego zadanie</i>
+      </button>`).join('')}` : '';
+
+  nowSwap(`
+    <div class="kicker">Twoje rzeczy · ${open.length}</div>
+    <div class="max-line" style="margin-bottom:6px">To, z czego wybieram</div>
+    <div class="now-why-big" style="margin-bottom:16px">Wpisuj krótko, tak jak myślisz. Resztę zgadnę sam.</div>
+
+    <div class="tk-add">
+      <input id="tkNew" class="tk-in" type="text" placeholder="np. zadzwonić do przychodni"
+             onkeydown="if(event.key==='Enter')addTaskUI()">
+      <button class="tk-go" onclick="addTaskUI()">Dodaj</button>
+    </div>
+
+    ${lista}
+    ${zdumpu}
+  `,`
+    <button class="btn btn-primary" onclick="exitNow()">Gotowe</button>
+    <div class="footnote"><button class="btn-text" onclick="openConnect()">Połączenia i zgody</button></div>
+  `);
+}
+
+function esc(s){ return (s||'').replace(/[<>&"]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+function eneWord(e){ return e==='low'?'lekkie':e==='high'?'ciężkie':'średnie'; }
+
+function addTaskUI(){
+  const el = document.getElementById('tkNew');
+  if(!el || !el.value.trim()) return;
+  taskAdd(el.value, 'local');
+  el.value = '';
+  buzz(BUZZ.easier);
+  renderTasks();
+}
+
+function promoteDump(ts){
+  const arr = dumpLoad();
+  const i = arr.findIndex(d=>d.t===ts);
+  if(i<0) return;
+  taskAdd(arr[i].txt, 'dump');
+  arr[i].promoted = true; dumpSave(arr);
+  buzz(BUZZ.easier);
+  renderTasks();
+}
+
+function taskDone(id){
+  taskPatch(id, {done:true, doneAt:Date.now()});
+  buzz(BUZZ.enter);
+  renderTasks();
+}
+
+/* Szczegół zadania — tu użytkownik może poprawić to, co Max zgadł.
+   Pytamy RAZ i zapamiętujemy, zamiast wymagać formularza przy dodawaniu. */
+function taskDetail(id){
+  const t = taskById(id); if(!t) return;
+  nowSwap(`
+    <div class="kicker">Jedna rzecz</div>
+    <div class="now-task-big" style="font-size:22px">${esc(t.t)}</div>
+    <div class="now-why-big" style="margin-bottom:14px">
+      ${t.guessed ? 'Zgadłem te dwie rzeczy z samej nazwy. Popraw, jeśli pudło — zapamiętam.' : 'Ustawione przez Ciebie.'}
+    </div>
+
+    <div class="tk-pick"><span class="tk-lab">Ile zajmie</span>
+      <div class="tk-opts">
+        ${[5,15,30,60,120].map(m=>`<button class="tk-opt ${t.min===m?'on':''}"
+          onclick="setMin('${id}',${m})">${m<60?m+' min':(m/60)+' h'}</button>`).join('')}
+      </div>
+    </div>
+
+    <div class="tk-pick"><span class="tk-lab">Ile trzeba się zebrać</span>
+      <div class="tk-opts">
+        ${[[1,'wcale'],[2,'trochę'],[3,'sporo'],[4,'bardzo']].map(([v,n])=>`
+          <button class="tk-opt ${t.dread===v?'on':''}" onclick="setDread('${id}',${v})">${n}</button>`).join('')}
+      </div>
+    </div>
+  `,`
+    <button class="btn btn-primary" onclick="renderTasks()">Zapisz</button>
+    <div class="footnote"><button class="btn-text" onclick="taskDrop('${id}')">Usuń to zadanie</button></div>
+  `);
+}
+function setMin(id,m){
+  const ene = m<=10?'low':m<=45?'mid':'high';
+  taskPatch(id,{min:m, ene:ene, guessed:false}); taskDetail(id);
+}
+function setDread(id,v){ taskPatch(id,{dread:v, guessed:false}); taskDetail(id); }
+function taskDrop(id){
+  const arr = taskLoad().filter(x=>x.id!==id); taskSave(arr); renderTasks();
+}
+
+/* ============================================================
+   POŁĄCZENIA I ZGODY
+   ------------------------------------------------------------
+   Każda zgoda osobno, każda domyślnie wyłączona, każda cofalna jednym
+   dotknięciem (P-36). Opis mówi wprost, CO wychodzi z urządzenia —
+   bo to jedyna informacja, która realnie interesuje użytkownika.
+   ============================================================ */
+function openConnect(){
+  const c = consLoad();
+  const sw = (k, tytul, opis, ostrz) => `
+    <div class="cn-row">
+      <div class="cn-txt"><b>${tytul}</b><small>${opis}</small>
+        ${ostrz?`<em class="cn-warn">${ostrz}</em>`:''}</div>
+      <button class="cn-sw ${c[k]?'on':''}" onclick="toggleCons('${k}')"
+        role="switch" aria-checked="${c[k]?'true':'false'}"><i></i></button>
+    </div>`;
+
+  nowSwap(`
+    <div class="kicker">Połączenia</div>
+    <div class="max-line" style="margin-bottom:6px">Co wolno mi widzieć</div>
+    <div class="now-why-big" style="margin-bottom:16px">
+      Domyślnie nic. Wszystko działa offline — to są dodatki, nie warunki.
+    </div>
+
+    ${sw('gtasks','Google Tasks','Wciągam Twoje zadania, żeby mieć z czego wybierać.',
+         'Treść zadań zostaje na urządzeniu.')}
+    ${sw('gcal','Kalendarz — tylko wolne okno','Sprawdzam, ile masz czasu do następnej rzeczy.',
+         'Nie czytam tytułów ani uczestników. Tylko godziny.')}
+    ${sw('ai','Podpowiedzi AI','Model doszacowuje czas i rozbija zadanie na kroki.',
+         'Treść zadania wychodzi wtedy poza urządzenie. Bez tej zgody zgaduję lokalnie.')}
+    ${sw('body','Sen i tętno z opaski','Pytam o stan trafniej — ale to Ty go oceniasz.',
+         'Nie powiem Ci, jak się czujesz. Mogę tylko zapytać.')}
+
+    <div class="cn-note">
+      Cofnięcie zgody kasuje też to, co dzięki niej zebrałem.
+    </div>
+  `,`
+    <button class="btn btn-primary" onclick="renderTasks()">Wróć</button>
+  `);
+}
+function toggleCons(k){
+  const c = consLoad();
+  c[k] = !c[k];
+  consSave(c);
+  buzz(BUZZ.easier);
+  if(k==='gtasks' && c[k]) { openConnect(); connectGoogleTasks(); return; }
+  if(k==='body' && c[k])  { openConnect(); connectBody(); return; }
+  openConnect();
+}
+
+/* ============================================================
+   GOOGLE TASKS — SZKIELET OAuth PKCE
+   ------------------------------------------------------------
+   Działa z czystej PWA: OAuth 2.0 z PKCE, bez backendu i bez sekretu.
+   Wymaga własnego Client ID z Google Cloud Console (typ: Web).
+   Zakres celowo najwęższy z możliwych.
+
+   UWAGA na przyszłość: Google Fit REST API jest wygaszane z końcem
+   2026 i nie ma zamiennika dla weba — dane z opaski trzeba brać
+   z Fitbit Web API / Google Health API albo przez wrapper.
+   ============================================================ */
+const GOOGLE_CLIENT_ID = '';                     /* ← wklej własny */
+const GT_SCOPE = 'https://www.googleapis.com/auth/tasks.readonly';
+
+function connectGoogleTasks(){
+  if(!GOOGLE_CLIENT_ID){
+    nowSwap(`
+      <div class="kicker">Google Tasks</div>
+      <div class="max-line" style="margin-bottom:10px">Brakuje jednej rzeczy</div>
+      <div class="now-why-big">
+        Żeby to ruszyło, potrzebny jest Client ID z Google Cloud Console
+        (typ: aplikacja webowa, zakres <code>tasks.readonly</code>).
+        Wklej go w stałej <code>GOOGLE_CLIENT_ID</code> w kodzie.
+        <br><br>Do tego czasu wszystko działa na lokalnej liście.
+      </div>
+    `,`<button class="btn btn-primary" onclick="openConnect()">Rozumiem</button>`);
+    return;
+  }
+  gtAuth();
+}
+
+async function gtAuth(){
+  const verifier = [...crypto.getRandomValues(new Uint8Array(32))]
+    .map(b=>('0'+b.toString(16)).slice(-2)).join('');
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
+  const challenge = btoa(String.fromCharCode(...new Uint8Array(digest)))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  sessionStorage.setItem('gt.verifier', verifier);
+
+  const u = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+  u.searchParams.set('client_id', GOOGLE_CLIENT_ID);
+  u.searchParams.set('redirect_uri', location.origin + location.pathname);
+  u.searchParams.set('response_type', 'code');
+  u.searchParams.set('scope', GT_SCOPE);
+  u.searchParams.set('code_challenge', challenge);
+  u.searchParams.set('code_challenge_method', 'S256');
+  location.href = u.toString();
+}
+
+/* Wciągnięcie zadań. Treść ląduje w localStorage i nigdzie indziej. */
+async function gtPull(token){
+  try{
+    const r  = await fetch('https://tasks.googleapis.com/tasks/v1/users/@me/lists',
+                 {headers:{Authorization:'Bearer '+token}});
+    const ls = await r.json();
+    for(const l of (ls.items||[])){
+      const r2 = await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${l.id}/tasks?showCompleted=false`,
+                   {headers:{Authorization:'Bearer '+token}});
+      const ts = await r2.json();
+      const have = new Set(taskLoad().map(x=>x.ext).filter(Boolean));
+      for(const t of (ts.items||[])){
+        if(have.has(t.id) || !t.title) continue;
+        const row = taskAdd(t.title, 'gtasks');
+        if(row) taskPatch(row.id, {ext:t.id, due:t.due||null});
+      }
+    }
+  }catch(e){ /* offline albo token wygasł — lista lokalna działa dalej */ }
+}
+
+/* ============================================================
+   KALENDARZ — TYLKO OKNO, ZERO TREŚCI (P-34)
+   ------------------------------------------------------------
+   Jedyne, co z niego bierzemy, to liczba minut do najbliższego zajętego
+   slotu. Tytuł, uczestnicy i lokalizacja są odrzucane w miejscu odczytu,
+   więc Max architektonicznie nie może powiedzieć „przez spotkania z X…"
+   (P-38). To nie jest deklaracja w polityce prywatności, tylko brak
+   danych w pamięci.
+   ============================================================ */
+let FREE_WINDOW = null;   /* minuty do następnej rzeczy albo null */
+
+async function calWindow(token){
+  if(!consLoad().gcal || !token) return null;
+  try{
+    const now = new Date();
+    const end = new Date(now.getTime() + 8*3600*1000);
+    const u = new URL('https://www.googleapis.com/calendar/v3/calendars/primary/events');
+    u.searchParams.set('timeMin', now.toISOString());
+    u.searchParams.set('timeMax', end.toISOString());
+    u.searchParams.set('singleEvents','true');
+    u.searchParams.set('orderBy','startTime');
+    const r = await fetch(u, {headers:{Authorization:'Bearer '+token}});
+    const j = await r.json();
+    /* Bierzemy WYŁĄCZNIE start. Reszta pola nie jest nawet odczytywana. */
+    const first = (j.items||[]).map(e => e.start && (e.start.dateTime||null)).filter(Boolean)[0];
+    if(!first) return null;
+    FREE_WINDOW = Math.max(5, Math.round((new Date(first) - now)/60000));
+    return FREE_WINDOW;
+  }catch(e){ return null; }
+}
+
+/* ============================================================
+   CZUJNIKI — PYTANIE, NIE WERDYKT
+   ------------------------------------------------------------
+   Konkurencja (Lifestack, Focuzed) czyta energię z opaski i podaje ją
+   jako fakt. My tego nie robimy, z dwóch powodów.
+
+   Po pierwsze rzetelność: sen i tętno korelują z odczuwaną energią
+   luźno i bardzo indywidualnie. Bez progu ≥3–4 tygodni danych i hipotez
+   postawionych z góry (P-37) to zgadywanie w ładnej oprawie.
+
+   Po drugie i ważniejsze — tożsamość produktu. Max jest lustrem, nie
+   diagnostą. „Twoje ciało mówi, że masz niską energię" unieważnia
+   odczyt użytkownika i podsuwa gotową wymówkę. „Spałeś 5 godzin, czuć
+   to?" zostawia ocenę przy nim — a to jest dokładnie ten mechanizm
+   appraisal, na którym stoi affect labeling.
+
+   Dlatego czujnik NIGDY nie ustawia suwaka. Dopisuje jedno zdanie nad
+   suwakami i tyle.
+   ============================================================ */
+function bodyLoad(){ try{ return JSON.parse(localStorage.getItem(BODY_KEY))||null; }catch(e){ return null; } }
+function bodySave(b){ try{ localStorage.setItem(BODY_KEY, JSON.stringify(b)); }catch(e){} }
+
+function connectBody(){
+  nowSwap(`
+    <div class="kicker">Sen i tętno</div>
+    <div class="max-line" style="margin-bottom:10px">Skąd to wziąć</div>
+    <div class="now-why-big">
+      Google Fit odpada — API kończy się z końcem 2026 i nie ma następcy
+      dla weba. Z przeglądarki działają: <b>Fitbit Web API</b>,
+      <b>Google Health API</b>, Oura i Whoop. Apple Health i Health Connect
+      wymagają wrappera.
+      <br><br>
+      Możesz też wpisać ręcznie — działa tak samo, bo i tak tylko pytam.
+    </div>
+  `,`
+    <button class="btn btn-primary" onclick="bodyManual()">Wpiszę ręcznie</button>
+    <div class="footnote"><button class="btn-text" onclick="openConnect()">Później</button></div>
+  `);
+}
+function bodyManual(){
+  nowSwap(`
+    <div class="kicker">Dziś w nocy</div>
+    <div class="max-line" style="margin-bottom:16px">Ile spałeś?</div>
+    <div class="sl-block">
+      <div class="sl-lab"><span>3 h</span><span>10 h</span></div>
+      <input class="sl" type="range" min="3" max="10" step="0.5" value="7" id="slSleep">
+      <div class="sl-name">Godziny snu</div>
+    </div>
+  `,`
+    <button class="btn btn-primary" onclick="bodyStore()">Zapisz</button>
+  `);
+}
+function bodyStore(){
+  const h = +document.getElementById('slSleep').value;
+  bodySave({sleep:h, at:Date.now()});
+  buzz(BUZZ.easier);
+  openConnect();
+}
+
+/* Jedno zdanie nad suwakami. Zawsze kończy się znakiem zapytania —
+   to nie jest stylistyka, tylko zabezpieczenie przed wydaniem werdyktu. */
+function bodyHint(){
+  const b = bodyLoad();
+  if(!consLoad().body || !b) return '';
+  const stare = (Date.now() - b.at) > 20*3600*1000;
+  if(stare) return '';
+  if(b.sleep <= 5)  return `<div class="ck-body">Spałeś ${b.sleep} h. Czuć to?</div>`;
+  if(b.sleep >= 8.5) return `<div class="ck-body">Spałeś ${b.sleep} h. Widać to po energii?</div>`;
+  return '';
+}
+
+/* ============================================================
+   „ZRÓB TO JEDNO" — OD v16 WSKAZUJE REALNĄ RZECZ
+   ------------------------------------------------------------
+   Do v15 tu stała tablica NOW_TASKS z ogólnikami w rodzaju „weź tę
+   rzecz, którą odkładasz najdłużej". To była porada, nie zadanie —
+   użytkownik i tak musiał wybrać sam, a wybieranie jest właśnie tym,
+   co mu nie wychodzi.
+
+   Teraz dobieramy z jego własnej listy, po trzech osiach check-inu.
+   Gdy lista jest pusta, Max mówi to wprost. Nie wymyśla.
+   ============================================================ */
+function nowPick(level, slid){
+  mapRecord(level);
+  const st = slid || {v:50, e: level==='high'?80:level==='low'?20:50, t:50};
+
+  const res = pickReal(st, FREE_WINDOW);
+
+  /* Pusta lista — jedyny uczciwy ruch to powiedzieć o tym i poprosić. */
+  if(!res){
+    nowSwap(`
+      <div class="kicker">🎯 Zrób teraz to jedno</div>
+      <div class="max-line" style="margin-bottom:10px">Nie mam z czego wybrać.</div>
+      <div class="now-why-big">
+        Mógłbym rzucić ogólnikiem, ale to byłaby porada z internetu, nie Twoja rzecz.
+        Podaj mi jedną — wystarczy tak, jak myślisz.
+      </div>
+      <div class="tk-add" style="margin-top:16px">
+        <input id="tkNew" class="tk-in" type="text" placeholder="np. zadzwonić do przychodni"
+               onkeydown="if(event.key==='Enter')addFromNow()">
+        <button class="tk-go" onclick="addFromNow()">Dodaj</button>
+      </div>
+    `,`
+      <div class="footnote"><button class="btn-text" onclick="exitNow()">Nie teraz</button></div>
+    `);
+    setTimeout(()=>maxSpeak('Nie mam z czego wybrać. Podaj mi jedną rzecz.',false),350);
+    return;
+  }
+
+  nowCurrent = res.pick;
+  taskPatch(res.pick.id, {offered:(res.pick.offered||0)+1, lastOffer:Date.now()});
+
+  const kolor = {high:'var(--ok)', mid:'#e8b34f', low:'#f2a3a3'}[level] || 'var(--ok)';
+
+  /* Rozjazd Thayera — stan, którego jedna oś by nie zauważyła. */
+  let uwaga = '', line = 'Bierzemy to jedno.';
+  if(st.e < 40 && st.t > 60){
+    uwaga = '<div class="ck-note">Mało energii, sporo napięcia. Wybrałem coś, przy czym nie trzeba się zbierać.</div>';
+    line  = 'Mało energii, a napięcia sporo. Wybrałem coś lekkiego.';
+  } else if(st.e > 60 && st.t > 70){
+    uwaga = '<div class="ck-note">Energia jest, ale i napięcie. Zaczynamy od czegoś, co je rozładuje.</div>';
+  }
+
+  const okno = FREE_WINDOW ? `<span class="nw-win">${FREE_WINDOW} min do następnej rzeczy</span>` : '';
+
+  /* Alternatywy pokazujemy od razu. Trzy widoczne opcje to nadal wybór,
+     ale ograniczony — a odrzucenie jednej rzeczy bez alternatywy
+     kończy się zamknięciem apki. */
+  const inne = res.alts.length ? `
+    <div class="nw-alts">
+      <span class="nw-alts-lab">albo</span>
+      ${res.alts.map(a=>`<button class="nw-alt" onclick="swapTo('${a.id}','${level}')">
+        ${esc(a.t)} <i>${a.min} min</i></button>`).join('')}
+    </div>` : '';
+
+  nowSwap(`
+    <div class="kicker" style="color:${kolor}">🎯 Zrób teraz to jedno ${okno}</div>
+    <div class="now-task-big">${esc(res.pick.t)}</div>
+    <div class="now-why-big">Bo ${res.reason}</div>
+    ${uwaga}
+    ${inne}
+  `,`
+    <button class="btn btn-primary" onclick="nowStart()">Biorę się 🔥</button>
+    <button class="btn btn-ghost" onclick="nowTooHard()">Za trudne teraz</button>
+  `);
+  setTimeout(()=>maxSpeak(line,false),350);
+}
+
+function addFromNow(){
+  const el = document.getElementById('tkNew');
+  if(!el || !el.value.trim()) return;
+  taskAdd(el.value, 'local');
+  buzz(BUZZ.easier);
+  const m = moodLoad(); const last = m[m.length-1];
+  nowPick(eneLevel(last ? last.a : 50), last ? {v:last.v, e:last.a, t:last.ten} : null);
+}
+
+function swapTo(id, level){
+  const t = taskById(id); if(!t) return;
+  nowCurrent = t;
+  taskPatch(id, {offered:(t.offered||0)+1, lastOffer:Date.now()});
+  buzz(BUZZ.easier);
+  const el = document.querySelector('.now-task-big');
+  if(el) el.textContent = t.t;
+  const why = document.querySelector('.now-why-big');
+  if(why) why.textContent = 'Dobra, bierzemy to.';
+  document.querySelectorAll('.nw-alt').forEach(b=>b.remove());
+  const lab = document.querySelector('.nw-alts-lab'); if(lab) lab.remove();
+}
+
+/* Nagroda za START, nie za ukończenie. To jest cała różnica wobec
+   reszty rynku: liczymy `started`, nie `done`. Zadanie zaczęte i
+   porzucone jest sukcesem, bo rozruch był problemem. */
+function nowStart(){
+  buzz(BUZZ.enter);
+  const t = nowCurrent;
+  if(t && t.id) taskPatch(t.id, {started:(t.started||0)+1, lastStart:Date.now()});
+  exitNow();
+  setTimeout(()=>{ startCrisisWithTask(t.t || t.task || 'to jedno'); }, 500);
+}
+
+/* „Za trudne teraz" nie schodzi po sztywnej drabinie low→mid→high,
+   tylko szuka czegoś lżejszego W TEJ SAMEJ liście. Odrzucenie jest
+   sygnałem o zadaniu, nie o człowieku — więc podbijamy jego dread. */
+function nowTooHard(){
+  buzz(BUZZ.easier);
+  if(nowCurrent && nowCurrent.id){
+    taskPatch(nowCurrent.id, {dread: Math.min(4,(nowCurrent.dread||2)+1), guessed:false});
+  }
+  const m = moodLoad(); const last = m[m.length-1];
+  const st = last ? {v:last.v, e:Math.max(0,last.a-25), t:last.ten} : {v:50,e:20,t:50};
+  const res = pickReal(st, FREE_WINDOW);
+
+  if(!res || (nowCurrent && res.pick.id === nowCurrent.id)){
+    nowSwap(`
+      <div class="kicker" style="color:#f2a3a3">🎯 Najmniejszy krok</div>
+      <div class="now-task-big">Otwórz to i popatrz. Nic więcej.</div>
+      <div class="now-why-big">Nie musisz nic zrobić. Samo spojrzenie liczy się jako ruch.</div>
+    `,`
+      <button class="btn btn-primary" onclick="nowStart()">Biorę się 🔥</button>
+      <button class="btn btn-ghost" onclick="exitNow()">Później</button>
+    `);
+    setTimeout(()=>maxSpeak('Dobra. To najmniejszy możliwy krok.',false),350);
+    return;
+  }
+  nowPick(eneLevel(st.e), st);
+  setTimeout(()=>maxSpeak('Jasne, weźmy coś lżejszego.',false),350);
+}
+
+</script>
+</body>
+</html>

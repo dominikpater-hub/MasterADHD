@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#16131f">
+<title>MasterADHD · Max</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ==================== EKRAN LOGOWANIA (Guardian ID) ==================== -->
+<div class="auth" id="auth">
+  <div class="auth-top">
+    <span class="brand-dot"></span>
+    <span class="brand-txt">
+      <span class="brand-name">Master<b>ADHD</b></span>
+      <span class="brand-tag">Master your ADHD</span>
+    </span>
+    <span class="auth-shield" onclick="showTrust()">🛡️ Twoje dane</span>
+  </div>
+  <div class="auth-wrap">
+    <div class="max-av"></div>
+    <div class="auth-maxname">Max · Twój trener</div>
+    <h1 id="aHead">Cześć, jestem Max.<br><b>Zrób konto</b>, a zapamiętam każdą sesję.</h1>
+    <p class="sub" id="aSub">Wszystko, co Ci pomaga, wróci na każdym urządzeniu — nawet gdy zmienisz telefon.</p>
+
+    <div class="tabs">
+      <button class="tab on" id="tabReg" onclick="setMode('register')">Nowe konto</button>
+      <button class="tab" id="tabLog" onclick="setMode('login')">Mam już konto</button>
+    </div>
+
+    <div class="fg">
+      <label class="lbl" for="aEmail">E-mail</label>
+      <input class="fld" id="aEmail" type="email" inputmode="email" autocomplete="email" placeholder="ty@przyklad.pl">
+      <div class="emsg" id="aEmailErr">Wpisz poprawny adres e-mail.</div>
+    </div>
+    <div class="fg">
+      <label class="lbl" for="aPass">Hasło</label>
+      <input class="fld" id="aPass" type="password" autocomplete="new-password" placeholder="min. 8 znaków">
+      <div class="emsg" id="aPassErr">Hasło musi mieć co najmniej 8 znaków.</div>
+    </div>
+
+    <div class="consent" id="aConsentBox">
+      <input type="checkbox" id="aConsent">
+      <label for="aConsent">Akceptuję <a onclick="showTrust();return false">zasady prywatności</a>. Moje dane są moje — mogę je pobrać lub usunąć w każdej chwili.</label>
+    </div>
+    <div class="emsg" id="aConsentErr" style="margin:-4px 0 6px">Zaznacz zgodę, żeby założyć konto.</div>
+
+    <button class="btn btn-primary" id="aSubmit" onclick="submitAuth()" style="margin-top:6px">Załóż konto</button>
+
+    <div class="divider">albo</div>
+    <div class="oauth">
+      <button class="btn-oauth" onclick="oauth('Google')"><span class="g">G</span>Kontynuuj z Google</button>
+      <button class="btn-oauth" onclick="oauth('Apple')"><span style="font-size:16px"></span>Kontynuuj z Apple</button>
+    </div>
+
+    <div class="skip">
+      <button onclick="skipAuth()">Na razie bez konta — po prostu zacznij</button>
+      <span class="hint">Zadziałam offline. Konto dodasz później.</span>
+    </div>
+  </div>
+</div>
+
+<!-- panel zaufania -->
+<div class="trust" id="trust" onclick="if(event.target===this)hideTrust()">
+  <div class="trust-card">
+    <h2>🛡️ Twoje dane należą do Ciebie</h2>
+    <div class="trust-item"><span class="ic">🇪🇺</span><div>Dane trzymamy w <b>Unii Europejskiej</b>. Nie opuszczają UE.</div></div>
+    <div class="trust-item"><span class="ic">🚫</span><div><b>Nie sprzedajemy</b> Twoich danych. Nie ma reklam. Jesteś użytkownikiem, nie towarem.</div></div>
+    <div class="trust-item"><span class="ic">📥</span><div>W każdej chwili możesz <b>pobrać wszystko</b>, co o Tobie wiemy.</div></div>
+    <div class="trust-item"><span class="ic">🗑️</span><div>Możesz <b>usunąć konto i dane</b> na zawsze. Bez pytań.</div></div>
+    <div class="trust-item"><span class="ic">📴</span><div>Max działa <b>offline</b>. Konto to wygoda, nie warunek.</div></div>
+    <button class="trust-close" onclick="hideTrust()">Rozumiem</button>
+  </div>
+</div>
+
+<div id="app">
+
+  <!-- ==================== EKRAN GŁÓWNY ==================== -->
+  <div class="home" id="home">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <span class="brand-txt">
+        <span class="brand-name">Master<b>ADHD</b></span>
+        <span class="brand-tag">Master your ADHD</span>
+      </span>
+      <button class="prof-btn" onclick="openProfile(false)" aria-label="Profil">⚙</button>
+      <button class="help-top" onclick="openSafety()" aria-label="Pomoc w kryzysie">Pomoc</button>
+      <span class="ver">v16</span>
+    </div>
+
+    <!-- ============================================================
+         MAX JEST GOSPODARZEM, DASHBOARD JEST JEGO NARZĘDZIEM.
+         Max wita, mówi co widzi i sam podaje narzędzia — kafelki to nie
+         menu aplikacji, tylko rzeczy, po które Max sięga w rozmowie.
+         Cała treść tej sekcji pochodzi z renderHost() i zależy od tego,
+         ile Max już o użytkowniku wie.
+         ============================================================ -->
+    <div class="host" id="host">
+      <div class="host-orb" id="hostOrb" onclick="openChat()"></div>
+      <div class="host-name" id="hostName">Max</div>
+      <div class="host-say" id="hostSay">Hej. Jestem Max.</div>
+      <div class="host-sub" id="hostSub">Chwila — sprawdzam, co u Ciebie.</div>
+    </div>
+
+    <button class="panic panic-top" onclick="startCrisis()">
+      <span class="lab">Nie mogę zacząć</span>
+      <span class="sub">Poprowadzę Cię — krok po kroku.</span>
+    </button>
+
+    <div class="home-mid">
+      <div class="home-kicker" id="toolsKicker">Czym mogę Cię teraz obsłużyć</div>
+
+      <div class="minors">
+        <button class="minor" onclick="openDump()"><span class="ico">🧠</span>Zrzuć myśli</button>
+        <button class="minor" onclick="openMood()"><span class="ico">💗</span>Zrzuć emocje</button>
+        <button class="minor" onclick="openEnergy()"><span class="ico">⚡</span>Pokaż energię</button>
+        <button class="minor" onclick="openAtlas()"><span class="ico">📖</span>Atlas emocji</button>
+        <button class="minor" onclick="openTasks()"><span class="ico">📋</span>Twoje rzeczy</button>
+        <button class="minor" onclick="openMap()"><span class="ico">🗺️</span>Twoja mapa</button>
+      </div>
+
+      <!-- Motywacja przez kompletność mapy: co odblokuje kolejny wpis. -->
+      <div class="prog-box" id="progBox"></div>
+
+      <button class="chat-entry" onclick="openChat()">
+        <span class="co">💬</span>
+        <span class="ct"><b>Pogadajmy</b><small id="chatHint">o energii, nastroju, o czymkolwiek</small></span>
+      </button>
+    </div>
+
+    <div class="bottom">
+      <!-- Kafelek recenzji: Max sam prosi o ocenę. Pyta o KONKRET
+           (ostatnio używane narzędzie), nie o ogólne „jak Ci się podoba". -->
+      <button class="review-tile" onclick="openReview()">
+        <span class="rv-ico">💭</span>
+        <span class="rv-txt">
+          <b id="rvHead">Masz uwagi? Powiedz mi wprost</b>
+          <small id="rvSub">Buduję to razem z Tobą — każda uwaga coś zmienia.</small>
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== NAKŁADKA TRYBU TERAZ ==================== -->
+  <div class="now" id="now">
+    <div class="now-top">
+      <button class="crisis-x" onclick="exitNow()">✕ wyjdź</button>
+      <button class="muteBtn" onclick="toggleVoice()" title="głos Maxa">🔊</button>
+    </div>
+    <div class="now-stage" id="nowStage"></div>
+    <div class="now-actions" id="nowActions"></div>
+  </div>
+
+  <!-- ==================== NAKŁADKA KRYZYSU ==================== -->
+  <div class="crisis" id="crisis">
+    <div class="crisis-top">
+      <button class="crisis-x" onclick="exitCrisis()">✕ wyjdź</button>
+      <div class="stepdots" id="dots"><i></i><i></i><i></i><i></i></div>
+      <button class="muteBtn" id="muteBtn" onclick="toggleVoice()" title="głos Maxa">🔊</button>
+    </div>
+    <div class="stage" id="stage"></div>
+    <div class="actions" id="actions"></div>
+  </div>
+
+</div>
+
+<script src="js/01-core.js"></script>
+<script src="js/02-safety.js"></script>
+<script src="js/03-ai.js"></script>
+<script src="js/04-now.js"></script>
+<script src="js/05-profile.js"></script>
+<script src="js/06-emotions.js"></script>
+<script src="js/07-goals.js"></script>
+<script src="js/08-auth.js"></script>
+<script src="js/09-tasks.js"></script>
+<script src="js/10-sensors.js"></script>
+</body>
+</html>
