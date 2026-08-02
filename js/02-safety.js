@@ -38,12 +38,12 @@ function openSafety(){
   try{ if('speechSynthesis'in window) speechSynthesis.cancel(); }catch(e){}
   const html=`
     <div class="safety-wrap">
-      <div class="safety-h">Nie musisz być z tym sam na sam. Pomoc jest w zasięgu ręki.</div>
+      <div class="safety-h">Nie musisz zostawać z tym w pojedynkę. Pomoc jest w zasięgu ręki.</div>
       <div class="safety-sub">Jeśli myślisz o zrobieniu sobie krzywdy albo czujesz, że nie dajesz rady — odezwij się do kogoś, kto pomoże teraz. Te rozmowy są anonimowe i bezpłatne.</div>
       ${HELPLINES.map(h=>`<a class="safety-num${h.emerg?' emerg':''}" href="tel:${h.tel}">
         <span class="sn-big">${h.num}</span>
         <span class="sn-meta">${h.meta}</span><span class="sn-go">›</span></a>`).join('')}
-      <div class="safety-fine">Wolisz napisać? Czat na <b>116sos.pl</b>. To nie oznaka słabości — to krok naprzód. Max jest tu i zostaje, kiedy będziesz gotowy.</div>
+      <div class="safety-fine">Wolisz napisać? Czat na <b>116sos.pl</b>. To nie oznaka słabości — to krok naprzód. Max jest tu i zostaje, kiedy tylko zechcesz.</div>
     </div>`;
   // użyj nakładki kryzysu jako nośnika (już istnieje, działa offline)
   crisis.classList.add('show');

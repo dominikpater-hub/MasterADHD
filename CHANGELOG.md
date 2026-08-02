@@ -2,6 +2,21 @@
 
 Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 
+## [Nieopublikowane] — personalizacja języka (C-1, audyt 2.0)
+
+Wybór formy gramatycznej w profilu (żeńska/męska/neutralna/własna) istniał już
+wcześniej; audyt 2.0 wykrył, że personalizacja **przeciekała** w kilku miejscach.
+Domknięte:
+
+- **`MOOD_GRID` — 16 etykiet emocji z przymiotników męskich na rzeczowniki
+  bezrodzajowe** (`ekscytacja, radość, spięcie, przygnębienie…`). To rdzeń affect
+  labeling: użytkownik nazywa stan, a nie przyjmuje cudzy rodzaj. Spójne z atlasem.
+- **Ekran wsparcia w kryzysie:** „kiedy będziesz **gotowy**" → „kiedy tylko zechcesz";
+  „sam na sam" → „zostawać z tym w pojedynkę".
+
+Zweryfikowane w Chromie: etykiety renderują się bezrodzajowo („brzmi jak: spięcie"),
+0 błędów. Brak pozostałych przecieków rodzaju w tekstach do użytkownika.
+
 ## [Nieopublikowane] — kalendarz (A-6, A-7)
 
 Zweryfikowane w headless Chromium: 0 błędów; z kalendarzem OFF **zero żądań do

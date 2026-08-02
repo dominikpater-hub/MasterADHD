@@ -11,11 +11,15 @@ function moodLoad(){ try{ return JSON.parse(localStorage.getItem(MOOD_KEY))||[];
 function moodSave(a){ try{ localStorage.setItem(MOOD_KEY, JSON.stringify(a.slice(-400))); }catch(e){} }
 
 /* Cztery ćwiartki modelu kołowego — etykiety dobierane do pozycji suwaków. */
+/* C-1 (audyt 2.0): etykiety to RZECZOWNIKI, nie przymiotniki — polskie
+   rzeczowniki są bezrodzajowe, więc „przygnębienie" nie misgenderuje jak
+   „przygnębiony". To rdzeń affect labeling: użytkownik nazywa stan, a nie
+   przyjmuje cudzy rodzaj. Spójne z atlasem, który już używa rzeczowników. */
 const MOOD_GRID = {
-  hiPos: ['podekscytowany','radosny','pełen energii','dumny'],
-  loPos: ['spokojny','rozluźniony','zadowolony','wyciszony'],
-  hiNeg: ['spięty','zdenerwowany','zły','przeciążony'],
-  loNeg: ['przygnębiony','smutny','zmęczony','pusty']
+  hiPos: ['ekscytacja','radość','energia','duma'],
+  loPos: ['spokój','rozluźnienie','zadowolenie','wyciszenie'],
+  hiNeg: ['spięcie','zdenerwowanie','złość','przeciążenie'],
+  loNeg: ['przygnębienie','smutek','zmęczenie','pustka']
 };
 
 /* ============================================================
