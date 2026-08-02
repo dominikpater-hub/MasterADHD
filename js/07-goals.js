@@ -33,7 +33,10 @@ function openProfile(first){
     <div class="pf-own" id="pfOwn" style="display:${p.gender==='own'?'block':'none'}">
       <input class="task-input" id="pfOwnVal" type="text" maxlength="20"
         placeholder="np. zrobiłoś" value="${((p.forms&&p.forms.zrobiles)||'').replace(/"/g,'&quot;')}">
-      <div class="pf-hint">Wpisz formę czasu przeszłego — resztę dopasuję.</div>
+      <div class="pf-hint">Forma czasu przeszłego (np. „zrobiłoś").</div>
+      <input class="task-input" id="pfOwnAdj" type="text" maxlength="20" style="margin-top:8px"
+        placeholder="np. gotowe" value="${((p.forms&&p.forms.gotowy)||'').replace(/"/g,'&quot;')}">
+      <div class="pf-hint">Forma przymiotnika (np. „gotowe") — żeby nie było „gotowś".</div>
     </div>
 
     <div class="pf-sec">Po co tu jesteś?</div>
@@ -67,17 +70,22 @@ function saveProfile(){
   const p = profLoad();
   const n  = document.getElementById('pfName');
   const ov = document.getElementById('pfOwnVal');
+  const av = document.getElementById('pfOwnAdj');
   if(n) p.name = n.value.trim() || null;
   if(pfG) p.gender = pfG;
   if(pfGoal) p.goal = pfGoal;
   if(p.gender === 'own' && ov && ov.value.trim()){
-    /* Z jednej formy wyprowadzamy resztę po końcówce — proste, ale działa
-       dla typowych form typu „zrobiłoś" → „stałoś", „ruszyłoś". */
+    /* T-5: czasowniki wyprowadzamy z końcówki (to działa: stał+oś, ruszył+oś…),
+       ale przymiotnika „gotowy" i zaimka „sam" NIE — pytamy o formę przymiotnika
+       osobno, żeby nie powstawały nie-słowa „gotowś/samś". */
     const w = ov.value.trim();
     const konc = w.slice(-2);
+    const adj = (av && av.value.trim()) ? av.value.trim() : '';
+    const ae = adj.slice(-1);
+    const sam = ae==='a' ? 'sama' : ae==='y' ? 'sam' : ae ? 'samo' : 'samodzielnie';
     p.forms = { zrobiles:w, stales:'stał'+konc, ruszyles:'ruszył'+konc,
                 pokazales:'pokazał'+konc, wrociles:'wrócił'+konc,
-                gotowy:'gotow'+konc.slice(-1), sam:'sam'+konc.slice(-1) };
+                gotowy: adj || 'gotowi', sam };
   }
   profSave(p);
   buzz(BUZZ.done);

@@ -2,6 +2,28 @@
 
 Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 
+## [Etap A] — sweep techniczny (audyt 2.0)
+
+Tani dług, bez zależności od backendu. Zweryfikowane w Chromie (0 błędów; T-4/T-5/T-6/T-7/T-9 PASS).
+
+- **T-4 — ukończone zadania nie wypychają otwartych.** `taskSave` trzyma wszystkie
+  otwarte + ostatnie 120 ukończonych (open to jedyne źródło doboru). Test: 130 done + 5 open → 5 open zostaje.
+- **T-5 — koniec „gotowś/samś".** Formy własne pytają osobno o **formę przymiotnika**
+  (np. „gotowe"); czasowniki nadal wyprowadzane z końcówki. Test: „zrobiłoś"+„gotowe" → `gotowy=gotowe`, `sam=samo`.
+- **T-6 — zapis nie ginie po cichu.** `saveGuarded()` na wszystkich zapisach
+  (`dump/mood/task/mem/prof/review`); przy `QuotaExceededError` jednorazowy baner zamiast fałszywego „Zapisane.".
+- **T-7 — recenzja zna wszystkie 10 narzędzi.** Mapy `nazwy` (renderHost + openReview)
+  uzupełnione o `mood/atlas/survey/tasks/profile`.
+- **T-9 — jeden licznik czasu.** `daysSinceLastSeen` liczy dni kalendarzowe (jak `trackDay`),
+  nie bloki 24 h — wczoraj 23:00 + dziś 8:00 = 1 dzień przerwy.
+- **T-10 — martwy kod: nic do usunięcia.** Skan potwierdził, że `_b64/_unb64/survStep*` są
+  używane; jedyny nieużywany symbol to `syncPull` — zostaje **do podłączenia** w Etapie B (T-2).
+- **T-11 — share target offline działa przez projekt.** SW dla nawigacji używa
+  `ignoreSearch:true`, więc `?text=…` trafia w powłokę z cache, nie przez fallback w `catch`.
+- **T-8 — strażnik globali w CI.** `scripts/check-globals.sh` (kolizje deklaracji top-level +
+  `node --check`) i workflow `.github/workflows/ci.yml` — duplikat globala nie wejdzie na `main`.
+- **C-5 — data weryfikacji numerów.** `HELPLINES_VERIFIED` + `console.warn` po roku (reguła corocznego przeglądu).
+
 ## [v19.1] — zanim cokolwiek się włączy (audyt 2.0)
 
 Twardnienie przed jakimkolwiek deployem/backendem. Zweryfikowane w Chromie (0 błędów).

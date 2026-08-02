@@ -8,7 +8,7 @@
    Polskie brzmienia są robocze — wymagają debriefingu kognitywnego.
    ============================================================ */
 function moodLoad(){ try{ return JSON.parse(localStorage.getItem(MOOD_KEY))||[]; }catch(e){ return []; } }
-function moodSave(a){ try{ localStorage.setItem(MOOD_KEY, JSON.stringify(a.slice(-400))); }catch(e){} }
+function moodSave(a){ saveGuarded(MOOD_KEY, JSON.stringify(a.slice(-400))); }  /* T-6 */
 
 /* Cztery ćwiartki modelu kołowego — etykiety dobierane do pozycji suwaków. */
 /* C-1 (audyt 2.0): etykiety to RZECZOWNIKI, nie przymiotniki — polskie

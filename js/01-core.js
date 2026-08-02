@@ -15,9 +15,25 @@ const MEM_KEY = 'masteradhd.max.v1';
 function memLoad(){
   try{ return JSON.parse(localStorage.getItem(MEM_KEY)) || null; }catch(e){ return null; }
 }
-function memSave(m){
-  try{ localStorage.setItem(MEM_KEY, JSON.stringify(m)); }catch(e){}
+/* T-6: zapis, który NIE połyka błędów po cichu. Przy pełnej pamięci
+   (QuotaExceededError) użytkownik dostaje jednorazowy komunikat, zamiast
+   widzieć „Zapisane." i tracić dane bez śladu. Zwraca true/false. */
+let _storageWarned = false;
+function saveGuarded(key, value){
+  try{ localStorage.setItem(key, value); return true; }
+  catch(e){ storageWarn(); return false; }
 }
+function storageWarn(){
+  if(_storageWarned) return; _storageWarned = true;
+  try{
+    const b = document.createElement('div');
+    b.className = 'storage-warn';
+    b.textContent = 'Pamięć urządzenia jest pełna — część zapisów może nie przejść. Pobierz kopię danych (Połączenia → Twoje dane) i usuń stare wpisy. (dotknij, by ukryć)';
+    b.onclick = () => b.remove();
+    document.body.appendChild(b);
+  }catch(e){}
+}
+function memSave(m){ saveGuarded(MEM_KEY, JSON.stringify(m)); }
 /* Zapisuje ślad po sesji. */
 function memRecord(patch){
   const m = memLoad() || { sessions:0, created:Date.now() };
@@ -47,7 +63,11 @@ function trackDay(){
 function daysSinceLastSeen(){
   const m = memLoad();
   if(!m || !m.lastSeen) return 0;
-  return Math.floor((Date.now() - m.lastSeen) / 86400000);
+  /* T-9: różnica DNI KALENDARZOWYCH (spójnie z trackDay), nie bloków 24 h —
+     wczoraj 23:00 i dziś 8:00 to 1 dzień przerwy, nie 0. */
+  const a = new Date(m.lastSeen); a.setHours(0,0,0,0);
+  const b = new Date();           b.setHours(0,0,0,0);
+  return Math.max(0, Math.round((b - a) / 86400000));
 }
 
 /* ---------- WARSTWA 3 — MAPA: POSTĘP JAKO SAMOPOZNANIE ----------

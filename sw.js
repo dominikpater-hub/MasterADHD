@@ -55,7 +55,7 @@ self.addEventListener('fetch', (e) => {
   if (url.origin !== self.location.origin) return;  // proxy/API/Google idą siecią, nie z cache
 
   e.respondWith(
-    caches.match(req).then((hit) => {
+    caches.match(req, req.mode === 'navigate' ? { ignoreSearch: true } : undefined).then((hit) => {  // T-11: nawigacja (np. share ?text=) trafia w powłokę z cache
       if (hit) {
         /* Aktualizacja w tle — użytkownik dostaje cache od razu, świeże na następny raz. */
         e.waitUntil(

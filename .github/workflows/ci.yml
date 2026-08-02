@@ -1,0 +1,18 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      # T-8: strażnik kolizji globali + składnia. Nie pozwala wejść na main
+      # duplikatowi deklaracji top-level, który po cichu wywala aplikację.
+      - name: Strażnik globali + node --check
+        run: bash scripts/check-globals.sh

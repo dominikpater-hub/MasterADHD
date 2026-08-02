@@ -27,7 +27,14 @@ const CONS_KEY  = 'masteradhd.consent.v1';
 const BODY_KEY  = 'masteradhd.body.v1';
 
 function taskLoad(){ try{ return JSON.parse(localStorage.getItem(TASK_KEY)) || []; }catch(e){ return []; } }
-function taskSave(a){ try{ localStorage.setItem(TASK_KEY, JSON.stringify(a.slice(-400))); }catch(e){} }
+function taskSave(a){
+  /* T-4: ukończone NIE mogą wypchnąć otwartych — open to jedyne źródło doboru.
+     Trzymamy wszystkie otwarte + ostatnie 120 ukończonych, w oryginalnej kolejności.
+     T-6: zapis przez saveGuarded (błąd pamięci nie ginie po cichu). */
+  const doneKeep = new Set(a.filter(x=>x.done).slice(-120));
+  const keep = a.filter(x=> !x.done || doneKeep.has(x));
+  saveGuarded(TASK_KEY, JSON.stringify(keep));
+}
 
 /* Zgody. Wszystkie domyślnie WYŁĄCZONE (P-36, privacy by design).
    Cofnięcie jednym ruchem — patrz openConnect(). */

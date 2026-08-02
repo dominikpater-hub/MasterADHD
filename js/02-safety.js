@@ -26,6 +26,12 @@ function readUserText(el){
   if(t && scanCrisis(t)){ openSafety(); return null; }
   return t;
 }
+/* C-5: numery i godziny linii się zmieniają (samo 116 123 przeszło z 14–22 na 24/7).
+   Ostatnia weryfikacja webowa: HELPLINES_VERIFIED. Reguła: przeglądać CO ROK.
+   Numery NIGDY nie są generowane przez model — wyłącznie ta stała lista. */
+const HELPLINES_VERIFIED = '2026-08-02';   // ⟵ zaktualizuj przy corocznym przeglądzie
+try{ if((Date.now() - new Date(HELPLINES_VERIFIED)) > 365*86400000)
+  console.warn('[MasterADHD] Numery pomocowe wymagają corocznej weryfikacji (ostatnia: '+HELPLINES_VERIFIED+').'); }catch(e){}
 const HELPLINES=[
   {num:'112', tel:'112', meta:'Bezpośrednie zagrożenie życia', emerg:true},
   {num:'116 123', tel:'116123', meta:'Kryzys emocjonalny, dorośli · 24/7'},

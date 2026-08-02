@@ -18,7 +18,7 @@ function profLoad(){
   try{ return JSON.parse(localStorage.getItem(PROFILE_KEY)) || {gender:'n'}; }
   catch(e){ return {gender:'n'}; }
 }
-function profSave(p){ try{ localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); }catch(e){} }
+function profSave(p){ saveGuarded(PROFILE_KEY, JSON.stringify(p)); }  /* T-6 */
 
 /* Słownik form. Neutralne używa konstrukcji bezosobowych — nie „stałxś",
    tylko przeformułowania, które po polsku brzmią naturalnie. */
@@ -164,7 +164,9 @@ function renderHost(){
   const rvS = document.getElementById('rvSub');
   if(rvH && m && m.lastTool){
     const nazwy = { dump:'dzienniku', energy:'wykresie energii', map:'mapie',
-                    steps:'krokach', chat:'rozmowie ze mną' };
+                    steps:'krokach', chat:'rozmowie ze mną', mood:'zrzucie emocji',
+                    atlas:'atlasie emocji', survey:'nazywaniu emocji',
+                    tasks:'Twoich rzeczach', profile:'profilu' };
     const n = nazwy[m.lastTool];
     if(n){
       rvH.textContent = `Co sądzisz o ${n}?`;
@@ -185,12 +187,14 @@ function markTool(name){
    ============================================================ */
 const REVIEW_KEY = 'masteradhd.reviews.v1';
 function reviewLoad(){ try{ return JSON.parse(localStorage.getItem(REVIEW_KEY))||[]; }catch(e){ return []; } }
-function reviewSave(a){ try{ localStorage.setItem(REVIEW_KEY, JSON.stringify(a.slice(-200))); }catch(e){} }
+function reviewSave(a){ saveGuarded(REVIEW_KEY, JSON.stringify(a.slice(-200))); }  /* T-6 */
 
 function openReview(){
   const m = memLoad();
   const nazwy = { dump:'dziennik', energy:'wykres energii', map:'mapa',
-                  steps:'kroki', chat:'rozmowa ze mną' };
+                  steps:'kroki', chat:'rozmowa ze mną', mood:'zrzut emocji',
+                  atlas:'atlas emocji', survey:'nazywanie emocji',
+                  tasks:'Twoje rzeczy', profile:'profil' };
   const cel = (m && m.lastTool && nazwy[m.lastTool]) ? nazwy[m.lastTool] : null;
 
   NOW.classList.add('show');

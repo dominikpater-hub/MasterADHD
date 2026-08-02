@@ -589,3 +589,7 @@
   .cn-danger{color:#ffabab;border-color:rgba(255,120,120,.35)}
   .cn-danger:active{background:rgba(255,80,80,.1)}
   .cn-acct-status{font-size:13px;color:var(--mist);line-height:1.45;margin-bottom:4px}
+  /* T-6: baner ostrzegający o pełnej pamięci (zapis nie przeszedł) */
+  .storage-warn{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top) + 10px);z-index:9999;
+    background:#3a1f1f;border:1px solid rgba(255,120,120,.5);color:#ffd9d9;font-size:13px;line-height:1.4;
+    padding:12px 14px;border-radius:12px;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,.4)}

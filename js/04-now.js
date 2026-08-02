@@ -147,9 +147,7 @@ let dumpFirstTask = '';   // A-11: pierwsze zadanie z modelu trzymamy tu, nie ws
 function dumpLoad(){
   try{ return JSON.parse(localStorage.getItem(DUMP_KEY)) || []; }catch(e){ return []; }
 }
-function dumpSave(arr){
-  try{ localStorage.setItem(DUMP_KEY, JSON.stringify(arr.slice(-300))); }catch(e){}
-}
+function dumpSave(arr){ saveGuarded(DUMP_KEY, JSON.stringify(arr.slice(-300))); }  /* T-6 */
 
 function openDump(){
   markTool('dump');
