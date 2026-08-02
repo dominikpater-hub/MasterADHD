@@ -5,6 +5,7 @@ docs/prototype-v16-monolith.html
 # Dokumenty wewnętrzne / z polami [do uzupełnienia] — nie na publiczny URL.
 docs/DPIA.md
 docs/AUDYT-v16.1.0.md
+docs/PLAN-REALIZACJI.md
 
 # Backend i proxy wdrażane są osobno (Supabase / Cloudflare), nie na Vercel.
 worker/
