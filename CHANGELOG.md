@@ -2,6 +2,32 @@
 
 Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 
+## [v19.1] — zanim cokolwiek się włączy (audyt 2.0)
+
+Twardnienie przed jakimkolwiek deployem/backendem. Zweryfikowane w Chromie (0 błędów).
+
+### Bezpieczeństwo / prywatność
+- **S-9 — `.vercelignore`.** Stary `docs/prototype-v16-monolith.html` (podatny, dzieli
+  origin i `localStorage` z produkcją) oraz dokumenty z placeholderami (DPIA, audyt v16.1)
+  nie trafiają na publiczny deploy. `worker/` i `backend/` też poza frontem.
+- **S-8 — `vercel.json`.** Nagłówki: `X-Content-Type-Options: nosniff`,
+  `Referrer-Policy: no-referrer`, `X-Frame-Options: DENY` + CSP `frame-ancestors 'none'`
+  (anty-clickjacking na przełącznikach zgód), `Permissions-Policy` bez geo/kamery/mikrofonu.
+- **C-2 — panel zaufania renderuje się ze stanu zgód** (`showTrust()` z `consLoad()`),
+  nie statycznie. Przy włączonym AI/kalendarzu/sync mówi wprost, **co** wychodzi, zamiast
+  fałszywego „dane nie opuszczają urządzenia".
+- **S-7 — zgoda linkuje do realnej polityki** (`docs/POLITYKA-PRYWATNOSCI.md`), nie do
+  panelu marketingowego. Panel „🛡️ Twoje dane" zostaje jako podsumowanie (z ikony).
+- **S-15 — `esc()` escapuje też `'` i `` ` ``** (obrona atrybutów w apostrofach).
+
+### Niezawodność / dostępność
+- **T-3 — Service Worker cache'uje tylko udane odpowiedzi** (`res.ok && res.type==='basic'`)
+  w obu gałęziach — błąd 500 w trakcie deployu nie zamrozi białej aplikacji w cache.
+- **U-4 — cele dotykowe „Pomoc" i ⚙ do ≥44×44 px** (WCAG 2.5.5). „Pomoc" to jedyny stały
+  afordans kryzysowy — był 64×26.
+- **U-5 — kontrast:** `.btn-text` (wszystkie wyjścia awaryjne) `.6→.85`, `.pg-sub`
+  (mechanika motywacyjna) `.8→1`, `.rv-txt small` `.7→.9`.
+
 ## [Nieopublikowane] — personalizacja języka (C-1, audyt 2.0)
 
 Wybór formy gramatycznej w profilu (żeńska/męska/neutralna/własna) istniał już

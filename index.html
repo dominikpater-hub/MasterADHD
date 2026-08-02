@@ -49,7 +49,7 @@
 
     <div class="consent" id="aConsentBox">
       <input type="checkbox" id="aConsent">
-      <label for="aConsent">Akceptuję <a onclick="showTrust();return false">zasady prywatności</a>. Moje dane są moje — mogę je pobrać lub usunąć w każdej chwili.</label>
+      <label for="aConsent">Akceptuję <a href="docs/POLITYKA-PRYWATNOSCI.md" target="_blank" rel="noopener">zasady prywatności</a>. Moje dane są moje — mogę je pobrać lub usunąć w każdej chwili.</label>
     </div>
     <div class="emsg" id="aConsentErr" style="margin:-4px 0 6px">Zaznacz zgodę, żeby założyć konto.</div>
 
@@ -72,11 +72,7 @@
 <div class="trust" id="trust" onclick="if(event.target===this)hideTrust()">
   <div class="trust-card">
     <h2>🛡️ Twoje dane należą do Ciebie</h2>
-    <div class="trust-item"><span class="ic">📱</span><div>Twoje dane <b>nie opuszczają tego urządzenia</b>. Nie wysyłamy ich na żaden serwer.</div></div>
-    <div class="trust-item"><span class="ic">🚫</span><div><b>Nie sprzedajemy</b> Twoich danych. Nie ma reklam. Jesteś użytkownikiem, nie towarem.</div></div>
-    <div class="trust-item"><span class="ic">📥</span><div>W każdej chwili możesz <b>pobrać wszystko</b>, co o Tobie wiemy (Połączenia → Twoje dane).</div></div>
-    <div class="trust-item"><span class="ic">🗑️</span><div>Możesz <b>usunąć wszystkie dane</b> jednym ruchem. Bez pytań.</div></div>
-    <div class="trust-item"><span class="ic">📴</span><div>Max działa <b>offline</b> i instaluje się na ekranie głównym. Tylko podpowiedzi AI potrzebują sieci.</div></div>
+    <div id="trustItems"></div>
     <button class="trust-close" onclick="hideTrust()">Rozumiem</button>
   </div>
 </div>

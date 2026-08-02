@@ -106,7 +106,33 @@ function enterApp(){
 })();
 
 /* panel zaufania */
-function showTrust(){ document.getElementById('trust').classList.add('show'); }
+/* C-2 (audyt 2.0): panel renderuje się ze STANU zgód, nie statycznie — inaczej
+   twierdzi „dane nie opuszczają urządzenia" nawet przy włączonym AI/sync/kalendarzu.
+   To jedyne miejsce, gdzie Max mógłby skłamać o prywatności. */
+function showTrust(){
+  const c = (typeof consLoad === 'function') ? consLoad() : {};
+  const syncOn = (typeof syncEnabled === 'function' && syncEnabled());
+  const wysyla = [];
+  if(c.ai)     wysyla.push('treść zadań i wpisów do modelu AI');
+  if(c.gcal)   wysyla.push('zapytanie do Google o wolne okno w kalendarzie');
+  if(c.gtasks) wysyla.push('zapytanie do Google Tasks');
+  if(syncOn)   wysyla.push('szyfrowaną kopię do chmury (sync)');
+
+  const items = [];
+  if(wysyla.length === 0){
+    items.push(['📱','Twoje dane <b>nie opuszczają tego urządzenia</b>. Nie wysyłamy ich na żaden serwer.']);
+  }else{
+    items.push(['📡','Na Twoją zgodę wychodzi: <b>'+wysyla.join('</b>; <b>')+'</b>. Reszta zostaje na urządzeniu.']);
+  }
+  items.push(['🚫','<b>Nie sprzedajemy</b> Twoich danych. Nie ma reklam.']);
+  items.push(['📥','W każdej chwili możesz <b>pobrać wszystko</b> (Połączenia → Twoje dane).']);
+  items.push(['🗑️','Możesz <b>usunąć dane z tego urządzenia</b> jednym ruchem.']);
+  items.push(['📴','Sedno Maxa działa <b>offline</b>. Sieci potrzebują tylko AI, kalendarz i sync.']);
+
+  const box = document.getElementById('trustItems');
+  if(box) box.innerHTML = items.map(([ic,t])=>`<div class="trust-item"><span class="ic">${ic}</span><div>${t}</div></div>`).join('');
+  document.getElementById('trust').classList.add('show');
+}
 function hideTrust(){ document.getElementById('trust').classList.remove('show'); }
 
 /* Enter wysyła formularz logowania */

@@ -242,7 +242,7 @@ function renderTasks(){
   `);
 }
 
-function esc(s){ return (s||'').replace(/[<>&"]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+function esc(s){ return (s||'').replace(/[<>&"'`]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c])); }  /* S-15: też ' i ` (atrybuty w apostrofach) */
 function eneWord(e){ return e==='low'?'lekkie':e==='high'?'ciężkie':'średnie'; }
 
 function addTaskUI(){

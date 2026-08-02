@@ -8,7 +8,7 @@
    offline" przestaje być obietnicą bez pokrycia (audyt A-8).
    Wersję bumpujemy przy każdej zmianie powłoki, żeby wyczyścić stary cache.
    ============================================================ */
-const CACHE = 'masteradhd-shell-v18';
+const CACHE = 'masteradhd-shell-v19';
 const SHELL = [
   './',
   './index.html',
@@ -60,15 +60,19 @@ self.addEventListener('fetch', (e) => {
         /* Aktualizacja w tle — użytkownik dostaje cache od razu, świeże na następny raz. */
         e.waitUntil(
           fetch(req).then((res) => {
-            const copy = res.clone();
-            return caches.open(CACHE).then((c) => c.put(req, copy));
+            if (res && res.ok && res.type === 'basic') {   // T-3: nie cache'uj 500/błędów hostingu
+              const copy = res.clone();
+              return caches.open(CACHE).then((c) => c.put(req, copy));
+            }
           }).catch(() => {})
         );
         return hit;
       }
       return fetch(req).then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+        if (res && res.ok && res.type === 'basic') {   // T-3: tylko udane odpowiedzi trafiają do cache
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+        }
         return res;
       }).catch(() => {
         if (req.mode === 'navigate') return caches.match('./index.html');

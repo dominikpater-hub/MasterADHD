@@ -1,0 +1,13 @@
+# S-9: stara wersja aplikacji dzieli origin (i localStorage) z produkcją —
+# nie może być publicznie serwowana. Zostaje w repo jako proweniencja.
+docs/prototype-v16-monolith.html
+
+# Dokumenty wewnętrzne / z polami [do uzupełnienia] — nie na publiczny URL.
+docs/DPIA.md
+docs/AUDYT-v16.1.0.md
+
+# Backend i proxy wdrażane są osobno (Supabase / Cloudflare), nie na Vercel.
+worker/
+backend/
+
+# POLITYKA-PRYWATNOSCI.md ZOSTAJE serwowana — linkuje do niej zgoda (S-7).
