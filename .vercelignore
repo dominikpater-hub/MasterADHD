@@ -6,6 +6,7 @@ docs/prototype-v16-monolith.html
 docs/DPIA.md
 docs/AUDYT-v16.1.0.md
 docs/PLAN-REALIZACJI.md
+docs/ANALIZA-S3-szyfrowanie-E2E.md
 
 # Backend i proxy wdrażane są osobno (Supabase / Cloudflare), nie na Vercel.
 worker/
